@@ -9,7 +9,7 @@ export function PopupCard({ popup }: { popup: StorePopup }) {
   const Icon = popup.icon;
 
   return (
-    <div className="gamified-glow overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+    <div className="gamified-glow overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-transform duration-200 hover:scale-[1.02]">
       <div
         className={`flex h-40 items-center justify-center bg-gradient-to-br ${popup.gradient}`}
       >

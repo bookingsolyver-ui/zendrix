@@ -141,7 +141,7 @@ export function Sidebar({
 
                       return (
                         <Link
-                          key={item.href}
+                          key={item.label}
                           href={item.href}
                           className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                             isActive
@@ -168,7 +168,7 @@ export function Sidebar({
 
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 title={collapsed ? item.label : undefined}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${

@@ -1,8 +1,9 @@
 import { setRequestLocale } from "next-intl/server";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { PopupCard } from "@/components/dashboard/marketing/popups/popup-card";
 import { STORE_POPUPS } from "@/components/dashboard/marketing/popups/popups-data";
+import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
 
 export default async function PopupsPage({
   params,
@@ -29,9 +30,11 @@ export default async function PopupsPage({
       />
 
       {STORE_POPUPS.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 py-16 text-center">
-          <p className="text-sm text-white/50">Ainda não criou nenhum pop-up.</p>
-        </div>
+        <MarketingEmptyState
+          icon={Sparkles}
+          title="Nenhum pop-up criado"
+          description="Crie o seu primeiro pop-up gamificado para captar leads diretamente na loja."
+        />
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {STORE_POPUPS.map((popup) => (

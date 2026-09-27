@@ -7,7 +7,7 @@ import {
 
 export function TemplateCard({ template }: { template: MessageTemplate }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 transition-all hover:border-emerald-500/30 hover:bg-white/10">
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-200 hover:scale-[1.02] hover:border-emerald-500/30 hover:bg-white/10">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#25D366]/10">

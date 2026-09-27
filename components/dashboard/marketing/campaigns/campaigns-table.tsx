@@ -1,12 +1,15 @@
-import { MoreHorizontal } from "lucide-react";
+import { Megaphone, MoreHorizontal } from "lucide-react";
 import { CAMPAIGNS, STATUS_LABELS, STATUS_STYLES } from "@/components/dashboard/marketing/campaigns/campaigns-data";
+import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
 
 export function CampaignsTable() {
   if (CAMPAIGNS.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 py-16 text-center">
-        <p className="text-sm text-white/50">Ainda não criou nenhuma campanha.</p>
-      </div>
+      <MarketingEmptyState
+        icon={Megaphone}
+        title="Nenhuma campanha ainda"
+        description="Crie a sua primeira campanha e comece a vender diretamente pelo WhatsApp."
+      />
     );
   }
 

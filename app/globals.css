@@ -189,13 +189,10 @@ body {
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 20px 60px -20px rgba(168, 85, 247, 0.35),
     0 10px 34px -14px rgba(236, 72, 153, 0.3);
-  transition:
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+  transition: box-shadow 0.25s ease;
 }
 
 .gamified-glow:hover {
-  transform: translateY(-3px);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.16),
     0 26px 70px -18px rgba(168, 85, 247, 0.5),
