@@ -1,14 +1,20 @@
 import { setRequestLocale } from "next-intl/server";
-import { CreditCard, MessageCircle, Plug, Users, Webhook } from "lucide-react";
+import { CreditCard, MessageCircle, Plug, User, Users, Webhook } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 
 const SETTINGS_LINKS = [
   {
+    href: "/dashboard/settings/profile",
+    icon: User,
+    title: "Perfil",
+    description: "Dados pessoais, fotografia e preferências de idioma.",
+  },
+  {
     href: "/dashboard/settings/billing",
     icon: CreditCard,
-    title: "Cobrança",
-    description: "Plano, ciclo de faturação, moeda e histórico de pagamentos.",
+    title: "Faturação e Subscrição",
+    description: "Plano, limites de uso, método de pagamento e faturas.",
   },
   {
     href: "/dashboard/settings/whatsapp",
