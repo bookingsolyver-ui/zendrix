@@ -1,8 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { SiteHeader } from "@/components/landing/site-header";
 import { Hero } from "@/components/landing/hero";
-import { Stats } from "@/components/landing/stats";
-import { Features } from "@/components/landing/features";
+import { LogosMarquee } from "@/components/landing/logos-marquee";
+import { BentoGrid } from "@/components/landing/bento-grid";
 import { FinalCta } from "@/components/landing/final-cta";
 import { SiteFooter } from "@/components/landing/site-footer";
 
@@ -19,8 +19,8 @@ export default async function HomePage({
       <SiteHeader />
       <main className="flex-1">
         <Hero />
-        <Stats />
-        <Features />
+        <LogosMarquee />
+        <BentoGrid />
         <FinalCta />
       </main>
       <SiteFooter />

@@ -6,30 +6,12 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 sm:flex-row sm:justify-between">
-        <div>
-          <Logo size="sm" />
-          <p className="mt-3 max-w-xs text-sm text-muted">{t("tagline")}</p>
-        </div>
-
-        <div className="flex gap-16 text-sm text-muted">
-          <div className="flex flex-col gap-2">
-            <span className="font-medium text-foreground">{t("product")}</span>
-            <span>{t("product")}</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="font-medium text-foreground">{t("company")}</span>
-            <span>{t("company")}</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="font-medium text-foreground">{t("legal")}</span>
-            <span>{t("legal")}</span>
-          </div>
-        </div>
-      </div>
-      <div className="border-t border-border px-6 py-6 text-center text-xs text-muted">
-        © {year} Zentrix. {t("rights")}
+    <footer className="border-t border-white/5">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 px-6 py-10 text-center sm:flex-row sm:justify-between sm:text-left">
+        <Logo size="sm" />
+        <p className="text-sm text-white/40">
+          © {year} Zentrix. {t("rights")}
+        </p>
       </div>
     </footer>
   );

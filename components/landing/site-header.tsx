@@ -7,19 +7,19 @@ export function SiteHeader() {
   const t = useTranslations("Nav");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-black/50 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Logo />
 
-        <nav className="hidden items-center gap-8 text-sm text-muted md:flex">
-          <a href="#features" className="transition-colors hover:text-foreground">
+        <nav className="hidden items-center gap-8 text-sm text-white/60 md:flex">
+          <a href="#product" className="transition-colors hover:text-white">
             {t("product")}
           </a>
-          <a href="#pricing" className="transition-colors hover:text-foreground">
-            {t("pricing")}
+          <a href="#solutions" className="transition-colors hover:text-white">
+            {t("solutions")}
           </a>
-          <a href="#docs" className="transition-colors hover:text-foreground">
-            {t("docs")}
+          <a href="#pricing" className="transition-colors hover:text-white">
+            {t("pricing")}
           </a>
         </nav>
 
@@ -27,13 +27,13 @@ export function SiteHeader() {
           <LocaleSwitcher />
           <Link
             href="/dashboard"
-            className="hidden text-sm text-muted transition-colors hover:text-foreground sm:inline"
+            className="hidden text-sm text-white/60 transition-colors hover:text-white sm:inline"
           >
             {t("login")}
           </Link>
           <Link
-            href="/dashboard"
-            className="neon-btn rounded-full px-4 py-2 text-sm font-semibold text-background"
+            href="/onboarding"
+            className="bright-border-btn rounded-full bg-white/[0.03] px-4 py-2 text-sm font-semibold text-foreground"
           >
             {t("getStarted")}
           </Link>

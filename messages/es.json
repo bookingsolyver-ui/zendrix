@@ -5,54 +5,37 @@
   },
   "Nav": {
     "product": "Producto",
+    "solutions": "Soluciones",
     "pricing": "Precios",
-    "docs": "Documentación",
     "login": "Iniciar sesión",
-    "getStarted": "Empezar ahora"
+    "getStarted": "Empezar gratis"
   },
   "Landing": {
-    "eyebrow": "Pagos globales, sin fronteras",
-    "titleLine1": "Vende globalmente,",
-    "titleLine2": "cobra localmente",
-    "subtitle": "Zentrix conecta tu negocio con más de 190 países mediante checkout localizado, conversión automática de moneda y una billetera multi-moneda lista para escalar.",
+    "titleLine1": "El Sistema Operativo de las",
+    "titleHighlight": "Ventas Globales",
+    "subtitle": "Centraliza WhatsApp, Instagram, CRM y checkouts multi-moneda en una sola plataforma guiada por IA.",
     "ctaPrimary": "Crear cuenta gratis",
     "ctaSecondary": "Hablar con ventas",
-    "trustLabel": "Empresas que ya venden globalmente con Zentrix",
-    "featuresTitle": "Todo lo que necesitas para vender sin fronteras",
-    "featuresSubtitle": "Desde tu primera venta hasta tu primer millón, Zentrix se encarga de los pagos para que te enfoques en crecer.",
-    "features": [
-      {
-        "title": "Pagos globales",
-        "description": "Acepta tarjetas, billeteras digitales y métodos locales en más de 190 países, con checkout optimizado para cada mercado."
-      },
-      {
-        "title": "Billetera multi-moneda",
-        "description": "Recibe, guarda y convierte entre decenas de monedas con tasas transparentes, sin sorpresas en tu extracto."
-      },
-      {
-        "title": "Red de afiliados",
-        "description": "Lanza tu propio programa de afiliados y escala las ventas a través de una red global de socios."
-      },
-      {
-        "title": "Pagos instantáneos",
-        "description": "Retira tus fondos a tu cuenta local en minutos, no en días, en más de 40 monedas."
-      }
-    ],
-    "stats": [
-      { "value": "190+", "label": "países alcanzados" },
-      { "value": "40+", "label": "monedas soportadas" },
-      { "value": "99.99%", "label": "uptime garantizado" },
-      { "value": "2 min", "label": "para empezar a vender" }
-    ],
-    "finalCtaTitle": "¿Listo para vender al mundo?",
-    "finalCtaSubtitle": "Crea tu cuenta Zentrix en minutos y empieza a recibir pagos globales hoy mismo.",
-    "finalCtaButton": "Empezar gratis"
+    "logosLabel": "Integrado con el ecosistema que ya usas:",
+    "bentoTitle": "Todo lo que tu negocio necesita",
+    "bentoSubtitle": "Una plataforma. Todas las ventas.",
+    "bento": {
+      "inboxTitle": "Inbox Omnicanal",
+      "inboxDescription": "WhatsApp, Instagram y Messenger conectados en una sola bandeja de entrada, sin perder el hilo.",
+      "paymentsTitle": "Pagos Globales",
+      "paymentsDescription": "Cobra en Kz, EUR o USD con conversión en tiempo real y tasas transparentes.",
+      "crmTitle": "CRM Visual",
+      "crmDescription": "Sigue cada negocio en un tablero Kanban simple y visual, desde el primer contacto hasta el cierre.",
+      "aiTitle": "Asistente IA",
+      "aiDescription": "Mientras duermes, tu asistente de IA responde, califica y cierra ventas por ti.",
+      "aiChatLine1": "3:42 — Cliente: ¿Todavía tienen la talla M?",
+      "aiChatLine2": "Asistente: ¡Sí! Acabo de reservarla y envié el link de pago. 🎉"
+    },
+    "finalCtaTitle": "Tu operación merece Zentrix.",
+    "finalCtaSubtitle": "Empieza hoy con 14 días de prueba gratis. Sin tarjeta de crédito.",
+    "finalCtaButton": "Crear cuenta gratis"
   },
   "Footer": {
-    "tagline": "Pagos globales para negocios sin fronteras.",
-    "product": "Producto",
-    "company": "Empresa",
-    "legal": "Legal",
     "rights": "Todos los derechos reservados."
   },
   "Dashboard": {

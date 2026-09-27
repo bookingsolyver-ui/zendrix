@@ -5,54 +5,37 @@
   },
   "Nav": {
     "product": "Product",
+    "solutions": "Solutions",
     "pricing": "Pricing",
-    "docs": "Docs",
     "login": "Log in",
-    "getStarted": "Get started"
+    "getStarted": "Get started free"
   },
   "Landing": {
-    "eyebrow": "Global payments, no borders",
-    "titleLine1": "Sell globally,",
-    "titleLine2": "get paid locally",
-    "subtitle": "Zentrix connects your business to over 190 countries with localized checkout, automatic currency conversion, and a multi-currency wallet built to scale.",
+    "titleLine1": "The Operating System for",
+    "titleHighlight": "Global Sales",
+    "subtitle": "Centralize WhatsApp, Instagram, CRM, and multi-currency checkouts in one AI-guided platform.",
     "ctaPrimary": "Create free account",
     "ctaSecondary": "Talk to sales",
-    "trustLabel": "Companies already selling globally with Zentrix",
-    "featuresTitle": "Everything you need to sell without borders",
-    "featuresSubtitle": "From your first sale to your first million, Zentrix handles payments so you can focus on growth.",
-    "features": [
-      {
-        "title": "Global payments",
-        "description": "Accept cards, digital wallets, and local payment methods in over 190 countries, with checkout optimized for every market."
-      },
-      {
-        "title": "Multi-currency wallet",
-        "description": "Receive, hold, and convert between dozens of currencies with transparent rates and no surprises on your statement."
-      },
-      {
-        "title": "Affiliate network",
-        "description": "Launch your own affiliate program and scale sales through a global network of partners."
-      },
-      {
-        "title": "Instant payouts",
-        "description": "Withdraw your funds to your local account in minutes, not days, across 40+ currencies."
-      }
-    ],
-    "stats": [
-      { "value": "190+", "label": "countries reached" },
-      { "value": "40+", "label": "currencies supported" },
-      { "value": "99.99%", "label": "guaranteed uptime" },
-      { "value": "2 min", "label": "to start selling" }
-    ],
-    "finalCtaTitle": "Ready to sell to the world?",
-    "finalCtaSubtitle": "Create your Zentrix account in minutes and start receiving global payments today.",
-    "finalCtaButton": "Start for free"
+    "logosLabel": "Integrated with the ecosystem you already use:",
+    "bentoTitle": "Everything your business needs",
+    "bentoSubtitle": "One platform. Every sale.",
+    "bento": {
+      "inboxTitle": "Omnichannel Inbox",
+      "inboxDescription": "WhatsApp, Instagram, and Messenger connected in a single inbox, without losing the thread.",
+      "paymentsTitle": "Global Payments",
+      "paymentsDescription": "Get paid in Kz, EUR, or USD with real-time conversion and transparent rates.",
+      "crmTitle": "Visual CRM",
+      "crmDescription": "Track every deal on a simple, visual Kanban board, from first contact to close.",
+      "aiTitle": "AI Assistant",
+      "aiDescription": "While you sleep, your AI assistant replies, qualifies, and closes sales for you.",
+      "aiChatLine1": "3:42 AM — Customer: Do you still have size M?",
+      "aiChatLine2": "Assistant: We do! Just reserved yours and sent the payment link. 🎉"
+    },
+    "finalCtaTitle": "Your business deserves Zentrix.",
+    "finalCtaSubtitle": "Start today with a 14-day free trial. No credit card required.",
+    "finalCtaButton": "Create free account"
   },
   "Footer": {
-    "tagline": "Global payments for borderless businesses.",
-    "product": "Product",
-    "company": "Company",
-    "legal": "Legal",
     "rights": "All rights reserved."
   },
   "Dashboard": {

@@ -5,22 +5,22 @@ export function FinalCta() {
   const t = useTranslations("Landing");
 
   return (
-    <section id="contact" className="mx-auto max-w-6xl px-6 pb-24">
-      <div className="glow-border relative overflow-hidden rounded-3xl px-8 py-16 text-center sm:px-16">
+    <section id="pricing" className="mx-auto max-w-5xl px-6 py-20 sm:py-28">
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] px-8 py-16 text-center backdrop-blur-sm sm:px-16 sm:py-20">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-primary-2/15"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_0%,rgba(34,197,94,0.14),transparent_70%)]"
         />
+
         <div className="relative">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
             {t("finalCtaTitle")}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-muted">
-            {t("finalCtaSubtitle")}
-          </p>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-white/50">{t("finalCtaSubtitle")}</p>
+
           <Link
-            href="/dashboard"
-            className="neon-btn mt-8 inline-block rounded-full px-8 py-3.5 text-sm font-semibold text-background"
+            href="/onboarding"
+            className="neon-green-btn mt-9 inline-block rounded-full bg-green-500 px-9 py-4 text-sm font-semibold text-background hover:bg-green-400"
           >
             {t("finalCtaButton")}
           </Link>

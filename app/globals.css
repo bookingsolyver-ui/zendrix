@@ -96,6 +96,30 @@ body {
     0 16px 32px -12px color-mix(in srgb, var(--neon-green-2) 80%, transparent);
 }
 
+.neon-green-white-text {
+  background-image: linear-gradient(135deg, var(--neon-green), #ffffff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bright-border-btn {
+  border: 1px solid color-mix(in srgb, var(--neon-green) 45%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--neon-green) 15%, transparent),
+    0 0 18px -6px color-mix(in srgb, var(--neon-green) 55%, transparent);
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.bright-border-btn:hover {
+  border-color: color-mix(in srgb, var(--neon-green) 70%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--neon-green) 30%, transparent),
+    0 0 26px -6px color-mix(in srgb, var(--neon-green) 75%, transparent);
+}
+
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
