@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { MiniCalendar } from "@/components/dashboard/crm/mini-calendar";
+import { GoogleCalendarPanel } from "@/components/dashboard/crm/google-calendar-panel";
 
 export default async function CrmAgendaPage({
   params,
@@ -13,7 +14,11 @@ export default async function CrmAgendaPage({
   return (
     <>
       <DashboardPageHeader title="Agenda" subtitle="Consulte e agende reuniões e compromissos da equipa." />
-      <DashboardEmptyState message="Em construção — os dados aparecerão aqui em breve." />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
+        <MiniCalendar />
+        <GoogleCalendarPanel />
+      </div>
     </>
   );
 }

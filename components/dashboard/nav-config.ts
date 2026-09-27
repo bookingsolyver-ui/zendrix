@@ -49,7 +49,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "CRM",
     icon: KanbanSquare,
     items: [
-      { label: "Quadros", href: "/dashboard/crm/quadros", icon: KanbanSquare },
+      { label: "Quadros", href: "/dashboard/crm/boards", icon: KanbanSquare },
       { label: "Agenda", href: "/dashboard/crm/agenda", icon: Calendar },
       { label: "Docs", href: "/dashboard/crm/docs", icon: FileText },
     ],

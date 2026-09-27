@@ -3,6 +3,7 @@ import { CalendarClock, CreditCard, Send, ShieldCheck } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { SummaryCard } from "@/components/dashboard/billing/summary-card";
 import { BillingPricing } from "@/components/dashboard/billing/billing-pricing";
+import { AddonsSection } from "@/components/billing/AddonsSection";
 
 function getTrialEndDateLabel(locale: string) {
   const trialEnd = new Date();
@@ -55,6 +56,10 @@ export default async function BillingPage({
 
       <div className="mt-10">
         <BillingPricing />
+      </div>
+
+      <div className="mt-10">
+        <AddonsSection />
       </div>
     </>
   );

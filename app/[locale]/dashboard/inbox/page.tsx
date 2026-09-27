@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { InboxShell } from "@/components/dashboard/inbox/inbox-shell";
 
 export default async function InboxPage({
   params,
@@ -13,7 +13,7 @@ export default async function InboxPage({
   return (
     <>
       <DashboardPageHeader title="Inbox" subtitle="Todas as conversas dos seus canais num só lugar." />
-      <DashboardEmptyState message="Em construção — os dados aparecerão aqui em breve." />
+      <InboxShell />
     </>
   );
 }
