@@ -1,0 +1,80 @@
+{
+  "Metadata": {
+    "title": "Zentrix — Sell globally, get paid locally",
+    "description": "The payments and e-commerce platform that connects your business to customers worldwide, with a multi-currency wallet and built-in affiliates."
+  },
+  "Nav": {
+    "product": "Product",
+    "pricing": "Pricing",
+    "docs": "Docs",
+    "login": "Log in",
+    "getStarted": "Get started"
+  },
+  "Landing": {
+    "eyebrow": "Global payments, no borders",
+    "titleLine1": "Sell globally,",
+    "titleLine2": "get paid locally",
+    "subtitle": "Zentrix connects your business to over 190 countries with localized checkout, automatic currency conversion, and a multi-currency wallet built to scale.",
+    "ctaPrimary": "Create free account",
+    "ctaSecondary": "Talk to sales",
+    "trustLabel": "Companies already selling globally with Zentrix",
+    "featuresTitle": "Everything you need to sell without borders",
+    "featuresSubtitle": "From your first sale to your first million, Zentrix handles payments so you can focus on growth.",
+    "features": [
+      {
+        "title": "Global payments",
+        "description": "Accept cards, digital wallets, and local payment methods in over 190 countries, with checkout optimized for every market."
+      },
+      {
+        "title": "Multi-currency wallet",
+        "description": "Receive, hold, and convert between dozens of currencies with transparent rates and no surprises on your statement."
+      },
+      {
+        "title": "Affiliate network",
+        "description": "Launch your own affiliate program and scale sales through a global network of partners."
+      },
+      {
+        "title": "Instant payouts",
+        "description": "Withdraw your funds to your local account in minutes, not days, across 40+ currencies."
+      }
+    ],
+    "stats": [
+      { "value": "190+", "label": "countries reached" },
+      { "value": "40+", "label": "currencies supported" },
+      { "value": "99.99%", "label": "guaranteed uptime" },
+      { "value": "2 min", "label": "to start selling" }
+    ],
+    "finalCtaTitle": "Ready to sell to the world?",
+    "finalCtaSubtitle": "Create your Zentrix account in minutes and start receiving global payments today.",
+    "finalCtaButton": "Start for free"
+  },
+  "Footer": {
+    "tagline": "Global payments for borderless businesses.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "rights": "All rights reserved."
+  },
+  "Dashboard": {
+    "nav": {
+      "overview": "Overview",
+      "sales": "Sales",
+      "affiliates": "Affiliates",
+      "products": "Products",
+      "wallet": "Multi-Currency Wallet"
+    },
+    "search": "Search...",
+    "account": "My account",
+    "overviewTitle": "Overview",
+    "overviewSubtitle": "Welcome back. Here's a summary of your business.",
+    "salesTitle": "Sales",
+    "salesSubtitle": "Track your sales across every market.",
+    "affiliatesTitle": "Affiliates",
+    "affiliatesSubtitle": "Manage your affiliate program and commissions.",
+    "productsTitle": "Products",
+    "productsSubtitle": "Create and organize your product catalog.",
+    "walletTitle": "Multi-Currency Wallet",
+    "walletSubtitle": "Check balances and convert between currencies.",
+    "comingSoon": "Under construction — data will appear here soon."
+  }
+}

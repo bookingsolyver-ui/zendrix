@@ -1,0 +1,80 @@
+{
+  "Metadata": {
+    "title": "Zentrix — Venda globalmente, receba localmente",
+    "description": "A plataforma de pagamentos e e-commerce que liga o seu negócio a clientes em todo o mundo, com carteira multi-moeda e afiliados integrados."
+  },
+  "Nav": {
+    "product": "Produto",
+    "pricing": "Preços",
+    "docs": "Documentação",
+    "login": "Entrar",
+    "getStarted": "Começar agora"
+  },
+  "Landing": {
+    "eyebrow": "Pagamentos globais, sem fronteiras",
+    "titleLine1": "Venda globalmente,",
+    "titleLine2": "receba localmente",
+    "subtitle": "A Zentrix liga o seu negócio a mais de 190 países com checkout localizado, conversão automática de moeda e uma carteira multi-moeda pronta para escalar.",
+    "ctaPrimary": "Criar conta grátis",
+    "ctaSecondary": "Falar com vendas",
+    "trustLabel": "Empresas que já vendem globalmente com a Zentrix",
+    "featuresTitle": "Tudo o que precisa para vender sem fronteiras",
+    "featuresSubtitle": "Da primeira venda ao primeiro milhão, a Zentrix trata dos pagamentos para que se possa focar em crescer.",
+    "features": [
+      {
+        "title": "Pagamentos globais",
+        "description": "Aceite cartões, carteiras digitais e métodos locais em mais de 190 países, com checkout otimizado para cada mercado."
+      },
+      {
+        "title": "Carteira multi-moeda",
+        "description": "Receba, guarde e converta entre dezenas de moedas com taxas transparentes, sem surpresas no extrato."
+      },
+      {
+        "title": "Rede de afiliados",
+        "description": "Lance o seu próprio programa de afiliados e escale as vendas através de uma rede de parceiros global."
+      },
+      {
+        "title": "Payouts instantâneos",
+        "description": "Levante os seus fundos para a conta local em minutos, não em dias, em mais de 40 moedas."
+      }
+    ],
+    "stats": [
+      { "value": "190+", "label": "países alcançados" },
+      { "value": "40+", "label": "moedas suportadas" },
+      { "value": "99.99%", "label": "uptime garantido" },
+      { "value": "2 min", "label": "para começar a vender" }
+    ],
+    "finalCtaTitle": "Pronto para vender ao mundo?",
+    "finalCtaSubtitle": "Crie a sua conta Zentrix em minutos e comece a receber pagamentos globais hoje mesmo.",
+    "finalCtaButton": "Começar gratuitamente"
+  },
+  "Footer": {
+    "tagline": "Pagamentos globais para negócios sem fronteiras.",
+    "product": "Produto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "rights": "Todos os direitos reservados."
+  },
+  "Dashboard": {
+    "nav": {
+      "overview": "Visão geral",
+      "sales": "Vendas",
+      "affiliates": "Afiliados",
+      "products": "Produtos",
+      "wallet": "Carteira Multi-Moeda"
+    },
+    "search": "Pesquisar...",
+    "account": "A minha conta",
+    "overviewTitle": "Visão geral",
+    "overviewSubtitle": "Bem-vindo de volta. Aqui está o resumo do seu negócio.",
+    "salesTitle": "Vendas",
+    "salesSubtitle": "Acompanhe as suas vendas em todos os mercados.",
+    "affiliatesTitle": "Afiliados",
+    "affiliatesSubtitle": "Gira o seu programa de afiliados e comissões.",
+    "productsTitle": "Produtos",
+    "productsSubtitle": "Crie e organize os produtos do seu catálogo.",
+    "walletTitle": "Carteira Multi-Moeda",
+    "walletSubtitle": "Consulte saldos e converta entre moedas.",
+    "comingSoon": "Em construção — os dados aparecerão aqui em breve."
+  }
+}
