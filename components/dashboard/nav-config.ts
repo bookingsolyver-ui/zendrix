@@ -59,7 +59,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "Marketing",
     icon: Megaphone,
     items: [
-      { label: "Campanhas", href: "/dashboard/marketing/campanhas", icon: Megaphone },
+      { label: "Campanhas", href: "/dashboard/marketing/campaigns", icon: Megaphone },
       { label: "Automações", href: "/dashboard/marketing/automations", icon: Workflow },
       { label: "Templates", href: "/dashboard/marketing/templates", icon: LayoutTemplate },
       { label: "Popups", href: "/dashboard/marketing/popups", icon: Sparkles },

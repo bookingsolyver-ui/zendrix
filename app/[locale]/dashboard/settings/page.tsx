@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { CreditCard, MessageCircle, Plug, Webhook } from "lucide-react";
+import { CreditCard, MessageCircle, Plug, Users, Webhook } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 
@@ -27,6 +27,12 @@ const SETTINGS_LINKS = [
     icon: Webhook,
     title: "Webhooks",
     description: "Configure endpoints para receber eventos em tempo real.",
+  },
+  {
+    href: "/dashboard/settings/team",
+    icon: Users,
+    title: "Equipa e Permissões",
+    description: "Convide colegas e defina o papel de cada membro da equipa.",
   },
 ] as const;
 
