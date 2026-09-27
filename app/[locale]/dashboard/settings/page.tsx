@@ -29,7 +29,7 @@ const SETTINGS_LINKS = [
     description: "Ligue a Zentrix às ferramentas que já utiliza.",
   },
   {
-    href: "/dashboard/settings/webhooks",
+    href: "/dashboard/webhooks",
     icon: Webhook,
     title: "Webhooks",
     description: "Configure endpoints para receber eventos em tempo real.",
