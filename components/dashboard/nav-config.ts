@@ -60,7 +60,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     icon: Megaphone,
     items: [
       { label: "Campanhas", href: "/dashboard/marketing/campanhas", icon: Megaphone },
-      { label: "Automações", href: "/dashboard/marketing/automacoes", icon: Workflow },
+      { label: "Automações", href: "/dashboard/marketing/automations", icon: Workflow },
       { label: "Templates", href: "/dashboard/marketing/templates", icon: LayoutTemplate },
       { label: "Popups", href: "/dashboard/marketing/popups", icon: Sparkles },
     ],
@@ -70,7 +70,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "Contatos",
     icon: Users,
     items: [
-      { label: "Todos", href: "/dashboard/contatos/todos", icon: Users },
+      { label: "Todos", href: "/dashboard/contacts", icon: Users },
       { label: "Segmentos", href: "/dashboard/contatos/segmentos", icon: Filter },
     ],
   },
@@ -109,7 +109,7 @@ export const NAV_ENTRIES: NavEntry[] = [
 ];
 
 export const NAV_FOOTER_ENTRIES: NavLeaf[] = [
-  { label: "Integrações", href: "/dashboard/settings/integracoes", icon: Plug },
+  { label: "Integrações", href: "/dashboard/settings/integrations", icon: Plug },
   { label: "Webhooks", href: "/dashboard/settings/webhooks", icon: Webhook },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
 ];

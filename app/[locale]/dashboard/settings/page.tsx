@@ -11,7 +11,7 @@ const SETTINGS_LINKS = [
     description: "Plano, ciclo de faturação, moeda e histórico de pagamentos.",
   },
   {
-    href: "/dashboard/settings/integracoes",
+    href: "/dashboard/settings/integrations",
     icon: Plug,
     title: "Integrações",
     description: "Ligue a Zentrix às ferramentas que já utiliza.",
