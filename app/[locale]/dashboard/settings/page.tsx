@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { CreditCard, Plug, Webhook } from "lucide-react";
+import { CreditCard, MessageCircle, Plug, Webhook } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 
@@ -9,6 +9,12 @@ const SETTINGS_LINKS = [
     icon: CreditCard,
     title: "Cobrança",
     description: "Plano, ciclo de faturação, moeda e histórico de pagamentos.",
+  },
+  {
+    href: "/dashboard/settings/whatsapp",
+    icon: MessageCircle,
+    title: "WhatsApp",
+    description: "Ligue e gira os números de WhatsApp Business da sua conta.",
   },
   {
     href: "/dashboard/settings/integrations",
