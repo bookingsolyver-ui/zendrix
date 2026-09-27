@@ -8,34 +8,158 @@
     "solutions": "Soluciones",
     "pricing": "Precios",
     "login": "Iniciar sesión",
-    "getStarted": "Empezar gratis"
+    "getStarted": "Prueba gratis"
   },
   "Landing": {
-    "titleLine1": "El Sistema Operativo de las",
-    "titleHighlight": "Ventas Globales",
-    "subtitle": "Centraliza WhatsApp, Instagram, CRM y checkouts multi-moneda en una sola plataforma guiada por IA.",
-    "ctaPrimary": "Crear cuenta gratis",
-    "ctaSecondary": "Hablar con ventas",
-    "logosLabel": "Integrado con el ecosistema que ya usas:",
-    "bentoTitle": "Todo lo que tu negocio necesita",
-    "bentoSubtitle": "Una plataforma. Todas las ventas.",
-    "bento": {
-      "inboxTitle": "Inbox Omnicanal",
-      "inboxDescription": "WhatsApp, Instagram y Messenger conectados en una sola bandeja de entrada, sin perder el hilo.",
-      "paymentsTitle": "Pagos Globales",
-      "paymentsDescription": "Cobra en Kz, EUR o USD con conversión en tiempo real y tasas transparentes.",
-      "crmTitle": "CRM Visual",
-      "crmDescription": "Sigue cada negocio en un tablero Kanban simple y visual, desde el primer contacto hasta el cierre.",
-      "aiTitle": "Asistente IA",
-      "aiDescription": "Mientras duermes, tu asistente de IA responde, califica y cierra ventas por ti.",
-      "aiChatLine1": "3:42 — Cliente: ¿Todavía tienen la talla M?",
-      "aiChatLine2": "Asistente: ¡Sí! Acabo de reservarla y envié el link de pago. 🎉"
+    "hero": {
+      "titleLine1": "Tu WhatsApp Business.",
+      "titleLine2": "Todo tu equipo,",
+      "titleHighlight": "el mismo número.",
+      "subtitle": "Vende globalmente, atiende en automático. Recupera carritos y cobra en Kz, R$, €, $.",
+      "ctaPrimary": "Prueba gratis",
+      "ctaSecondary": "Hablar con ventas",
+      "phoneContact": "Ana Cliente",
+      "phoneMessage1": "¡Hola! Todavía tengo el carrito abierto 👀",
+      "phoneMessage2": "¡Buenas noticias! Guardamos tu carrito y tus artículos 🎉",
+      "phoneBadge": "Carrito Recuperado",
+      "phonePayButton": "Pagar con Multicaixa/Pix"
     },
-    "finalCtaTitle": "Tu operación merece Zentrix.",
-    "finalCtaSubtitle": "Empieza hoy con 14 días de prueba gratis. Sin tarjeta de crédito.",
-    "finalCtaButton": "Crear cuenta gratis"
+    "sameNumber": {
+      "title": "El teléfono sigue igual.",
+      "titleHighlight": "Todo el equipo se suma.",
+      "subtitle": "Sigue usando el número de siempre — ahora con todo tu equipo respondiendo a la vez, sin pisarse unos a otros.",
+      "phoneLabel": "WhatsApp Business",
+      "inboxLabel": "Shared Inbox Zentrix",
+      "agent1": "Marta",
+      "agent2": "João",
+      "agent3": "Ana",
+      "syncedLabel": "Sincronizado en tiempo real"
+    },
+    "omnichannel": {
+      "title": "Instagram y Facebook,",
+      "titleHighlight": "en la misma bandeja de WhatsApp.",
+      "subtitle": "Direct, Messenger y WhatsApp caen en la misma fila. Tu equipo responde todo en un solo lugar, sin cambiar de app.",
+      "col1Label": "WhatsApp",
+      "col2Label": "Instagram Direct",
+      "col3Label": "Messenger",
+      "col1Message": "¿Todavía tienen este vestido en M?",
+      "col2Message": "Lo vi en Reels, ¿cuánto cuesta?",
+      "col3Message": "¿Hacen entregas hoy?",
+      "queueNote": "Todo cae en la misma fila del Inbox Zentrix."
+    },
+    "aiVoiceScheduling": {
+      "title": "La IA responde con audio.",
+      "titleHighlight": "Y agenda tus reuniones.",
+      "subtitle": "Tu asistente habla con el cliente como una persona y agenda todo solo, sin que tu equipo intervenga.",
+      "voiceLabel": "Nota de voz de la IA",
+      "voiceDuration": "0:12",
+      "calendarTitle": "Google Calendar",
+      "calendarEvent": "Reunión con Ana Martins",
+      "calendarTime": "Mañana, 15:00",
+      "calendarConfirmed": "Confirmado por la IA"
+    },
+    "automations": {
+      "title": "Del primer contacto",
+      "titleHighlight": "a la próxima compra.",
+      "subtitle": "Crea flujos visuales que trabajan por ti, 24 horas al día.",
+      "node1": "Disparador: Carrito abandonado",
+      "node2": "Esperar 20 min",
+      "node3": "Enviar Cupón"
+    },
+    "useCases": {
+      "title": "Hecho para tu negocio,",
+      "titleHighlight": "sea cual sea.",
+      "subtitle": "Elige tu sector y ve a Zentrix en acción.",
+      "tabs": {
+        "moda": "Moda",
+        "clinicas": "Clínicas",
+        "cursos": "Cursos",
+        "restaurantes": "Restaurantes"
+      },
+      "timelines": {
+        "moda": [
+          { "time": "10:02", "text": "Cliente comenta en un Reel" },
+          { "time": "10:05", "text": "Automatización envía un Direct" },
+          { "time": "10:40", "text": "Pago confirmado" }
+        ],
+        "clinicas": [
+          { "time": "09:15", "text": "Paciente pide una cita por WhatsApp" },
+          { "time": "09:17", "text": "La IA la agenda automáticamente en Google Calendar" },
+          { "time": "09:20", "text": "Recordatorio de confirmación enviado" }
+        ],
+        "cursos": [
+          { "time": "14:00", "text": "Lead pregunta sobre el curso" },
+          { "time": "14:02", "text": "La IA envía un vídeo de presentación" },
+          { "time": "14:30", "text": "Matrícula confirmada con Pix" }
+        ],
+        "restaurantes": [
+          { "time": "19:40", "text": "Cliente pide el menú por WhatsApp" },
+          { "time": "19:42", "text": "El bot sugiere el plato del día" },
+          { "time": "20:05", "text": "Pedido confirmado y en camino" }
+        ]
+      }
+    },
+    "integrations": {
+      "label": "Conecta con las herramientas que ya usas"
+    },
+    "pricing": {
+      "title": "Precios simples,",
+      "titleHighlight": "sin sorpresas.",
+      "subtitle": "Empieza gratis. Mejora tu plan cuando tu negocio crezca.",
+      "perMonth": "/mes",
+      "proBadge": "Tu prueba empieza aquí",
+      "ctaBasic": "Empezar con Basic",
+      "ctaPro": "Empezar ahora",
+      "ctaEnterprise": "Hablar con ventas",
+      "plans": {
+        "basic": {
+          "description": "Para empezar a organizar ventas y atención.",
+          "features": [
+            "1.000 envíos de mensajes / mes",
+            "1 número de WhatsApp",
+            "1 miembro de equipo",
+            "CRM básico"
+          ]
+        },
+        "pro": {
+          "description": "Para equipos en crecimiento que necesitan automatización e IA.",
+          "features": [
+            "10.000 envíos de mensajes / mes",
+            "3 números de WhatsApp",
+            "Bandejas de entrada multiagente",
+            "Respuestas de IA por texto y voz"
+          ]
+        },
+        "enterprise": {
+          "description": "Para operaciones a gran escala con necesidades avanzadas.",
+          "features": [
+            "Envíos de mensajes ilimitados",
+            "Números de WhatsApp ilimitados",
+            "Miembros de equipo ilimitados",
+            "CRM completo con automatizaciones"
+          ]
+        }
+      }
+    },
+    "referral": {
+      "title": "Recomienda Zentrix.",
+      "titleHighlight": "Gana 10% recurrente.",
+      "subtitle": "Conviértete en partner de Zentrix y recibe un 10% de comisión recurrente por cada cliente que recomiendes, todos los meses.",
+      "cta": "Quiero ser partner",
+      "partnersNote": "Ya lo usan decenas de partners"
+    }
   },
   "Footer": {
+    "tagline": "Hecho para vender globalmente.",
+    "product": "Producto",
+    "productPricing": "Precios",
+    "productIntegrations": "Integraciones",
+    "company": "Empresa",
+    "companyPartners": "Partners",
+    "companyContact": "Contacto",
+    "legal": "Legal",
+    "legalPrivacy": "Privacidad",
+    "legalTerms": "Términos",
     "rights": "Todos los derechos reservados."
   },
   "Dashboard": {

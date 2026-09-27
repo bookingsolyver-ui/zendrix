@@ -12,10 +12,10 @@ export function SiteHeader() {
         <Logo />
 
         <nav className="hidden items-center gap-8 text-sm text-white/60 md:flex">
-          <a href="#product" className="transition-colors hover:text-white">
+          <a href="#section-features" className="transition-colors hover:text-white">
             {t("product")}
           </a>
-          <a href="#solutions" className="transition-colors hover:text-white">
+          <a href="#section-use-cases" className="transition-colors hover:text-white">
             {t("solutions")}
           </a>
           <a href="#pricing" className="transition-colors hover:text-white">
