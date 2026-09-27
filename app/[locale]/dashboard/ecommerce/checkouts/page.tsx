@@ -1,8 +1,9 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { CheckoutStats } from "@/components/dashboard/ecommerce/checkouts/checkout-stats";
+import { CheckoutsList } from "@/components/dashboard/ecommerce/checkouts/checkouts-list";
 
-export default async function EcommerceCheckoutsPage({
+export default async function CheckoutsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -12,8 +13,16 @@ export default async function EcommerceCheckoutsPage({
 
   return (
     <>
-      <DashboardPageHeader title="Checkouts" subtitle="Personalize as páginas de checkout da sua loja." />
-      <DashboardEmptyState message="Em construção — os dados aparecerão aqui em breve." />
+      <DashboardPageHeader
+        title="Checkouts Abandonados"
+        subtitle="Recupere vendas perdidas contactando clientes que não terminaram a compra."
+      />
+
+      <CheckoutStats />
+
+      <div className="mt-6">
+        <CheckoutsList />
+      </div>
     </>
   );
 }

@@ -89,7 +89,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "E-commerce",
     icon: ShoppingCart,
     items: [
-      { label: "Pedidos", href: "/dashboard/ecommerce/pedidos", icon: ShoppingCart },
+      { label: "Pedidos", href: "/dashboard/ecommerce/orders", icon: ShoppingCart },
       { label: "Produtos", href: "/dashboard/ecommerce/products", icon: Package },
       { label: "Checkouts", href: "/dashboard/ecommerce/checkouts", icon: CreditCard },
       { label: "Rastreio", href: "/dashboard/ecommerce/rastreio", icon: Truck },
@@ -101,8 +101,8 @@ export const NAV_ENTRIES: NavEntry[] = [
     icon: BarChart3,
     items: [
       { label: "Geral", href: "/dashboard/analytics/overview", icon: BarChart3 },
-      { label: "Receita", href: "/dashboard/analytics/receita", icon: DollarSign },
-      { label: "Métricas", href: "/dashboard/analytics/metricas", icon: Activity },
+      { label: "Receita", href: "/dashboard/analytics/revenue", icon: DollarSign },
+      { label: "Métricas", href: "/dashboard/analytics/metrics", icon: Activity },
       { label: "RFM", href: "/dashboard/analytics/rfm", icon: Target },
     ],
   },

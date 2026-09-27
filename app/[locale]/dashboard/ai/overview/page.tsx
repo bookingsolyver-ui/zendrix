@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { AiSummaryCards } from "@/components/dashboard/ai/overview/summary-cards";
+import { RecentConversations } from "@/components/dashboard/ai/overview/recent-conversations";
 
 export default async function AiOverviewPage({
   params,
@@ -12,8 +13,15 @@ export default async function AiOverviewPage({
 
   return (
     <>
-      <DashboardPageHeader title="Visão Geral da IA" subtitle="Acompanhe o desempenho do seu assistente de IA." />
-      <DashboardEmptyState message="Em construção — os dados aparecerão aqui em breve." />
+      <DashboardPageHeader
+        title="Desempenho do Assistente IA"
+        subtitle="Acompanhe como o seu assistente de IA está a atender os seus clientes."
+      />
+
+      <div className="space-y-6">
+        <AiSummaryCards />
+        <RecentConversations />
+      </div>
     </>
   );
 }
