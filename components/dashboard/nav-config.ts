@@ -80,8 +80,8 @@ export const NAV_ENTRIES: NavEntry[] = [
     icon: BrainCircuit,
     items: [
       { label: "Visão geral", href: "/dashboard/ai/overview", icon: BrainCircuit },
-      { label: "Persona", href: "/dashboard/ai/knowledge", icon: UserCog },
-      { label: "Conhecimento", href: "/dashboard/ai/knowledge", icon: BookOpen },
+      { label: "Persona", href: "/dashboard/ai/settings", icon: UserCog },
+      { label: "Conhecimento", href: "/dashboard/ai/settings", icon: BookOpen },
     ],
   },
   {
