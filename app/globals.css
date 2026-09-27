@@ -12,6 +12,10 @@
   --danger: #ff5c7a;
   --neon-green: #22c55e;
   --neon-green-2: #4ade80;
+  --rfm-green: #059669;
+  --rfm-blue: #3b82f6;
+  --rfm-amber: #d97706;
+  --rfm-dormant: #5b5fa8;
 }
 
 @theme inline {
@@ -26,6 +30,10 @@
   --color-danger: var(--danger);
   --color-neon-green: var(--neon-green);
   --color-neon-green-2: var(--neon-green-2);
+  --color-rfm-green: var(--rfm-green);
+  --color-rfm-blue: var(--rfm-blue);
+  --color-rfm-amber: var(--rfm-amber);
+  --color-rfm-dormant: var(--rfm-dormant);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

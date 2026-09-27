@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { RfmBoard } from "@/components/dashboard/analytics/rfm/rfm-board";
 
 export default async function AnalyticsRfmPage({
   params,
@@ -12,8 +12,11 @@ export default async function AnalyticsRfmPage({
 
   return (
     <>
-      <DashboardPageHeader title="RFM" subtitle="Segmentação de clientes por Recência, Frequência e Valor Monetário." />
-      <DashboardEmptyState message="Em construção — os dados aparecerão aqui em breve." />
+      <DashboardPageHeader
+        title="Segmentação RFM"
+        subtitle="Recência, Frequência e Valor Monetário — identifique e ative cada segmento de clientes."
+      />
+      <RfmBoard />
     </>
   );
 }
