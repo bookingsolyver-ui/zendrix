@@ -79,9 +79,9 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "IA",
     icon: BrainCircuit,
     items: [
-      { label: "Visão geral", href: "/dashboard/ia/visao-geral", icon: BrainCircuit },
-      { label: "Persona", href: "/dashboard/ia/persona", icon: UserCog },
-      { label: "Conhecimento", href: "/dashboard/ia/conhecimento", icon: BookOpen },
+      { label: "Visão geral", href: "/dashboard/ai/overview", icon: BrainCircuit },
+      { label: "Persona", href: "/dashboard/ai/knowledge", icon: UserCog },
+      { label: "Conhecimento", href: "/dashboard/ai/knowledge", icon: BookOpen },
     ],
   },
   {
@@ -90,7 +90,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     icon: ShoppingCart,
     items: [
       { label: "Pedidos", href: "/dashboard/ecommerce/pedidos", icon: ShoppingCart },
-      { label: "Produtos", href: "/dashboard/ecommerce/produtos", icon: Package },
+      { label: "Produtos", href: "/dashboard/ecommerce/products", icon: Package },
       { label: "Checkouts", href: "/dashboard/ecommerce/checkouts", icon: CreditCard },
       { label: "Rastreio", href: "/dashboard/ecommerce/rastreio", icon: Truck },
     ],
@@ -100,7 +100,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "Analytics",
     icon: BarChart3,
     items: [
-      { label: "Geral", href: "/dashboard/analytics/geral", icon: BarChart3 },
+      { label: "Geral", href: "/dashboard/analytics/overview", icon: BarChart3 },
       { label: "Receita", href: "/dashboard/analytics/receita", icon: DollarSign },
       { label: "Métricas", href: "/dashboard/analytics/metricas", icon: Activity },
       { label: "RFM", href: "/dashboard/analytics/rfm", icon: Target },
