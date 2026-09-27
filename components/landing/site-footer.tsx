@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { Logo } from "@/components/Logo";
 
 export function SiteFooter() {
   const t = useTranslations("Footer");
@@ -8,12 +9,7 @@ export function SiteFooter() {
     <footer className="border-t border-border">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 sm:flex-row sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg neon-btn text-xs font-bold text-background">
-              Z
-            </span>
-            <span className="font-semibold tracking-tight">Zentrix</span>
-          </div>
+          <Logo size="sm" />
           <p className="mt-3 max-w-xs text-sm text-muted">{t("tagline")}</p>
         </div>
 

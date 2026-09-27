@@ -56,25 +56,10 @@
     "rights": "All rights reserved."
   },
   "Dashboard": {
-    "nav": {
-      "overview": "Overview",
-      "sales": "Sales",
-      "affiliates": "Affiliates",
-      "products": "Products",
-      "wallet": "Multi-Currency Wallet"
-    },
     "search": "Search...",
     "account": "My account",
     "overviewTitle": "Overview",
     "overviewSubtitle": "Welcome back. Here's a summary of your business.",
-    "salesTitle": "Sales",
-    "salesSubtitle": "Track your sales across every market.",
-    "affiliatesTitle": "Affiliates",
-    "affiliatesSubtitle": "Manage your affiliate program and commissions.",
-    "productsTitle": "Products",
-    "productsSubtitle": "Create and organize your product catalog.",
-    "walletTitle": "Multi-Currency Wallet",
-    "walletSubtitle": "Check balances and convert between currencies.",
     "comingSoon": "Under construction — data will appear here soon."
   }
 }

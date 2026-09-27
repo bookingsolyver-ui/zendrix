@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Zentrix — Venda globalmente, receba localmente",
+    "title": "Zentrix - Venda globalmente, receba localmente",
     "description": "A plataforma de pagamentos e e-commerce que liga o seu negócio a clientes em todo o mundo, com carteira multi-moeda e afiliados integrados."
   },
   "Nav": {
@@ -56,25 +56,10 @@
     "rights": "Todos os direitos reservados."
   },
   "Dashboard": {
-    "nav": {
-      "overview": "Visão geral",
-      "sales": "Vendas",
-      "affiliates": "Afiliados",
-      "products": "Produtos",
-      "wallet": "Carteira Multi-Moeda"
-    },
     "search": "Pesquisar...",
     "account": "A minha conta",
     "overviewTitle": "Visão geral",
     "overviewSubtitle": "Bem-vindo de volta. Aqui está o resumo do seu negócio.",
-    "salesTitle": "Vendas",
-    "salesSubtitle": "Acompanhe as suas vendas em todos os mercados.",
-    "affiliatesTitle": "Afiliados",
-    "affiliatesSubtitle": "Gira o seu programa de afiliados e comissões.",
-    "productsTitle": "Produtos",
-    "productsSubtitle": "Crie e organize os produtos do seu catálogo.",
-    "walletTitle": "Carteira Multi-Moeda",
-    "walletSubtitle": "Consulte saldos e converta entre moedas.",
     "comingSoon": "Em construção — os dados aparecerão aqui em breve."
   }
 }

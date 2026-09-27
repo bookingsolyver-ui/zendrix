@@ -1,20 +1,19 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { DashboardEmptyState } from "@/components/dashboard/empty-state";
 
-export default async function SalesPage({
+export default async function InboxPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("Dashboard");
 
   return (
     <>
-      <DashboardPageHeader title={t("salesTitle")} subtitle={t("salesSubtitle")} />
-      <DashboardEmptyState message={t("comingSoon")} />
+      <DashboardPageHeader title="Inbox" subtitle="Todas as conversas dos seus canais num só lugar." />
+      <DashboardEmptyState message="Em construção — os dados aparecerão aqui em breve." />
     </>
   );
 }

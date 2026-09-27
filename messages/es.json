@@ -56,25 +56,10 @@
     "rights": "Todos los derechos reservados."
   },
   "Dashboard": {
-    "nav": {
-      "overview": "Resumen",
-      "sales": "Ventas",
-      "affiliates": "Afiliados",
-      "products": "Productos",
-      "wallet": "Billetera Multi-Moneda"
-    },
     "search": "Buscar...",
     "account": "Mi cuenta",
     "overviewTitle": "Resumen",
     "overviewSubtitle": "Bienvenido de nuevo. Aquí tienes el resumen de tu negocio.",
-    "salesTitle": "Ventas",
-    "salesSubtitle": "Sigue tus ventas en todos los mercados.",
-    "affiliatesTitle": "Afiliados",
-    "affiliatesSubtitle": "Gestiona tu programa de afiliados y comisiones.",
-    "productsTitle": "Productos",
-    "productsSubtitle": "Crea y organiza el catálogo de tus productos.",
-    "walletTitle": "Billetera Multi-Moneda",
-    "walletSubtitle": "Consulta saldos y convierte entre monedas.",
     "comingSoon": "En construcción — los datos aparecerán aquí pronto."
   }
 }
