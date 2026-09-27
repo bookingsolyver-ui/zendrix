@@ -109,7 +109,7 @@ export const NAV_ENTRIES: NavEntry[] = [
 ];
 
 export const NAV_FOOTER_ENTRIES: NavLeaf[] = [
-  { label: "Integrações", href: "/dashboard/settings/integrations", icon: Plug },
+  { label: "Integrações", href: "/dashboard/integrations", icon: Plug },
   { label: "Webhooks", href: "/dashboard/settings/webhooks", icon: Webhook },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
 ];
