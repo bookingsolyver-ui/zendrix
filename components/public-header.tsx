@@ -3,12 +3,18 @@ import { Globe, Play } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 
-export function PublicHeader() {
+export function PublicHeader({
+  primaryCtaLabel,
+  primaryCtaHref = "/onboarding",
+}: {
+  primaryCtaLabel?: string;
+  primaryCtaHref?: string;
+}) {
   const t = useTranslations("PublicHeader");
   const locale = useLocale();
 
   const navLinks = [
-    { label: t("resources"), href: "/#product" },
+    { label: t("resources"), href: "/#section-features" },
     { label: t("pricing"), href: "/#pricing" },
     { label: t("services"), href: "#" },
     { label: t("docs"), href: "#" },
@@ -16,7 +22,7 @@ export function PublicHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
         <div className="flex items-center gap-8">
           <Logo />
@@ -77,10 +83,10 @@ export function PublicHeader() {
           </Link>
 
           <Link
-            href="/onboarding"
+            href={primaryCtaHref}
             className="rounded-md bg-emerald-500 px-4 py-1.5 text-sm font-medium text-black transition-colors hover:bg-emerald-400"
           >
-            {t("generateLink")}
+            {primaryCtaLabel ?? t("freeTrial")}
           </Link>
         </div>
       </div>

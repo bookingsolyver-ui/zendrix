@@ -29,10 +29,11 @@ export default async function PartnersPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const tHeader = await getTranslations({ locale, namespace: "PublicHeader" });
 
   return (
     <div className="flex min-h-screen flex-col">
-      <PublicHeader />
+      <PublicHeader primaryCtaLabel={tHeader("generateLink")} />
       <main className="flex-1">
         <PartnersHero />
         <HowItWorksSection />

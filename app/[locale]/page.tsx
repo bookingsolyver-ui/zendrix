@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { SiteHeader } from "@/components/landing/site-header";
+import { PublicHeader } from "@/components/public-header";
 import { Hero } from "@/components/landing/hero";
 import { SameNumberSection } from "@/components/landing/same-number-section";
 import { OmnichannelSection } from "@/components/landing/omnichannel-section";
@@ -21,7 +21,7 @@ export default async function HomePage({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader />
+      <PublicHeader />
       <main className="flex-1">
         <Hero />
         <SameNumberSection />

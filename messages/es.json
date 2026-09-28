@@ -3,13 +3,6 @@
     "title": "Zentrix — Vende globalmente, cobra localmente",
     "description": "La plataforma de pagos y e-commerce que conecta tu negocio con clientes en todo el mundo, con billetera multi-moneda y afiliados integrados."
   },
-  "Nav": {
-    "product": "Producto",
-    "solutions": "Soluciones",
-    "pricing": "Precios",
-    "login": "Iniciar sesión",
-    "getStarted": "Prueba gratis"
-  },
   "Landing": {
     "hero": {
       "titleLine1": "Tu WhatsApp Business.",
@@ -223,6 +216,7 @@
     "blog": "Blog",
     "tutorials": "Tutoriales",
     "partnerArea": "Área de partner",
-    "generateLink": "Generar mi link"
+    "generateLink": "Generar mi link",
+    "freeTrial": "Prueba gratis"
   }
 }
