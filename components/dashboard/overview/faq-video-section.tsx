@@ -1,6 +1,11 @@
+"use client";
+
 import { Play } from "lucide-react";
+import { usePanels } from "@/components/dashboard/panels-context";
 
 export function FaqVideoSection() {
+  const { openTutorials } = usePanels();
+
   return (
     <div>
       <h2 className="text-[18px] font-medium text-white">Dúvidas frequentes</h2>
@@ -11,6 +16,7 @@ export function FaqVideoSection() {
 
       <button
         type="button"
+        onClick={openTutorials}
         className="group mt-4 flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4 transition-all hover:border-emerald-500/30 hover:bg-white/10"
       >
         <div className="flex items-center gap-3">
