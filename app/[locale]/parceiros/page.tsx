@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { PartnersHeader } from "@/components/partners/partners-header";
+import { PublicHeader } from "@/components/public-header";
 import { PartnersHero } from "@/components/partners/partners-hero";
 import { HowItWorksSection } from "@/components/partners/how-it-works-section";
 import { BenefitsBento } from "@/components/partners/benefits-bento";
@@ -32,7 +32,7 @@ export default async function PartnersPage({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <PartnersHeader />
+      <PublicHeader />
       <main className="flex-1">
         <PartnersHero />
         <HowItWorksSection />

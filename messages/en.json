@@ -169,11 +169,6 @@
   "Partners": {
     "metaTitle": "Zentrix Partners — Refer and earn 10% recurring",
     "metaDescription": "Become a Zentrix partner, refer new customers and earn a 10% recurring commission every month.",
-    "nav": {
-      "logoSuffix": "Partners",
-      "login": "Log in to Partner Area",
-      "cta": "Become a Partner"
-    },
     "hero": {
       "titleLine1": "Refer Zentrix.",
       "titleHighlight": "Earn 10% recurring commission.",
@@ -218,5 +213,16 @@
       "subtitle": "Join dozens of partners already building recurring income with Zentrix.",
       "button": "Create Partner Account Now"
     }
+  },
+  "PublicHeader": {
+    "resources": "Resources",
+    "pricing": "Pricing",
+    "services": "Services",
+    "referral": "Refer & earn",
+    "docs": "Docs",
+    "blog": "Blog",
+    "tutorials": "Tutorials",
+    "partnerArea": "Partner Area",
+    "generateLink": "Generate my link"
   }
 }

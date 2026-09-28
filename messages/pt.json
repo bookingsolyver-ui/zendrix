@@ -169,11 +169,6 @@
   "Partners": {
     "metaTitle": "Zentrix Parceiros — Indique e ganhe 10% recorrente",
     "metaDescription": "Torne-se parceiro Zentrix, indique novos clientes e ganhe 10% de comissão recorrente todos os meses.",
-    "nav": {
-      "logoSuffix": "Parceiros",
-      "login": "Entrar na Área de Parceiro",
-      "cta": "Tornar-me Parceiro"
-    },
     "hero": {
       "titleLine1": "Indique a Zentrix.",
       "titleHighlight": "Ganhe 10% de comissão recorrente.",
@@ -218,5 +213,16 @@
       "subtitle": "Junte-se a dezenas de parceiros que já estão a construir um rendimento recorrente com a Zentrix.",
       "button": "Criar Conta de Parceiro Agora"
     }
+  },
+  "PublicHeader": {
+    "resources": "Recursos",
+    "pricing": "Preços",
+    "services": "Serviços",
+    "referral": "Indique e ganhe",
+    "docs": "Docs",
+    "blog": "Blog",
+    "tutorials": "Tutoriais",
+    "partnerArea": "Área do parceiro",
+    "generateLink": "Gerar meu link"
   }
 }

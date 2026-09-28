@@ -169,11 +169,6 @@
   "Partners": {
     "metaTitle": "Zentrix Partners — Recomienda y gana 10% recurrente",
     "metaDescription": "Conviértete en partner de Zentrix, recomienda nuevos clientes y gana un 10% de comisión recurrente cada mes.",
-    "nav": {
-      "logoSuffix": "Partners",
-      "login": "Entrar al Área de Partner",
-      "cta": "Quiero ser Partner"
-    },
     "hero": {
       "titleLine1": "Recomienda Zentrix.",
       "titleHighlight": "Gana 10% de comisión recurrente.",
@@ -218,5 +213,16 @@
       "subtitle": "Únete a decenas de partners que ya están construyendo un ingreso recurrente con Zentrix.",
       "button": "Crear Cuenta de Partner Ahora"
     }
+  },
+  "PublicHeader": {
+    "resources": "Recursos",
+    "pricing": "Precios",
+    "services": "Servicios",
+    "referral": "Recomienda y gana",
+    "docs": "Docs",
+    "blog": "Blog",
+    "tutorials": "Tutoriales",
+    "partnerArea": "Área de partner",
+    "generateLink": "Generar mi link"
   }
 }

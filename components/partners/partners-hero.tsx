@@ -6,7 +6,7 @@ export function PartnersHero() {
   const t = useTranslations("Partners.hero");
 
   return (
-    <section className="relative overflow-hidden pt-40 sm:pt-48">
+    <section className="relative overflow-hidden pt-16 sm:pt-20">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[42rem] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(34,197,94,0.18),transparent_70%)]"
