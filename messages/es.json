@@ -15,7 +15,16 @@
       "phoneMessage1": "¡Hola! Todavía tengo el carrito abierto 👀",
       "phoneMessage2": "¡Buenas noticias! Guardamos tu carrito y tus artículos 🎉",
       "phoneBadge": "Carrito Recuperado",
-      "phonePayButton": "Pagar con Multicaixa/Pix"
+      "phonePayButton": "Pagar con Multicaixa/Pix",
+      "inboxTitle": "Shared Inbox",
+      "inboxTimeNow": "Ahora",
+      "inboxAssignedTo": "Asignado a: Agente Carlos",
+      "inboxOnlineLabel": "Online",
+      "inboxNoteLabel": "Nota Interna",
+      "inboxNote": "Ana va a pagar por referencia Multicaixa, estén atentos al sistema.",
+      "inboxContact2Name": "João Pedro",
+      "inboxContact2Preview": "¿Cuál es el IBAN?",
+      "inboxContact2Time": "10:00"
     },
     "sameNumber": {
       "title": "El teléfono sigue igual.",

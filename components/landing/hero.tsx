@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { PhoneMockup } from "@/components/landing/phone-mockup";
+import { HeroMockupCollage } from "@/components/landing/hero-mockup-collage";
 
 export function Hero() {
   const t = useTranslations("Landing.hero");
@@ -12,7 +12,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[42rem] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(34,197,94,0.16),transparent_70%)]"
       />
 
-      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 px-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="text-center lg:text-left">
           <h1 className="text-5xl font-extrabold leading-[1.02] tracking-tight text-balance sm:text-6xl lg:text-7xl">
             {t("titleLine1")}
@@ -41,7 +41,7 @@ export function Hero() {
           </div>
         </div>
 
-        <PhoneMockup />
+        <HeroMockupCollage />
       </div>
     </section>
   );
