@@ -21,12 +21,28 @@
       "title": "The phone stays the same.",
       "titleHighlight": "The whole team joins in.",
       "subtitle": "Keep using the number you already have — now with your whole team replying at once, without stepping on each other.",
-      "phoneLabel": "WhatsApp Business",
-      "inboxLabel": "Zentrix Shared Inbox",
-      "agent1": "Marta",
-      "agent2": "João",
-      "agent3": "Ana",
-      "syncedLabel": "Synced in real time"
+      "phoneBotName": "Zentrix Bot",
+      "phoneMessages": [
+        { "from": "bot", "text": "Hi! Welcome to the store. How can I help you today? 👋" },
+        { "from": "customer", "text": "Hi, I'd like to know the status of order #4821" },
+        { "from": "bot", "text": "Sure! One moment, let me check and I'll let you know." }
+      ],
+      "syncLabel": "Synced in real time",
+      "inboxTitle": "Shared Inbox",
+      "inboxContacts": [
+        { "name": "Maria Fernandes", "preview": "Already sent the proof of payment ✅", "time": "9:41" },
+        { "name": "John Miller", "preview": "What's the delivery time?", "time": "9:32" },
+        { "name": "Ana Paula", "preview": "Thanks for the help! 🙏", "time": "yesterday" }
+      ],
+      "activeContact": "Maria Fernandes",
+      "chatMessages": [
+        { "from": "contact", "text": "Hi! I've already paid via Multicaixa Express." },
+        { "from": "agent", "text": "Got it, Maria! I'll confirm your order now and move it to shipping." }
+      ],
+      "internalNoteLabel": "Internal note",
+      "internalNote": "Maria already sent proof of payment. Confirm stock before shipping.",
+      "inputPlaceholder": "Write a message...",
+      "sendLabel": "Send"
     },
     "omnichannel": {
       "title": "Instagram and Facebook,",

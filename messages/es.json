@@ -21,12 +21,28 @@
       "title": "El teléfono sigue igual.",
       "titleHighlight": "Todo el equipo se suma.",
       "subtitle": "Sigue usando el número de siempre — ahora con todo tu equipo respondiendo a la vez, sin pisarse unos a otros.",
-      "phoneLabel": "WhatsApp Business",
-      "inboxLabel": "Shared Inbox Zentrix",
-      "agent1": "Marta",
-      "agent2": "João",
-      "agent3": "Ana",
-      "syncedLabel": "Sincronizado en tiempo real"
+      "phoneBotName": "Zentrix Bot",
+      "phoneMessages": [
+        { "from": "bot", "text": "¡Hola! Bienvenido a la tienda. ¿En qué puedo ayudarte hoy? 👋" },
+        { "from": "customer", "text": "Hola, quería saber el estado de mi pedido #4821" },
+        { "from": "bot", "text": "¡Claro! Un momento, lo reviso y te aviso." }
+      ],
+      "syncLabel": "Sincronizado en tiempo real",
+      "inboxTitle": "Shared Inbox",
+      "inboxContacts": [
+        { "name": "Maria Fernandes", "preview": "Ya envié el comprobante ✅", "time": "09:41" },
+        { "name": "João Kiala", "preview": "¿Cuál es el plazo de entrega?", "time": "09:32" },
+        { "name": "Ana Paula", "preview": "¡Gracias por la ayuda! 🙏", "time": "ayer" }
+      ],
+      "activeContact": "Maria Fernandes",
+      "chatMessages": [
+        { "from": "contact", "text": "¡Buenas! Ya hice el pago vía Multicaixa Express." },
+        { "from": "agent", "text": "Recibido, Maria. Confirmo tu pedido y lo paso a envío." }
+      ],
+      "internalNoteLabel": "Nota interna",
+      "internalNote": "Maria ya envió el comprobante. Confirmar stock antes de despachar.",
+      "inputPlaceholder": "Escribe un mensaje...",
+      "sendLabel": "Enviar"
     },
     "omnichannel": {
       "title": "Instagram y Facebook,",
