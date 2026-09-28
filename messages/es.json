@@ -164,9 +164,6 @@
   },
   "Dashboard": {
     "search": "Buscar...",
-    "account": "Mi cuenta",
-    "overviewTitle": "Resumen",
-    "overviewSubtitle": "Bienvenido de nuevo. Aquí tienes el resumen de tu negocio.",
-    "comingSoon": "En construcción — los datos aparecerán aquí pronto."
+    "account": "Mi cuenta"
   }
 }

@@ -164,9 +164,6 @@
   },
   "Dashboard": {
     "search": "Search...",
-    "account": "My account",
-    "overviewTitle": "Overview",
-    "overviewSubtitle": "Welcome back. Here's a summary of your business.",
-    "comingSoon": "Under construction — data will appear here soon."
+    "account": "My account"
   }
 }

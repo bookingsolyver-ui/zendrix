@@ -1,23 +1,29 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { DashboardEmptyState } from "@/components/dashboard/empty-state";
+import { KpiCards } from "@/components/dashboard/overview/kpi-cards";
+import { RevenueEvolutionChart } from "@/components/dashboard/overview/revenue-evolution-chart";
+import { LiveActivityFeed } from "@/components/dashboard/overview/live-activity-feed";
 
-export default async function DashboardOverviewPage({
+export default async function DashboardPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("Dashboard");
 
   return (
     <>
       <DashboardPageHeader
-        title={t("overviewTitle")}
-        subtitle={t("overviewSubtitle")}
+        title="Visão geral"
+        subtitle="Bem-vindo de volta. Aqui está o resumo do seu negócio."
       />
-      <DashboardEmptyState message={t("comingSoon")} />
+
+      <div className="space-y-6">
+        <KpiCards />
+        <RevenueEvolutionChart />
+        <LiveActivityFeed />
+      </div>
     </>
   );
 }
