@@ -84,6 +84,64 @@
       "node2": "Esperar 20 min",
       "node3": "Enviar Cupón"
     },
+    "improveWithAi": {
+      "eyebrow": "Mejorar con IA",
+      "title": "Tu idea.",
+      "titleHighlight": "Con la voz de tu marca.",
+      "subtitle": "Escribe un borrador y deja que la IA lo reescriba con el tono de tu marca, más corto o más persuasivo, sin perder las variables.",
+      "draftLabel": "Tu borrador",
+      "draftText": "Hola {{1}}, todavía tienes productos en el carrito. Vuelve para terminar tu compra.",
+      "directions": {
+        "brandVoice": "Voz de marca",
+        "shorter": "Más corto",
+        "persuasive": "Más persuasivo"
+      },
+      "resultLabel": "Con Mejorar con IA",
+      "results": {
+        "brandVoice": "¡Hola {{1}}! ¿Te quedó alguna duda sobre tu elección? Tu carrito está guardado esperándote.",
+        "shorter": "Hola {{1}}, tu carrito sigue abierto. Toca aquí para terminar.",
+        "persuasive": "¡Hola {{1}}! Quedan pocas unidades en tu carrito — finaliza ahora y asegura tu pedido."
+      },
+      "variablePreserved": "Variable preservada"
+    },
+    "campaigns": {
+      "title": "Una campaña en",
+      "titleHighlight": "tres pasos.",
+      "subtitle": "Elige quién la recibe, el mensaje y la hora. Mira el costo estimado antes de enviar.",
+      "step1Title": "Segmento",
+      "step1Description": "Combina reglas de compra, carrito o etiquetas y mira el conteo actualizarse al instante.",
+      "segmentRule": "Cliente compró en los últimos 90 días",
+      "estimatedCostLabel": "Costo estimado",
+      "step2Title": "Template",
+      "step2Description": "Aprobado por Meta, con variables de tu tienda.",
+      "templateName": "promo-fin-de-semana",
+      "templateMessage": "María, este fin de semana solo hasta el domingo: 20% en toda la tienda 🎉",
+      "step3Title": "Envío",
+      "step3Description": "Ahora o programado. Zentrix envía por la API oficial y mide el retorno.",
+      "resultsLabel": "Resultados",
+      "dispatchStats": [
+        { "label": "Enviados", "value": "3.240" },
+        { "label": "Leídos", "value": "2.180" },
+        { "label": "Clics", "value": "412" },
+        { "label": "Ingresos", "value": "Kz 890K" }
+      ]
+    },
+    "popupToWhatsapp": {
+      "title": "Del pop-up",
+      "titleHighlight": "al WhatsApp.",
+      "subtitle": "Quien solo estaba mirando la tienda deja su WhatsApp y recibe la oferta al instante, en tu número.",
+      "step1Label": "En tu tienda",
+      "step1Title": "Pop-up con oferta",
+      "step1Description": "Capta el WhatsApp con un cupón o una raspadita.",
+      "step2Label": "En Zentrix",
+      "step2Title": "Llega el evento",
+      "step2Trigger": "Disparador de automatización",
+      "step2Segment": "Filtro de segmento",
+      "step2Variable": "Variable de mensaje",
+      "step3Label": "En WhatsApp",
+      "step3Title": "Template aprobado",
+      "step3Message": "¡Hola! Tu cupón del 20% ya está activo 💚 Úsalo hasta el domingo."
+    },
     "useCases": {
       "title": "Hecho para tu negocio,",
       "titleHighlight": "sea cual sea.",
@@ -165,6 +223,83 @@
       "subtitle": "Conviértete en partner de Zentrix y recibe un 10% de comisión recurrente por cada cliente que recomiendes, todos los meses.",
       "cta": "Quiero ser partner",
       "partnersNote": "Ya lo usan decenas de partners"
+    },
+    "workWith": {
+      "title": "Móntalo tú mismo.",
+      "titleHighlight": "O deja que Zentrix lo monte y lo opere.",
+      "subtitle": "La plataforma es la misma en los tres caminos. Lo que cambia es quién hace el trabajo.",
+      "selfServe": {
+        "title": "Tú mismo",
+        "description": "Te suscribes, conectas y montas tus propios flujos. Así empieza la mayoría."
+      },
+      "setup": {
+        "title": "Lo implementamos",
+        "description": "Conectamos tu tienda, escribimos los templates y activamos los flujos. Después la cuenta es tuya."
+      },
+      "managed": {
+        "title": "Lo operamos",
+        "description": "Campañas, ajustes y lectura de resultados cada mes. Tu equipo solo atiende."
+      }
+    },
+    "faq": {
+      "title": "Tus dudas,",
+      "titleHighlight": "resueltas.",
+      "subtitle": "Respuestas directas sobre cómo funciona Zentrix.",
+      "q1": {
+        "question": "¿Voy a perder mi número de WhatsApp?",
+        "answer": "No. El número sigue en tu teléfono y tu equipo empieza a atender también por Zentrix, en el mismo número."
+      },
+      "q2": {
+        "question": "¿Varios agentes pueden usar el mismo número?",
+        "answer": "Sí. Cada persona entra con su propio usuario y atiende en la misma bandeja compartida, con filas y transferencias entre agentes."
+      },
+      "q3": {
+        "question": "¿Zentrix atiende Instagram y Facebook?",
+        "answer": "Sí, desde el plan Pro. Direct, Messenger y comentarios llegan a la misma bandeja del WhatsApp."
+      },
+      "q4": {
+        "question": "¿La IA responde con audio?",
+        "answer": "Sí, en el plan Enterprise. La IA puede responder con una nota de voz, siempre o solo cuando el cliente envía audio."
+      },
+      "q5": {
+        "question": "¿La IA agenda reuniones en mi calendario?",
+        "answer": "Sí. Conectada a Google Calendar, la IA consulta tu disponibilidad y agenda directamente en la conversación."
+      },
+      "q6": {
+        "question": "¿Necesito tarjeta de crédito para probarlo?",
+        "answer": "No. La prueba gratis empieza sin tarjeta y puedes cancelar cuando quieras."
+      },
+      "q7": {
+        "question": "¿Cuánto cuesta?",
+        "answer": "Desde Kz 35.000 al mes en el plan Basic. El Pro (Kz 75.000) añade bandeja multiagente y campañas; el Enterprise (Kz 150.000) incluye atención por IA con voz y automatizaciones completas."
+      },
+      "q8": {
+        "question": "¿Funciona con mi tienda en línea?",
+        "answer": "Sí. Conectamos con las principales plataformas de e-commerce, y cualquier otro sistema puede integrarse por webhook."
+      },
+      "q9": {
+        "question": "¿Cómo funciona la recuperación de carrito?",
+        "answer": "En cuanto un cliente abandona el checkout, un flujo automático envía recordatorios con el enlace para terminar la compra."
+      },
+      "q10": {
+        "question": "¿Puedo cancelar cuando quiera?",
+        "answer": "Sí, sin permanencia. Cancelas directamente desde el panel, en cualquier momento."
+      },
+      "q11": {
+        "question": "¿Puedo saber qué venta vino de WhatsApp?",
+        "answer": "Sí. Cada enlace se rastrea y cada venta se atribuye al clic, a la lectura del mensaje o al cupón usado."
+      },
+      "q12": {
+        "question": "¿Hay soporte en español?",
+        "answer": "Sí, toda la plataforma y el soporte están disponibles en español, además de portugués e inglés."
+      }
+    },
+    "finalCta": {
+      "title": "Tu número ya es conocido.",
+      "titleHighlight": "Ahora trabaja con todo tu equipo.",
+      "subtitle": "Conecta tu WhatsApp Business, invita a tu equipo y empieza a atender por Zentrix hoy mismo.",
+      "ctaPrimary": "Prueba gratis",
+      "ctaSecondary": "Ver planes"
     }
   },
   "Footer": {
