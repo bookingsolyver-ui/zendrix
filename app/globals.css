@@ -128,6 +128,14 @@ body {
     0 0 26px -6px color-mix(in srgb, var(--neon-green) 75%, transparent);
 }
 
+.pricing-pro-glow {
+  border-color: color-mix(in srgb, var(--neon-green) 70%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--neon-green) 45%, transparent),
+    0 0 60px -12px color-mix(in srgb, var(--neon-green) 65%, transparent),
+    0 0 120px -30px color-mix(in srgb, var(--neon-green-2) 55%, transparent);
+}
+
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;

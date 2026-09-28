@@ -22,17 +22,17 @@ export function PricingSection() {
 
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
         {PLANS.map((plan) => {
+          const kz = formatPrice(MONTHLY_PRICES[plan.id].AOA, "AOA");
           const brl = formatPrice(MONTHLY_PRICES[plan.id].BRL, "BRL");
-          const aoa = formatPrice(MONTHLY_PRICES[plan.id].AOA, "AOA");
           const description = t(`plans.${plan.id}.description`);
           const features = t.raw(`plans.${plan.id}.features`) as string[];
 
           return (
             <div
               key={plan.id}
-              className={`relative flex flex-col rounded-3xl p-7 sm:p-8 ${
+              className={`relative flex flex-col rounded-3xl p-7 transition-transform sm:p-8 ${
                 plan.highlight
-                  ? "border-2 border-emerald-500 bg-white/[0.03] ring-2 ring-emerald-500/40 lg:-translate-y-2"
+                  ? "pricing-pro-glow border-2 bg-white/[0.03] lg:-translate-y-2"
                   : "border border-white/10 bg-white/[0.02]"
               }`}
             >
@@ -48,11 +48,11 @@ export function PricingSection() {
               <div className="mt-6">
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-3xl font-semibold tracking-tight text-foreground">
-                    {brl}
+                    {kz}
                   </span>
                   <span className="text-sm text-white/40">{t("perMonth")}</span>
                 </div>
-                <p className="mt-1 text-xs text-white/40">{aoa} / mês</p>
+                <p className="mt-1 text-xs text-white/40">{brl} / mês</p>
               </div>
 
               <ul className="mt-7 flex-1 space-y-2.5">

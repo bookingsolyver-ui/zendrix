@@ -16,9 +16,9 @@ export const CYCLES: { code: Cycle; label: string; months: number; discountPct: 
 ];
 
 export const MONTHLY_PRICES: Record<PlanId, Record<Currency, number>> = {
-  basic: { USD: 29, BRL: 149, AOA: 14999, EUR: 27 },
-  pro: { USD: 49, BRL: 249, AOA: 34999, EUR: 45 },
-  enterprise: { USD: 89, BRL: 449, AOA: 64999, EUR: 82 },
+  basic: { USD: 29, BRL: 149, AOA: 35000, EUR: 27 },
+  pro: { USD: 49, BRL: 249, AOA: 75000, EUR: 45 },
+  enterprise: { USD: 89, BRL: 449, AOA: 150000, EUR: 82 },
 };
 
 export const PLANS: {
