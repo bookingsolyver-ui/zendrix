@@ -1,8 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
-import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { KpiCards } from "@/components/dashboard/overview/kpi-cards";
-import { RevenueEvolutionChart } from "@/components/dashboard/overview/revenue-evolution-chart";
-import { LiveActivityFeed } from "@/components/dashboard/overview/live-activity-feed";
+import { TrialBanner } from "@/components/dashboard/overview/trial-banner";
+import { DashboardFilters } from "@/components/dashboard/overview/dashboard-filters";
+import { WhatsappEmptyState } from "@/components/dashboard/overview/whatsapp-empty-state";
 import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-section";
 
 export default async function DashboardPage({
@@ -15,15 +14,11 @@ export default async function DashboardPage({
 
   return (
     <>
-      <DashboardPageHeader
-        title="Visão geral"
-        subtitle="Bem-vindo de volta. Aqui está o resumo do seu negócio."
-      />
+      <TrialBanner />
+      <DashboardFilters />
+      <WhatsappEmptyState />
 
-      <div className="space-y-6">
-        <KpiCards />
-        <RevenueEvolutionChart />
-        <LiveActivityFeed />
+      <div className="mt-6">
         <FaqVideoSection />
       </div>
     </>
