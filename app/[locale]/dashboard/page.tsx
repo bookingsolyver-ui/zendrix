@@ -3,6 +3,7 @@ import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { KpiCards } from "@/components/dashboard/overview/kpi-cards";
 import { RevenueEvolutionChart } from "@/components/dashboard/overview/revenue-evolution-chart";
 import { LiveActivityFeed } from "@/components/dashboard/overview/live-activity-feed";
+import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-section";
 
 export default async function DashboardPage({
   params,
@@ -23,6 +24,7 @@ export default async function DashboardPage({
         <KpiCards />
         <RevenueEvolutionChart />
         <LiveActivityFeed />
+        <FaqVideoSection />
       </div>
     </>
   );
