@@ -165,5 +165,58 @@
   "Dashboard": {
     "search": "Buscar...",
     "account": "Mi cuenta"
+  },
+  "Partners": {
+    "metaTitle": "Zentrix Partners — Recomienda y gana 10% recurrente",
+    "metaDescription": "Conviértete en partner de Zentrix, recomienda nuevos clientes y gana un 10% de comisión recurrente cada mes.",
+    "nav": {
+      "logoSuffix": "Partners",
+      "login": "Entrar al Área de Partner",
+      "cta": "Quiero ser Partner"
+    },
+    "hero": {
+      "titleLine1": "Recomienda Zentrix.",
+      "titleHighlight": "Gana 10% de comisión recurrente.",
+      "subtitle": "Ayuda a otras empresas a facturar más con WhatsApp y construye una nueva fuente de ingresos. Gana un 10% de cada mensualidad, todos los meses, mientras el cliente esté activo.",
+      "ctaPrimary": "Generar mi Link de Partner",
+      "ctaSecondary": "Saber más",
+      "notificationTitle": "Nueva Comisión Recibida",
+      "notificationAmount": "Kz 34.900"
+    },
+    "howItWorks": {
+      "title": "Cómo Funciona",
+      "subtitle": "Empieza a ganar en tres pasos simples.",
+      "step1Title": "Crea tu link",
+      "step1Description": "Genera un link exclusivo en menos de 1 minuto.",
+      "step2Title": "Comparte Zentrix",
+      "step2Description": "Envíalo a clientes, amigos o ponlo en tu bio.",
+      "step3Title": "Cobra todos los meses",
+      "step3Description": "Recibe el pago directamente en tu cuenta bancaria cada mes."
+    },
+    "benefits": {
+      "title": "Por qué te va a encantar este programa",
+      "subtitle": "Hecho para recompensar a quien confía en Zentrix.",
+      "item1Title": "Comisión Vitalicia",
+      "item1Description": "Mientras el cliente pague, tú cobras. Sin límite de tiempo.",
+      "item2Title": "Cookies de 90 días",
+      "item2Description": "Si hace clic hoy y compra dentro de 2 meses, la comisión sigue siendo tuya.",
+      "item3Title": "Dashboard Transparente",
+      "item3Description": "Sigue clics, conversiones y saldo en tiempo real, sin sorpresas."
+    },
+    "audience": {
+      "title": "¿Para Quién es el Programa?",
+      "subtitle": "Si ya trabajas con negocios digitales, este programa es para ti.",
+      "item1Title": "Agencias de Marketing",
+      "item1Description": "Añade Zentrix a tu portafolio de servicios y gana con cada cliente que integres.",
+      "item2Title": "Creadores de Contenido",
+      "item2Description": "Recomienda a tu audiencia una herramienta que ya usas y en la que confías.",
+      "item3Title": "Consultores de E-commerce",
+      "item3Description": "Ayuda a tus clientes a vender más y convierte eso en una nueva fuente de ingresos."
+    },
+    "finalCta": {
+      "title": "¿Listo para escalar tus ganancias?",
+      "subtitle": "Únete a decenas de partners que ya están construyendo un ingreso recurrente con Zentrix.",
+      "button": "Crear Cuenta de Partner Ahora"
+    }
   }
 }

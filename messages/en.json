@@ -165,5 +165,58 @@
   "Dashboard": {
     "search": "Search...",
     "account": "My account"
+  },
+  "Partners": {
+    "metaTitle": "Zentrix Partners — Refer and earn 10% recurring",
+    "metaDescription": "Become a Zentrix partner, refer new customers and earn a 10% recurring commission every month.",
+    "nav": {
+      "logoSuffix": "Partners",
+      "login": "Log in to Partner Area",
+      "cta": "Become a Partner"
+    },
+    "hero": {
+      "titleLine1": "Refer Zentrix.",
+      "titleHighlight": "Earn 10% recurring commission.",
+      "subtitle": "Help other businesses sell more with WhatsApp and build a new source of income. Earn 10% of every monthly payment, every month, for as long as the customer stays active.",
+      "ctaPrimary": "Generate my Partner Link",
+      "ctaSecondary": "Learn more",
+      "notificationTitle": "New Commission Received",
+      "notificationAmount": "Kz 34,900"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Start earning in three simple steps.",
+      "step1Title": "Create your link",
+      "step1Description": "Generate an exclusive link in under 1 minute.",
+      "step2Title": "Share Zentrix",
+      "step2Description": "Send it to customers, friends, or add it to your bio.",
+      "step3Title": "Get paid every month",
+      "step3Description": "Receive payments directly to your bank account every month."
+    },
+    "benefits": {
+      "title": "Why you'll love this program",
+      "subtitle": "Built to reward the people who trust Zentrix.",
+      "item1Title": "Lifetime Commission",
+      "item1Description": "As long as the customer keeps paying, you keep earning. No time limit.",
+      "item2Title": "90-Day Cookies",
+      "item2Description": "If they click today and buy in 2 months, the commission is still yours.",
+      "item3Title": "Transparent Dashboard",
+      "item3Description": "Track clicks, conversions, and balance in real time, no surprises."
+    },
+    "audience": {
+      "title": "Who Is This Program For?",
+      "subtitle": "If you already work with digital businesses, this program is for you.",
+      "item1Title": "Marketing Agencies",
+      "item1Description": "Add Zentrix to your service portfolio and earn from every client you onboard.",
+      "item2Title": "Content Creators",
+      "item2Description": "Recommend a tool your audience already uses and trusts.",
+      "item3Title": "E-commerce Consultants",
+      "item3Description": "Help your clients sell more and turn it into a new source of income."
+    },
+    "finalCta": {
+      "title": "Ready to scale your earnings?",
+      "subtitle": "Join dozens of partners already building recurring income with Zentrix.",
+      "button": "Create Partner Account Now"
+    }
   }
 }

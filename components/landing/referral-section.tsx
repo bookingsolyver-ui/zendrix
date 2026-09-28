@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Percent, Users } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 export function ReferralSection() {
   const t = useTranslations("Landing.referral");
@@ -26,12 +27,12 @@ export function ReferralSection() {
           </div>
 
           <div className="flex shrink-0 flex-col items-center gap-4">
-            <button
-              type="button"
+            <Link
+              href="/parceiros"
               className="neon-green-btn rounded-full bg-green-500 px-8 py-4 text-sm font-semibold text-background hover:bg-green-400"
             >
               {t("cta")}
-            </button>
+            </Link>
             <span className="flex items-center gap-1.5 text-xs text-white/30">
               <Users className="h-3.5 w-3.5" />
               {t("partnersNote")}
