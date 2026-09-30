@@ -19,7 +19,7 @@ export function FinalCtaSection() {
 
         <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
-            href="/onboarding"
+            href="/register"
             className="neon-green-btn w-full rounded-full bg-green-500 px-8 py-4 text-sm font-semibold text-background hover:bg-green-400 sm:w-auto"
           >
             {t("ctaPrimary")}

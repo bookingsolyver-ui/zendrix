@@ -11,7 +11,7 @@ export function AutomationFlowSection() {
   ];
 
   return (
-    <section id="section-features" className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
+    <section id="section-automation" className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t("title")} <span className="neon-green-text">{t("titleHighlight")}</span>

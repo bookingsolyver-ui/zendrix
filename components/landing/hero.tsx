@@ -1,7 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HeroMockupCollage } from "@/components/landing/hero-mockup-collage";
-import { SoonButton } from "@/components/ui/soon-button";
 
 export function Hero() {
   const t = useTranslations("Landing.hero");
@@ -28,17 +27,17 @@ export function Hero() {
 
           <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
             <Link
-              href="/onboarding"
+              href="/register"
               className="neon-green-btn w-full rounded-full bg-green-500 px-8 py-4 text-sm font-semibold text-background hover:bg-green-400 sm:w-auto"
             >
               {t("ctaPrimary")}
             </Link>
-            <SoonButton feature={t("ctaSecondary")}
-              type="button"
+            <a
+              href="#pricing"
               className="w-full rounded-full border border-white/15 bg-background px-8 py-4 text-sm font-semibold text-foreground transition-colors hover:border-white/30 hover:bg-white/[0.03] sm:w-auto"
             >
               {t("ctaSecondary")}
-            </SoonButton>
+            </a>
           </div>
         </div>
 

@@ -1,6 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { PublicHeader } from "@/components/public-header";
 import { Hero } from "@/components/landing/hero";
+import { ProductPreview } from "@/components/landing/product-preview";
+import { FeaturesGrid } from "@/components/landing/features-grid";
 import { SameNumberSection } from "@/components/landing/same-number-section";
 import { OmnichannelSection } from "@/components/landing/omnichannel-section";
 import { AiVoiceSchedulingSection } from "@/components/landing/ai-voice-scheduling-section";
@@ -30,6 +32,8 @@ export default async function HomePage({
       <PublicHeader />
       <main className="flex-1">
         <Hero />
+        <ProductPreview />
+        <FeaturesGrid />
         <SameNumberSection />
         <OmnichannelSection />
         <AiVoiceSchedulingSection />

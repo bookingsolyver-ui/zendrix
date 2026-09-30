@@ -5,7 +5,7 @@ import { Logo } from "@/components/Logo";
 
 export function PublicHeader({
   primaryCtaLabel,
-  primaryCtaHref = "/onboarding",
+  primaryCtaHref = "/register",
 }: {
   primaryCtaLabel?: string;
   primaryCtaHref?: string;
@@ -76,10 +76,10 @@ export function PublicHeader({
           </Link>
 
           <Link
-            href="/dashboard"
+            href="/login"
             className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white transition-colors hover:bg-white/10"
           >
-            {t("partnerArea")}
+            {t("login")}
           </Link>
 
           <Link

@@ -18,6 +18,9 @@ export function PricingSection() {
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t("title")} <span className="neon-green-text">{t("titleHighlight")}</span>
         </h2>
+        <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400">
+          {t("trialBadge")}
+        </span>
         <p className="mt-4 text-white/50">{t("subtitle")}</p>
       </div>
 
@@ -79,6 +82,8 @@ export function PricingSection() {
           );
         })}
       </div>
+
+      <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-white/40">{t("trialNote")}</p>
     </section>
   );
 }

@@ -8,9 +8,9 @@
       "titleLine1": "O seu WhatsApp Business.",
       "titleLine2": "Toda a equipa,",
       "titleHighlight": "no mesmo número.",
-      "subtitle": "Venda globalmente, atenda no automático. Recupere carrinhos e fature em Kz, R$, €, $.",
-      "ctaPrimary": "Teste grátis",
-      "ctaSecondary": "Falar com vendas",
+      "subtitle": "Respostas centralizadas para toda a equipa, um agente de IA treinado com os dados do seu negócio e dados isolados por empresa.",
+      "ctaPrimary": "Criar conta com trial de 14 dias",
+      "ctaSecondary": "Ver preços",
       "phoneContact": "Ana Cliente",
       "phoneMessage1": "Olá! Ainda tenho o carrinho aberto 👀",
       "phoneMessage2": "Boa notícia! Recuperámos o seu carrinho e guardámos os artigos 🎉",
@@ -32,21 +32,48 @@
       "subtitle": "Continue a usar o número de sempre — agora com toda a equipa a responder ao mesmo tempo, sem pisarem uns aos outros.",
       "phoneBotName": "Zentrix Bot",
       "phoneMessages": [
-        { "from": "bot", "text": "Olá! Bem-vindo à loja. Em que posso ajudar hoje? 👋" },
-        { "from": "customer", "text": "Boa tarde, queria saber o estado da minha encomenda #4821" },
-        { "from": "bot", "text": "Claro! Um momento, vou verificar e já lhe digo." }
+        {
+          "from": "bot",
+          "text": "Olá! Bem-vindo à loja. Em que posso ajudar hoje? 👋"
+        },
+        {
+          "from": "customer",
+          "text": "Boa tarde, queria saber o estado da minha encomenda #4821"
+        },
+        {
+          "from": "bot",
+          "text": "Claro! Um momento, vou verificar e já lhe digo."
+        }
       ],
       "syncLabel": "Sincronização em tempo real",
       "inboxTitle": "Shared Inbox",
       "inboxContacts": [
-        { "name": "Maria Fernandes", "preview": "Já enviei o comprovativo ✅", "time": "09:41" },
-        { "name": "João Kiala", "preview": "Qual é o prazo de entrega?", "time": "09:32" },
-        { "name": "Ana Paula", "preview": "Obrigada pela ajuda! 🙏", "time": "ontem" }
+        {
+          "name": "Maria Fernandes",
+          "preview": "Já enviei o comprovativo ✅",
+          "time": "09:41"
+        },
+        {
+          "name": "João Kiala",
+          "preview": "Qual é o prazo de entrega?",
+          "time": "09:32"
+        },
+        {
+          "name": "Ana Paula",
+          "preview": "Obrigada pela ajuda! 🙏",
+          "time": "ontem"
+        }
       ],
       "activeContact": "Maria Fernandes",
       "chatMessages": [
-        { "from": "contact", "text": "Boa tarde! Já fiz o pagamento via Multicaixa Express." },
-        { "from": "agent", "text": "Recebido, Maria! Vou confirmar já o seu pedido e avanço com o envio." }
+        {
+          "from": "contact",
+          "text": "Boa tarde! Já fiz o pagamento via Multicaixa Express."
+        },
+        {
+          "from": "agent",
+          "text": "Recebido, Maria! Vou confirmar já o seu pedido e avanço com o envio."
+        }
       ],
       "internalNoteLabel": "Nota interna",
       "internalNote": "A Maria já enviou o comprovativo. Confirmar stock antes de despachar.",
@@ -120,10 +147,22 @@
       "step3Description": "Agora ou agendado. A Zentrix envia pela API oficial e mede o retorno.",
       "resultsLabel": "Resultados",
       "dispatchStats": [
-        { "label": "Enviadas", "value": "3.240" },
-        { "label": "Lidas", "value": "2.180" },
-        { "label": "Cliques", "value": "412" },
-        { "label": "Receita", "value": "Kz 890K" }
+        {
+          "label": "Enviadas",
+          "value": "3.240"
+        },
+        {
+          "label": "Lidas",
+          "value": "2.180"
+        },
+        {
+          "label": "Cliques",
+          "value": "412"
+        },
+        {
+          "label": "Receita",
+          "value": "Kz 890K"
+        }
       ]
     },
     "popupToWhatsapp": {
@@ -154,24 +193,60 @@
       },
       "timelines": {
         "moda": [
-          { "time": "10:02", "text": "Cliente comenta no Reels" },
-          { "time": "10:05", "text": "Automação envia Direct" },
-          { "time": "10:40", "text": "Pagamento confirmado" }
+          {
+            "time": "10:02",
+            "text": "Cliente comenta no Reels"
+          },
+          {
+            "time": "10:05",
+            "text": "Automação envia Direct"
+          },
+          {
+            "time": "10:40",
+            "text": "Pagamento confirmado"
+          }
         ],
         "clinicas": [
-          { "time": "09:15", "text": "Paciente pede uma consulta no WhatsApp" },
-          { "time": "09:17", "text": "IA agenda automaticamente no Google Calendar" },
-          { "time": "09:20", "text": "Lembrete de confirmação enviado" }
+          {
+            "time": "09:15",
+            "text": "Paciente pede uma consulta no WhatsApp"
+          },
+          {
+            "time": "09:17",
+            "text": "IA agenda automaticamente no Google Calendar"
+          },
+          {
+            "time": "09:20",
+            "text": "Lembrete de confirmação enviado"
+          }
         ],
         "cursos": [
-          { "time": "14:00", "text": "Lead pergunta sobre o curso" },
-          { "time": "14:02", "text": "IA envia vídeo de apresentação" },
-          { "time": "14:30", "text": "Matrícula confirmada com Pix" }
+          {
+            "time": "14:00",
+            "text": "Lead pergunta sobre o curso"
+          },
+          {
+            "time": "14:02",
+            "text": "IA envia vídeo de apresentação"
+          },
+          {
+            "time": "14:30",
+            "text": "Matrícula confirmada com Pix"
+          }
         ],
         "restaurantes": [
-          { "time": "19:40", "text": "Cliente pede o cardápio no WhatsApp" },
-          { "time": "19:42", "text": "Bot sugere o prato do dia" },
-          { "time": "20:05", "text": "Pedido confirmado e a caminho" }
+          {
+            "time": "19:40",
+            "text": "Cliente pede o cardápio no WhatsApp"
+          },
+          {
+            "time": "19:42",
+            "text": "Bot sugere o prato do dia"
+          },
+          {
+            "time": "20:05",
+            "text": "Pedido confirmado e a caminho"
+          }
         ]
       }
     },
@@ -181,7 +256,7 @@
     "pricing": {
       "title": "Preços simples,",
       "titleHighlight": "sem surpresas.",
-      "subtitle": "Comece grátis. Faça upgrade quando a sua operação crescer.",
+      "subtitle": "Comece com 14 dias de teste grátis. Faça upgrade quando a sua operação crescer.",
       "perMonth": "/mês",
       "proBadge": "O teste começa aqui",
       "ctaBasic": "Começar com Basic",
@@ -215,7 +290,9 @@
             "CRM completo com automações"
           ]
         }
-      }
+      },
+      "trialBadge": "14 dias de teste grátis",
+      "trialNote": "Todas as contas novas começam com 14 dias de teste. Durante o teste, o agente de IA fica disponível assim que preencher a ficha do seu negócio."
     },
     "referral": {
       "title": "Indique a Zentrix.",
@@ -300,6 +377,55 @@
       "subtitle": "Conecte o seu WhatsApp Business, convide a equipa e comece a atender pela Zentrix hoje mesmo.",
       "ctaPrimary": "Teste grátis",
       "ctaSecondary": "Ver planos"
+    },
+    "features": {
+      "title": "Tudo o que precisa para atender",
+      "titleHighlight": "melhor e mais depressa.",
+      "subtitle": "Uma plataforma para a equipa, a IA e os dados do seu negócio.",
+      "items": {
+        "team": {
+          "title": "Vários operadores, um só número",
+          "text": "Toda a equipa responde a partir do mesmo número de WhatsApp Business, com conversas partilhadas, notas internas e atribuição."
+        },
+        "ai": {
+          "title": "IA treinada com os dados do negócio",
+          "text": "O agente responde com a ficha que preencher (produtos, preços, horários e regras) e passa a conversa a uma pessoa quando é preciso."
+        },
+        "security": {
+          "title": "Dados isolados por empresa",
+          "text": "Cada organização só vê os seus próprios dados. O isolamento multi-tenant é reforçado na base de dados (Supabase RLS) e as credenciais são guardadas cifradas."
+        },
+        "always": {
+          "title": "Atendimento automático 24/7",
+          "text": "Respostas por texto e por nota de voz a qualquer hora, com opção de pausar a IA em qualquer conversa."
+        }
+      }
+    },
+    "preview": {
+      "title": "Equipa e IA na",
+      "titleHighlight": "mesma conversa.",
+      "subtitle": "Veja como a IA responde primeiro e a equipa assume quando o cliente precisa de uma pessoa.",
+      "window": "Inbox Zentrix",
+      "sample": "Exemplo ilustrativo",
+      "customerMessage": "Olá! Quanto custa o plano Pro?",
+      "aiLabel": "Agente de IA",
+      "aiMessage": "Olá! O plano Pro custa 75.000 Kz por mês e inclui 3 números de WhatsApp. Quantas pessoas atendem os seus clientes hoje?",
+      "handoff": "Cliente pediu falar com uma pessoa",
+      "customerFollowup": "Prefiro falar com alguém da equipa, por favor.",
+      "agentLabel": "Carlos · Equipa",
+      "agentMessage": "Olá Ana, sou o Carlos. Já vi a conversa e trato disso consigo agora.",
+      "c1": {
+        "name": "Ana Cliente",
+        "preview": "Qual é o preço do plano Pro?"
+      },
+      "c2": {
+        "name": "João Pedro",
+        "preview": "Obrigado, fico a aguardar."
+      },
+      "c3": {
+        "name": "Marta S.",
+        "preview": "Vocês têm horário ao sábado?"
+      }
     }
   },
   "Footer": {
@@ -377,7 +503,8 @@
     "tutorials": "Tutoriais",
     "partnerArea": "Área do parceiro",
     "generateLink": "Gerar meu link",
-    "freeTrial": "Teste grátis"
+    "freeTrial": "Criar conta com trial de 14 dias",
+    "login": "Entrar"
   },
   "Auth": {
     "login": {
