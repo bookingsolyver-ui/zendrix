@@ -1,4 +1,5 @@
 import { ShoppingCart } from "lucide-react";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function PurchaseSection() {
   return (
@@ -25,12 +26,12 @@ export function PurchaseSection() {
           <p className="text-lg font-semibold text-foreground">
             R$ 49,90<span className="text-sm font-normal text-muted">/mês</span>
           </p>
-          <button
+          <SoonButton feature="Comprar número"
             type="button"
             className="neon-btn rounded-full px-5 py-2.5 text-sm font-semibold text-background"
           >
             Comprar número
-          </button>
+          </SoonButton>
         </div>
       </div>
     </section>

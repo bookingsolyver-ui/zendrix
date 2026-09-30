@@ -1,6 +1,7 @@
 import { Eye, Webhook } from "lucide-react";
 import { WEBHOOK_ENDPOINTS } from "@/components/dashboard/webhooks/webhooks-data";
 import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function WebhooksList() {
   if (WEBHOOK_ENDPOINTS.length === 0) {
@@ -45,13 +46,13 @@ export function WebhooksList() {
             </div>
           </div>
 
-          <button
+          <SoonButton feature="Ver Logs"
             type="button"
             className="flex shrink-0 items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:border-white/30 hover:bg-white/[0.03]"
           >
             <Eye className="h-4 w-4" />
             Ver Logs
-          </button>
+          </SoonButton>
         </div>
       ))}
     </div>

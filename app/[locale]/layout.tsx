@@ -5,6 +5,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
+import { SoonToaster } from "@/components/ui/soon-button";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -59,6 +60,7 @@ export default async function LocaleLayout({
       <body className="min-h-full bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
           {children}
+          <SoonToaster />
         </NextIntlClientProvider>
       </body>
     </html>

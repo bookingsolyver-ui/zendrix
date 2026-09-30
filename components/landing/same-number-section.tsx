@@ -168,12 +168,12 @@ export function SameNumberSection() {
               <div className="h-9 flex-1 rounded-full border border-white/10 bg-white/5 px-3.5 text-[11px] leading-9 text-white/30">
                 {t("inputPlaceholder")}
               </div>
-              <button
-                type="button"
+              <div
+                aria-hidden="true"
                 className="neon-green-btn shrink-0 rounded-full bg-emerald-500 px-4 py-2 text-[11px] font-semibold text-background"
               >
                 {t("sendLabel")}
-              </button>
+              </div>
             </div>
           </div>
         </div>

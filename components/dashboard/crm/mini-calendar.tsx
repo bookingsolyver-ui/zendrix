@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { SoonButton } from "@/components/ui/soon-button";
 
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
 const MONTH_LABELS = [
@@ -94,13 +95,13 @@ export function MiniCalendar() {
         })}
       </div>
 
-      <button
+      <SoonButton feature="Novo tipo de compromisso"
         type="button"
         className="glow-border mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary"
       >
         <Plus className="h-4 w-4" />
         Novo tipo de compromisso
-      </button>
+      </SoonButton>
     </div>
   );
 }

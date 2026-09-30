@@ -1,4 +1,5 @@
 import { Play } from "lucide-react";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function VideoBlock() {
   return (
@@ -13,12 +14,12 @@ export function VideoBlock() {
         </div>
       </div>
 
-      <button
+      <SoonButton feature="Assistir"
         type="button"
         className="glow-border shrink-0 rounded-full px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary"
       >
         Assistir
-      </button>
+      </SoonButton>
     </div>
   );
 }

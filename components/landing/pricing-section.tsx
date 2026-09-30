@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { MONTHLY_PRICES, PLANS, formatPrice } from "@/components/dashboard/billing/pricing-data";
 
 export function PricingSection() {
@@ -64,8 +65,8 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <button
-                type="button"
+              <Link
+                href="/register"
                 className={`mt-7 w-full rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
                   plan.highlight
                     ? "neon-green-btn bg-green-500 text-background hover:bg-green-400"
@@ -73,7 +74,7 @@ export function PricingSection() {
                 }`}
               >
                 {ctaByPlan[plan.id]}
-              </button>
+              </Link>
             </div>
           );
         })}

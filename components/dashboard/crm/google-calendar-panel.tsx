@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { GoogleCalendarMark } from "@/components/icons/google-calendar-mark";
+import { Link } from "@/i18n/navigation";
 
 export function GoogleCalendarPanel() {
   return (
@@ -22,12 +23,12 @@ export function GoogleCalendarPanel() {
           respeitando a sua disponibilidade real e evitando conflitos de horário.
         </p>
 
-        <button
-          type="button"
+        <Link
+          href="/dashboard/integrations"
           className="neon-btn mt-7 rounded-full px-6 py-3 text-sm font-semibold text-background"
         >
           Conectar Google Agenda
-        </button>
+        </Link>
       </div>
     </div>
   );

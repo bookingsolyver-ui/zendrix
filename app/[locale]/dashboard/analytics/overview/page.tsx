@@ -22,14 +22,9 @@ export default async function AnalyticsOverviewPage({
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KpiCard icon={Wallet} label="Receita Total" value="Kz 2.480.000" trend="+15% vs mês passado" />
-        <KpiCard
-          icon={TicketPercent}
-          label="Conversão de Checkouts"
-          value="4,8%"
-          trend="+8% vs mês passado"
-        />
-        <KpiCard icon={Receipt} label="Ticket Médio" value="Kz 38.500" trend="+15% vs mês passado" />
+        <KpiCard icon={Wallet} label="Receita Total" value="Kz 0" />
+        <KpiCard icon={TicketPercent} label="Conversão de Checkouts" value="—" />
+        <KpiCard icon={Receipt} label="Ticket Médio" value="—" />
       </div>
 
       <div className="mt-6">

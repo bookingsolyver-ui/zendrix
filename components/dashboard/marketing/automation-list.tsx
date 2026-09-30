@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Send, TrendingUp } from "lucide-react";
+import { Send, TrendingUp, Workflow } from "lucide-react";
+import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
 import { INITIAL_AUTOMATIONS } from "@/components/dashboard/marketing/automations-data";
 
 export function AutomationList() {
@@ -12,6 +13,16 @@ export function AutomationList() {
       prev.map((automation) =>
         automation.id === id ? { ...automation, active: !automation.active } : automation,
       ),
+    );
+  }
+
+  if (automations.length === 0) {
+    return (
+      <MarketingEmptyState
+        icon={Workflow}
+        title="Nenhum fluxo de automação ainda"
+        description="Crie o seu primeiro fluxo para nutrir e converter contactos automaticamente."
+      />
     );
   }
 

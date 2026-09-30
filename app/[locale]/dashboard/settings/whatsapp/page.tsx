@@ -7,6 +7,11 @@ import { PurchaseSection } from "@/components/dashboard/whatsapp/purchase-sectio
 import { VideoBlock } from "@/components/dashboard/whatsapp/video-block";
 import { HowItWorksAccordion } from "@/components/dashboard/whatsapp/how-it-works-accordion";
 import { DedicatedNumberSection } from "@/components/whatsapp/dedicated-number-section";
+import { UpdateTokenForm } from "@/components/whatsapp/update-token-form";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { getWhatsAppStatus } from "@/lib/whatsapp/status";
+
+const PLAN_SEATS = 3;
 
 export default async function WhatsAppSettingsPage({
   params,
@@ -15,6 +20,9 @@ export default async function WhatsAppSettingsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const user = await getCurrentUser();
+  const { count } = await getWhatsAppStatus(user?.workspace?.id);
 
   return (
     <>
@@ -28,17 +36,23 @@ export default async function WhatsAppSettingsPage({
         <SummaryCard
           icon={Smartphone}
           label="Números conectados"
-          value="0"
-          hint="Nenhum número ligado ainda"
+          value={String(count)}
+          hint={count === 0 ? "Nenhum número ligado ainda" : "Número ligado à sua conta"}
         />
         <SummaryCard
           icon={Layers}
           label="Vagas do plano"
-          value="0 / 3"
-          hint="vagas livres no plano Pro"
+          value={`${count} / ${PLAN_SEATS}`}
+          hint={`${Math.max(PLAN_SEATS - count, 0)} vagas livres no plano Pro`}
           accent
         />
       </div>
+
+      {count > 0 && (
+        <div className="mt-6">
+          <UpdateTokenForm />
+        </div>
+      )}
 
       <div className="mt-10">
         <h2 className="text-lg font-semibold">Número dedicado</h2>

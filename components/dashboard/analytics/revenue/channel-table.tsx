@@ -2,9 +2,9 @@ import { Camera, MessageCircle } from "lucide-react";
 import { WhatsAppGlyph } from "@/components/icons/whatsapp-glyph";
 
 const CHANNELS = [
-  { name: "WhatsApp", icon: WhatsAppGlyph, color: "#25D366", amount: "Kz 1.680.000", share: 69 },
-  { name: "Instagram Direct", icon: Camera, color: "#E1306C", amount: "Kz 520.000", share: 21 },
-  { name: "Facebook Messenger", icon: MessageCircle, color: "#0084FF", amount: "Kz 250.000", share: 10 },
+  { name: "WhatsApp", icon: WhatsAppGlyph, color: "#25D366", amount: "Kz 0", share: 0 },
+  { name: "Instagram Direct", icon: Camera, color: "#E1306C", amount: "Kz 0", share: 0 },
+  { name: "Facebook Messenger", icon: MessageCircle, color: "#0084FF", amount: "Kz 0", share: 0 },
 ];
 
 export function ChannelTable() {

@@ -2,38 +2,57 @@
 
 import { useMemo, useState } from "react";
 import { Download, Search, SlidersHorizontal } from "lucide-react";
-import { CONTACTS } from "@/components/dashboard/contacts/contacts-data";
-import { TagBadge } from "@/components/dashboard/contacts/tag-badge";
+import { SoonButton } from "@/components/ui/soon-button";
+import { visibleName } from "@/lib/inbox/display";
 
-function initials(name: string) {
+export type ContactRow = {
+  id: string;
+  name: string | null;
+  phone: string;
+  registeredAt: string; // already formatted on the server, so server and client render the same text
+};
+
+function displayName(contact: ContactRow) {
+  return visibleName(contact.name) ?? contact.phone;
+}
+
+function initials(contact: ContactRow) {
+  const name = visibleName(contact.name);
+  if (!name) return "#";
   return name
-    .split(" ")
+    .split(/\s+/)
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
     .toUpperCase();
 }
 
-export function ContactsTable() {
+function csvCell(value: string) {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return CONTACTS;
-    return CONTACTS.filter((contact) => contact.name.toLowerCase().includes(normalized));
-  }, [query]);
+    if (!normalized) return contacts;
+    return contacts.filter(
+      (contact) =>
+        displayName(contact).toLowerCase().includes(normalized) ||
+        contact.phone.replace(/\D/g, "").includes(normalized.replace(/\D/g, "") || "\u0000"),
+    );
+  }, [contacts, query]);
 
   function exportCsv() {
-    const header = ["Nome", "Telemóvel", "LTV", "Tags", "Data de Registo"];
+    const header = ["Nome", "Telemóvel", "Data de Registo"];
     const rows = filtered.map((contact) => [
-      contact.name,
+      visibleName(contact.name) ?? "",
       contact.phone,
-      contact.ltv,
-      contact.tags.join("; "),
       contact.registeredAt,
     ]);
 
-    const csv = [header, ...rows].map((row) => row.join(",")).join("\n");
+    const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
@@ -59,13 +78,13 @@ export function ContactsTable() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <SoonButton feature="Filtros"
             type="button"
             className="glow-border flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary"
           >
             <SlidersHorizontal className="h-4 w-4" />
             Filtros
-          </button>
+          </SoonButton>
           <button
             type="button"
             onClick={exportCsv}
@@ -78,13 +97,11 @@ export function ContactsTable() {
       </div>
 
       <div className="glow-border mt-5 overflow-x-auto rounded-2xl">
-        <table className="w-full min-w-[720px] border-collapse text-sm">
+        <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-left text-muted">
               <th className="px-5 py-3 font-medium">Nome</th>
               <th className="px-5 py-3 font-medium">Telemóvel</th>
-              <th className="px-5 py-3 font-medium">LTV</th>
-              <th className="px-5 py-3 font-medium">Tags</th>
               <th className="px-5 py-3 font-medium">Data de Registo</th>
             </tr>
           </thead>
@@ -97,28 +114,22 @@ export function ContactsTable() {
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-semibold text-foreground">
-                      {initials(contact.name)}
+                      {initials(contact)}
                     </span>
-                    <span className="font-medium text-foreground">{contact.name}</span>
+                    <span className="font-medium text-foreground">{displayName(contact)}</span>
                   </div>
                 </td>
                 <td className="px-5 py-4 text-muted">{contact.phone}</td>
-                <td className="px-5 py-4 font-medium text-foreground">{contact.ltv}</td>
-                <td className="px-5 py-4">
-                  <div className="flex flex-wrap gap-1.5">
-                    {contact.tags.map((tag) => (
-                      <TagBadge key={tag} tag={tag} />
-                    ))}
-                  </div>
-                </td>
                 <td className="px-5 py-4 text-muted">{contact.registeredAt}</td>
               </tr>
             ))}
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted">
-                  Nenhum contacto encontrado.
+                <td colSpan={3} className="px-5 py-10 text-center text-sm text-muted">
+                  {contacts.length === 0
+                    ? "Ainda não há contactos. Os clientes que escreverem para o seu WhatsApp aparecem aqui automaticamente."
+                    : "Nenhum contacto encontrado."}
                 </td>
               </tr>
             )}

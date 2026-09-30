@@ -1,5 +1,6 @@
 import { Bot } from "lucide-react";
 import { ToggleSwitch } from "@/components/dashboard/ai/settings/toggle-switch";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function SettingsHeader({
   aiActive,
@@ -27,12 +28,12 @@ export function SettingsHeader({
           </span>
         </div>
 
-        <button
+        <SoonButton feature="Guardar Alterações"
           type="button"
           className="neon-green-btn rounded-full bg-green-500 px-5 py-2.5 text-sm font-semibold text-background hover:bg-green-400"
         >
           Guardar Alterações
-        </button>
+        </SoonButton>
       </div>
     </div>
   );

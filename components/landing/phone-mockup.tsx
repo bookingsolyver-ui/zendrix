@@ -39,12 +39,12 @@ export function PhoneMockup() {
                 <ShoppingCart className="h-3 w-3" />
                 {t("phoneBadge")}
               </span>
-              <button
-                type="button"
-                className="mt-2.5 w-full rounded-lg bg-green-500 py-2.5 text-[11px] font-semibold text-background"
+              <div
+                aria-hidden="true"
+                className="mt-2.5 w-full rounded-lg bg-green-500 py-2.5 text-center text-[11px] font-semibold text-background"
               >
                 {t("phonePayButton")}
-              </button>
+              </div>
             </div>
           </div>
         </div>

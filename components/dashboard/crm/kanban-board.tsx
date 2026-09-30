@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { KANBAN_COLUMNS, type DealCard } from "@/components/dashboard/crm/kanban-data";
+import { SoonButton } from "@/components/ui/soon-button";
 
 function DealCardView({ card }: { card: DealCard }) {
   return (
@@ -41,19 +42,22 @@ export function KanbanBoard() {
                 {column.cards.length}
               </span>
             </div>
-            <button
+            <SoonButton feature={`Adicionar negócio em ${column.title}`}
               type="button"
               aria-label={`Adicionar negócio em ${column.title}`}
               className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-foreground"
             >
               <Plus className="h-4 w-4" />
-            </button>
+            </SoonButton>
           </div>
 
           <div className="space-y-3">
             {column.cards.map((card) => (
               <DealCardView key={card.id} card={card} />
             ))}
+            {column.cards.length === 0 && (
+              <p className="px-2 py-8 text-center text-xs text-muted">Sem negócios nesta fase.</p>
+            )}
           </div>
         </div>
       ))}

@@ -67,13 +67,13 @@ export function PublicHeader({
             {locale.toUpperCase()}
           </span>
 
-          <button
-            type="button"
+          <Link
+            href="/#faq"
             className="hidden items-center gap-1.5 text-sm font-medium text-white/60 transition-colors hover:text-white sm:flex"
           >
             <Play className="h-4 w-4" />
             {t("tutorials")}
-          </button>
+          </Link>
 
           <Link
             href="/dashboard"

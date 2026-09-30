@@ -31,7 +31,6 @@ export const INTEGRATION_APPS: IntegrationApp[] = [
     category: "pagamentos",
     icon: Smartphone,
     tint: "#e0393e",
-    connected: true,
   },
   {
     id: "stripe",
@@ -50,7 +49,6 @@ export const INTEGRATION_APPS: IntegrationApp[] = [
     category: "ecommerce",
     icon: ShoppingBag,
     tint: "#95bf47",
-    connected: true,
   },
   {
     id: "woocommerce",

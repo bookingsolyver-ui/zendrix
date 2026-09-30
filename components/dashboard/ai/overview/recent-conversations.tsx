@@ -4,58 +4,28 @@ import { useState } from "react";
 import { FileText } from "lucide-react";
 import { WhatsAppGlyph } from "@/components/icons/whatsapp-glyph";
 
-type Conversation = {
+export type RecentConversation = {
   id: string;
   customer: string;
   summary: string;
-  resolved: boolean;
   transcript: string[];
 };
 
-const CONVERSATIONS: Conversation[] = [
-  {
-    id: "conv-1",
-    customer: "Ana Martins",
-    summary: "Perguntou sobre o estado da entrega do pedido #1042.",
-    resolved: true,
-    transcript: [
-      "Cliente: Olá, o meu pedido já foi enviado?",
-      "IA: Olá Ana! O seu pedido #1042 foi enviado esta manhã e chega em 2 dias úteis. 📦",
-      "Cliente: Perfeito, obrigada!",
-    ],
-  },
-  {
-    id: "conv-2",
-    customer: "João Costa",
-    summary: "Pediu para falar com um atendente sobre uma reclamação.",
-    resolved: false,
-    transcript: [
-      "Cliente: Isto não é o que eu encomendei, quero falar com alguém.",
-      "IA: Lamento a situação, João. Vou transferir a conversa para a nossa equipa de atendimento.",
-    ],
-  },
-  {
-    id: "conv-3",
-    customer: "Marta Silva",
-    summary: "Confirmou a compra e recebeu o link de pagamento.",
-    resolved: true,
-    transcript: [
-      "Cliente: Ainda têm o vestido azul em M?",
-      "IA: Temos sim! Acabei de reservar o seu e enviei o link de pagamento. 🎉",
-      "Cliente: Já paguei, obrigada!",
-    ],
-  },
-];
-
-export function RecentConversations() {
+export function RecentConversations({ conversations }: { conversations: RecentConversation[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7">
       <h2 className="text-sm font-semibold text-white">Últimas Conversas Geridas</h2>
 
+      {conversations.length === 0 && (
+        <p className="mt-5 rounded-xl border border-white/5 bg-black/20 px-4 py-8 text-center text-sm text-white/40">
+          Ainda não há conversas. Quando um cliente escrever para o seu WhatsApp, aparece aqui.
+        </p>
+      )}
+
       <div className="mt-5 space-y-3">
-        {CONVERSATIONS.map((conversation) => {
+        {conversations.map((conversation) => {
           const isOpen = openId === conversation.id;
 
           return (

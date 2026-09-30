@@ -1,5 +1,6 @@
 import { GripVertical } from "lucide-react";
 import { TOOLBOX_GROUPS } from "@/components/dashboard/automations/flow-data";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function ToolboxPanel() {
   return (
@@ -20,7 +21,7 @@ export function ToolboxPanel() {
                 const Icon = item.icon;
 
                 return (
-                  <button
+                  <SoonButton feature={item.label}
                     key={item.label}
                     type="button"
                     className="group flex w-full cursor-grab items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left transition-all hover:ring-1 hover:ring-emerald-500/50 active:cursor-grabbing"
@@ -28,7 +29,7 @@ export function ToolboxPanel() {
                     <Icon className="h-4 w-4 shrink-0 text-white/50 group-hover:text-emerald-400" />
                     <span className="flex-1 text-sm text-white/80">{item.label}</span>
                     <GripVertical className="h-3.5 w-3.5 shrink-0 text-white/20" />
-                  </button>
+                  </SoonButton>
                 );
               })}
             </div>

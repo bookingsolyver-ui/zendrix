@@ -1,11 +1,9 @@
-"use client";
-
-import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import type { IntegrationApp } from "@/components/dashboard/integrations/apps-data";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function AppCard({ app }: { app: IntegrationApp }) {
-  const [connected, setConnected] = useState(Boolean(app.connected));
+  const connected = Boolean(app.connected);
   const Icon = app.icon;
 
   return (
@@ -29,9 +27,9 @@ export function AppCard({ app }: { app: IntegrationApp }) {
       <h3 className="mt-4 text-sm font-semibold text-white">{app.name}</h3>
       <p className="mt-1.5 flex-1 text-sm text-white/50">{app.description}</p>
 
-      <button
-        type="button"
-        onClick={() => setConnected((value) => !value)}
+      {/* No integration flow exists yet: the button says so instead of faking a connection. */}
+      <SoonButton
+        feature={`Conectar ${app.name}`}
         className={`mt-5 flex w-full items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
           connected
             ? "border border-white/15 text-white/80 hover:border-white/30 hover:bg-white/[0.03]"
@@ -39,7 +37,7 @@ export function AppCard({ app }: { app: IntegrationApp }) {
         }`}
       >
         {connected ? "Gerir" : "Conectar"}
-      </button>
+      </SoonButton>
     </div>
   );
 }

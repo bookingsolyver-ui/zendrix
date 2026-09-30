@@ -7,12 +7,8 @@ type Appointment = {
   meetLink: boolean;
 };
 
-const APPOINTMENTS: Appointment[] = [
-  { id: "appt-1", title: "Call de Demonstração — João Silva", time: "Hoje, 14:30", meetLink: true },
-  { id: "appt-2", title: "Follow-up — Beatriz Fonseca", time: "Hoje, 16:00", meetLink: false },
-  { id: "appt-3", title: "Onboarding — Rui Ferreira", time: "Amanhã, 10:00", meetLink: true },
-  { id: "appt-4", title: "Renovação de contrato — Sara Pinto", time: "Sex, 15:00", meetLink: true },
-];
+// There is no appointments table yet, so the list is empty.
+const APPOINTMENTS: Appointment[] = [];
 
 export function UpcomingAppointments() {
   return (
@@ -21,6 +17,12 @@ export function UpcomingAppointments() {
         <Calendar className="h-4 w-4 text-emerald-400" />
         Próximos Compromissos
       </h2>
+
+      {APPOINTMENTS.length === 0 && (
+        <p className="mt-5 rounded-xl border border-white/5 bg-black/20 px-4 py-8 text-center text-sm text-white/40">
+          Não tem compromissos agendados.
+        </p>
+      )}
 
       <div className="mt-5 space-y-3">
         {APPOINTMENTS.map((appointment) => (

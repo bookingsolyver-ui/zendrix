@@ -73,6 +73,15 @@ export function ProductsTable() {
               </td>
             </tr>
           ))}
+
+          {products.length === 0 && (
+            <tr>
+              <td colSpan={5} className="px-5 py-16 text-center">
+                <Package className="mx-auto h-8 w-8 text-muted" strokeWidth={1.5} />
+                <p className="mt-3 text-sm text-muted">Ainda não adicionou produtos.</p>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

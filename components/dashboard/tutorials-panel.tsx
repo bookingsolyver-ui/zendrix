@@ -2,6 +2,7 @@
 
 import { ExternalLink, X } from "lucide-react";
 import { usePanels } from "@/components/dashboard/panels-context";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function TutorialsPanel() {
   const { tutorialsOpen, closeTutorials } = usePanels();
@@ -42,17 +43,17 @@ export function TutorialsPanel() {
               </button>
             </div>
 
-            <a
-              href="#"
+            <SoonButton feature={"Ver a playlist no YouTube"}
+              type="button"
               className="mt-3 inline-flex items-center gap-1.5 text-xs text-white/50 transition-colors hover:text-emerald-400"
             >
               Ver a playlist no YouTube
               <ExternalLink className="h-3 w-3" />
-            </a>
+            </SoonButton>
           </div>
 
           <div className="flex-1 overflow-y-auto p-5">
-            <button
+            <SoonButton feature={"Vídeo do tutorial"}
               type="button"
               className="flex w-full items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-all hover:border-emerald-500/30 hover:bg-white/10"
             >
@@ -77,7 +78,7 @@ export function TutorialsPanel() {
               </span>
 
               <span className="shrink-0 text-xs text-white/40">29:40</span>
-            </button>
+            </SoonButton>
           </div>
         </div>
       </aside>

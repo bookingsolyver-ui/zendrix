@@ -80,7 +80,9 @@ export function OrdersTable() {
               <tr>
                 <td colSpan={5} className="px-5 py-16 text-center">
                   <Package className="mx-auto h-8 w-8 text-white/20" strokeWidth={1.5} />
-                  <p className="mt-3 text-sm text-white/50">Nenhum pedido encontrado.</p>
+                  <p className="mt-3 text-sm text-white/50">
+                    {ORDERS.length === 0 ? "Ainda não há pedidos." : "Nenhum pedido encontrado."}
+                  </p>
                 </td>
               </tr>
             )}

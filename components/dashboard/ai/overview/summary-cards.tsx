@@ -1,15 +1,18 @@
 import { Bot, Timer, Users } from "lucide-react";
 
-const CARDS = [
-  { icon: Users, label: "Conversas Atendidas", value: "1.842" },
-  { icon: Bot, label: "Resoluções sem intervenção humana", value: "78%" },
-  { icon: Timer, label: "Tempo Médio de Resposta", value: "< 1 min" },
-];
+type Card = { icon: typeof Users; label: string; value: string; hint?: string };
 
-export function AiSummaryCards() {
+export function AiSummaryCards({ attended }: { attended: number }) {
+  // Only what the database can answer is a number. Resolution and response time are not tracked yet.
+  const cards: Card[] = [
+    { icon: Users, label: "Conversas Atendidas", value: String(attended), hint: attended === 0 ? "Sem conversas ainda" : undefined },
+    { icon: Bot, label: "Resoluções sem intervenção humana", value: "—", hint: "Ainda não medido" },
+    { icon: Timer, label: "Tempo Médio de Resposta", value: "—", hint: "Ainda não medido" },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {CARDS.map((card) => {
+      {cards.map((card) => {
         const Icon = card.icon;
 
         return (
@@ -22,6 +25,7 @@ export function AiSummaryCards() {
               <Icon className="h-4 w-4 text-emerald-400" />
             </div>
             <p className="mt-3 text-2xl font-semibold text-white">{card.value}</p>
+            {card.hint && <p className="mt-1 text-xs text-white/40">{card.hint}</p>}
           </div>
         );
       })}

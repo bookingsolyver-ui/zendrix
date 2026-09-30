@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
-import { Link, usePathname } from "@/i18n/navigation";
+import { ChevronDown, Loader2, LogOut, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 import { NAV_ENTRIES, NAV_FOOTER_ENTRIES, type NavGroup } from "@/components/dashboard/nav-config";
 
@@ -22,6 +22,22 @@ export function Sidebar({
   onCloseMobile: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (!res.ok) throw new Error("logout_failed");
+      router.replace("/login");
+      router.refresh();
+    } catch {
+      setIsLoggingOut(false);
+      alert("Não foi possível terminar a sessão. Tente novamente.");
+    }
+  }
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     for (const entry of NAV_ENTRIES) {
@@ -184,6 +200,23 @@ export function Sidebar({
               </Link>
             );
           })}
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            title={collapsed ? "Sair" : undefined}
+            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-70 ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            {isLoggingOut ? (
+              <Loader2 className="h-[18px] w-[18px] shrink-0 animate-spin" />
+            ) : (
+              <LogOut className="h-[18px] w-[18px] shrink-0" />
+            )}
+            {!collapsed && "Sair"}
+          </button>
 
           <button
             type="button"

@@ -21,7 +21,7 @@ export function RfmKpiCards() {
           <span className="text-xs font-medium text-white/50">Participação da Receita VIP</span>
           <Crown className="h-4 w-4 text-amber-300" />
         </div>
-        <p className="mt-3 text-2xl font-semibold text-white">45%</p>
+        <p className="mt-3 text-2xl font-semibold text-white">—</p>
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
@@ -29,7 +29,7 @@ export function RfmKpiCards() {
           <span className="text-xs font-medium text-white/50">Receita em Risco</span>
           <TrendingDown className="h-4 w-4 text-amber-400" />
         </div>
-        <p className="mt-3 text-2xl font-semibold text-amber-400">Kz 2.450.000</p>
+        <p className="mt-3 text-2xl font-semibold text-amber-400">Kz 0</p>
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
@@ -37,7 +37,7 @@ export function RfmKpiCards() {
           <span className="text-xs font-medium text-white/50">Oportunidade de Retomada</span>
           <TrendingUp className="h-4 w-4 text-emerald-400" />
         </div>
-        <p className="mt-3 text-2xl font-semibold text-white">Kz 8.900.000</p>
+        <p className="mt-3 text-2xl font-semibold text-white">Kz 0</p>
       </div>
     </div>
   );

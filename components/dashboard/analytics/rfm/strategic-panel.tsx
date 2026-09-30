@@ -1,4 +1,5 @@
 import { Lightbulb, Sparkles, Users } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { TIER_STYLES, type RfmSegment } from "@/components/dashboard/analytics/rfm/segment-data";
 
 function withThousands(value: number): string {
@@ -34,13 +35,13 @@ export function StrategicPanel({ segment }: { segment: RfmSegment }) {
         <p className="mt-2 text-sm leading-relaxed text-white/70">{segment.tip}</p>
       </div>
 
-      <button
-        type="button"
+      <Link
+        href="/dashboard/marketing/automations"
         className="neon-green-btn mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-green-500 py-3 text-sm font-semibold text-background hover:bg-green-400"
       >
         <Sparkles className="h-4 w-4" />
         Criar Automação para este Segmento
-      </button>
+      </Link>
     </div>
   );
 }

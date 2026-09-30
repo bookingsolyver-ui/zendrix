@@ -1,15 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, User } from "lucide-react";
+import { Loader2, Mail, Phone, User } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import { useCurrentUser } from "@/components/dashboard/current-user-context";
 
 const inputClassName =
   "w-full rounded-lg border border-white/10 bg-white/5 py-2.5 pl-10 pr-3 text-sm text-white placeholder:text-white/30 outline-none transition-colors focus:border-emerald-500/50";
 
 export function ProfileForm() {
-  const [name, setName] = useState("Filipe Oliveira");
-  const [email, setEmail] = useState("bookings.olyver@gmail.com");
-  const [phone, setPhone] = useState("");
+  const currentUser = useCurrentUser();
+  const [name, setName] = useState(currentUser?.name ?? "");
+  const email = currentUser?.email ?? "";
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function handleSave() {
+    if (isSaving) return;
+    setIsSaving(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) throw new Error("save_failed");
+      setFeedback({ ok: true, text: "Alterações guardadas." });
+      router.refresh();
+    } catch {
+      setFeedback({ ok: false, text: "Não foi possível guardar. Tente novamente." });
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -41,8 +66,10 @@ export function ProfileForm() {
               id="profile-email"
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className={inputClassName}
+              readOnly
+              aria-readonly="true"
+              title="O e-mail é o da sua conta e não pode ser alterado aqui."
+              className={`${inputClassName} cursor-not-allowed opacity-70`}
             />
           </div>
         </div>
@@ -56,21 +83,34 @@ export function ProfileForm() {
             <input
               id="profile-phone"
               type="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="923 456 789"
-              className={inputClassName}
+              disabled
+              title="Disponível em breve."
+              placeholder="Disponível em breve"
+              className={`${inputClassName} cursor-not-allowed opacity-50`}
             />
           </div>
         </div>
       </div>
 
-      <button
-        type="button"
-        className="neon-green-btn mt-6 rounded-full bg-green-500 px-5 py-2.5 text-sm font-semibold text-background hover:bg-green-400"
-      >
-        Guardar Alterações
-      </button>
+      <div className="mt-6 flex items-center gap-4">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving || !name.trim()}
+          className="neon-green-btn flex items-center gap-2 rounded-full bg-green-500 px-5 py-2.5 text-sm font-semibold text-background hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+          Guardar Alterações
+        </button>
+        {feedback && (
+          <p
+            role="status"
+            className={`text-sm ${feedback.ok ? "text-emerald-400" : "text-red-400"}`}
+          >
+            {feedback.text}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

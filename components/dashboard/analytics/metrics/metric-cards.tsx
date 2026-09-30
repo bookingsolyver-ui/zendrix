@@ -1,15 +1,27 @@
 import { Eye, MousePointerClick, Send } from "lucide-react";
 
-const CARDS = [
-  { icon: Send, label: "Mensagens Entregues", value: "24.680" },
-  { icon: Eye, label: "Taxa de Abertura", value: "85%" },
-  { icon: MousePointerClick, label: "Taxa de Clique (CTR)", value: "12%" },
-];
+export type MessageMetrics = {
+  delivered: number;
+  read: number;
+};
 
-export function MetricCards() {
+function formatCount(value: number) {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+export function MetricCards({ metrics }: { metrics: MessageMetrics }) {
+  // Real numbers from the Message table. Delivery/read states come from Meta's status webhooks.
+  const openRate = metrics.delivered > 0 ? `${Math.round((metrics.read / metrics.delivered) * 100)}%` : "—";
+
+  const cards = [
+    { icon: Send, label: "Mensagens Entregues", value: formatCount(metrics.delivered), hint: metrics.delivered === 0 ? "Sem mensagens entregues ainda" : undefined },
+    { icon: Eye, label: "Taxa de Abertura", value: openRate, hint: metrics.delivered === 0 ? "Sem mensagens para calcular" : "Mensagens lidas / entregues" },
+    { icon: MousePointerClick, label: "Taxa de Clique (CTR)", value: "—", hint: "Ainda não medido" },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {CARDS.map((card) => {
+      {cards.map((card) => {
         const Icon = card.icon;
 
         return (
@@ -22,6 +34,7 @@ export function MetricCards() {
               <Icon className="h-4 w-4 text-emerald-400" />
             </div>
             <p className="mt-3 text-2xl font-semibold text-white">{card.value}</p>
+            {card.hint && <p className="mt-1 text-xs text-white/40">{card.hint}</p>}
           </div>
         );
       })}

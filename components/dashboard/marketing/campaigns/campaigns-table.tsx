@@ -1,6 +1,7 @@
 import { Megaphone, MoreHorizontal } from "lucide-react";
 import { CAMPAIGNS, STATUS_LABELS, STATUS_STYLES } from "@/components/dashboard/marketing/campaigns/campaigns-data";
 import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function CampaignsTable() {
   if (CAMPAIGNS.length === 0) {
@@ -42,13 +43,13 @@ export function CampaignsTable() {
               <td className="px-5 py-4 text-white/70">{campaign.metricLabel ?? "—"}</td>
               <td className="px-5 py-4 text-white/50">{campaign.date ?? "—"}</td>
               <td className="px-5 py-4 text-right">
-                <button
+                <SoonButton feature="Mais opções"
                   type="button"
                   aria-label="Mais opções"
                   className="rounded-md p-1 text-white/30 hover:bg-white/10 hover:text-white"
                 >
                   <MoreHorizontal className="h-4 w-4" />
-                </button>
+                </SoonButton>
               </td>
             </tr>
           ))}

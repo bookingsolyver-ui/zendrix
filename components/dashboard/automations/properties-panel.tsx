@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
 import { FLOW_NODES, type FlowNodeId } from "@/components/dashboard/automations/flow-data";
+import { SoonButton } from "@/components/ui/soon-button";
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="text-xs font-medium text-white/50">{children}</label>;
@@ -75,13 +76,13 @@ function ActionProperties() {
         </div>
       </div>
 
-      <button
+      <SoonButton feature="Melhorar com IA ✨"
         type="button"
         className="neon-green-btn flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 py-2.5 text-sm font-semibold text-background hover:bg-green-400"
       >
         <Sparkles className="h-4 w-4" />
         Melhorar com IA ✨
-      </button>
+      </SoonButton>
     </div>
   );
 }

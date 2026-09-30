@@ -1,4 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { prisma } from "@/lib/prisma";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { CurrentPlanCard } from "@/components/dashboard/settings/billing/current-plan-card";
 import { UsageBars } from "@/components/dashboard/settings/billing/usage-bars";
@@ -13,6 +15,21 @@ export default async function BillingPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const user = await getCurrentUser();
+  const workspaceId = user?.workspace?.id;
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+
+  const [sentThisMonth, teamMembers] = workspaceId
+    ? await Promise.all([
+        prisma.message.count({
+          where: { workspaceId, direction: "OUT", createdAt: { gte: monthStart } },
+        }),
+        prisma.user.count({ where: { workspaceId } }),
+      ])
+    : [0, 0];
+
   return (
     <>
       <DashboardPageHeader
@@ -22,7 +39,13 @@ export default async function BillingPage({
 
       <div className="space-y-6">
         <CurrentPlanCard />
-        <UsageBars />
+        <UsageBars
+          items={[
+            { label: "Mensagens de WhatsApp enviadas", value: String(sentThisMonth), hint: "Este mês" },
+            { label: "Minutos de Áudio IA", value: "—", hint: "Ainda não medido" },
+            { label: "Membros da equipa", value: String(teamMembers) },
+          ]}
+        />
         <PaymentMethodCard />
         <InvoiceHistory />
       </div>

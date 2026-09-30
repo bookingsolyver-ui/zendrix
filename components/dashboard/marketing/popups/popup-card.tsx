@@ -4,6 +4,7 @@ import {
   STATUS_STYLES,
   type StorePopup,
 } from "@/components/dashboard/marketing/popups/popups-data";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function PopupCard({ popup }: { popup: StorePopup }) {
   const Icon = popup.icon;
@@ -33,12 +34,12 @@ export function PopupCard({ popup }: { popup: StorePopup }) {
           </p>
         )}
 
-        <button
+        <SoonButton feature="Editar"
           type="button"
           className="mt-5 w-full rounded-full border border-white/15 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:border-white/30 hover:bg-white/[0.03]"
         >
           Editar
-        </button>
+        </SoonButton>
       </div>
     </div>
   );

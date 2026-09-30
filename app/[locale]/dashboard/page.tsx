@@ -1,8 +1,10 @@
 import { setRequestLocale } from "next-intl/server";
 import { TrialBanner } from "@/components/dashboard/overview/trial-banner";
 import { DashboardFilters } from "@/components/dashboard/overview/dashboard-filters";
-import { WhatsappEmptyState } from "@/components/dashboard/overview/whatsapp-empty-state";
+import { WhatsappGate } from "@/components/dashboard/overview/whatsapp-gate";
 import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-section";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { getWhatsAppStatus } from "@/lib/whatsapp/status";
 
 export default async function DashboardPage({
   params,
@@ -12,11 +14,14 @@ export default async function DashboardPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const user = await getCurrentUser();
+  const whatsapp = await getWhatsAppStatus(user?.workspace?.id);
+
   return (
     <>
       <TrialBanner />
       <DashboardFilters />
-      <WhatsappEmptyState />
+      <WhatsappGate connected={whatsapp.connected} />
 
       <div className="mt-6">
         <FaqVideoSection />

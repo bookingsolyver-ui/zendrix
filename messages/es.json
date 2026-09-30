@@ -90,7 +90,7 @@
       "titleHighlight": "Con la voz de tu marca.",
       "subtitle": "Escribe un borrador y deja que la IA lo reescriba con el tono de tu marca, más corto o más persuasivo, sin perder las variables.",
       "draftLabel": "Tu borrador",
-      "draftText": "Hola {{1}}, todavía tienes productos en el carrito. Vuelve para terminar tu compra.",
+      "draftText": "Hola '{{'1'}}', todavía tienes productos en el carrito. Vuelve para terminar tu compra.",
       "directions": {
         "brandVoice": "Voz de marca",
         "shorter": "Más corto",
@@ -98,9 +98,9 @@
       },
       "resultLabel": "Con Mejorar con IA",
       "results": {
-        "brandVoice": "¡Hola {{1}}! ¿Te quedó alguna duda sobre tu elección? Tu carrito está guardado esperándote.",
-        "shorter": "Hola {{1}}, tu carrito sigue abierto. Toca aquí para terminar.",
-        "persuasive": "¡Hola {{1}}! Quedan pocas unidades en tu carrito — finaliza ahora y asegura tu pedido."
+        "brandVoice": "¡Hola '{{'1'}}'! ¿Te quedó alguna duda sobre tu elección? Tu carrito está guardado esperándote.",
+        "shorter": "Hola '{{'1'}}', tu carrito sigue abierto. Toca aquí para terminar.",
+        "persuasive": "¡Hola '{{'1'}}'! Quedan pocas unidades en tu carrito — finaliza ahora y asegura tu pedido."
       },
       "variablePreserved": "Variable preservada"
     },
@@ -378,5 +378,43 @@
     "partnerArea": "Área de partner",
     "generateLink": "Generar mi link",
     "freeTrial": "Prueba gratis"
+  },
+  "Auth": {
+    "login": {
+      "title": "Iniciar sesión en Zentrix",
+      "subtitle": "Acceda al panel de su empresa.",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "noAccount": "¿Aún no tiene cuenta?",
+      "createAccount": "Crear cuenta",
+      "invalid": "Correo o contraseña incorrectos.",
+      "callbackError": "No se pudo confirmar su acceso. Inténtelo de nuevo.",
+      "generic": "No se pudo iniciar sesión. Inténtelo de nuevo."
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Configure el espacio de trabajo de su empresa.",
+      "name": "Su nombre",
+      "workspace": "Nombre de la empresa",
+      "email": "Correo de trabajo",
+      "password": "Contraseña",
+      "passwordHint": "Mínimo 8 caracteres.",
+      "submit": "Crear cuenta",
+      "submitting": "Creando...",
+      "haveAccount": "¿Ya tiene cuenta?",
+      "signIn": "Entrar",
+      "confirmEmail": "Cuenta creada. Confirme su correo para poder entrar.",
+      "exists": "Ya existe una cuenta con este correo.",
+      "weak": "La contraseña debe tener al menos 8 caracteres.",
+      "invalidEmail": "Introduzca un correo válido.",
+      "rateLimited": "Demasiados intentos. Espere un poco e inténtelo de nuevo.",
+      "provisionFailed": "La cuenta se creó, pero falló la configuración de la empresa. Confirme su correo (si se pide) y entre; se completará en el primer acceso.",
+      "generic": "No se pudo crear la cuenta. Inténtelo de nuevo."
+    }
+  },
+  "Common": {
+    "comingSoon": "«{feature}» aún no está disponible."
   }
 }

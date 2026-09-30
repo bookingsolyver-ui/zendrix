@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { RefreshCw } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { MiniCalendar } from "@/components/dashboard/crm/mini-calendar";
 import { GoogleCalendarPanel } from "@/components/dashboard/crm/google-calendar-panel";
@@ -19,13 +20,13 @@ export default async function CrmAgendaPage({
         title="Agenda"
         subtitle="Consulte e agende reuniões e compromissos da equipa."
         action={
-          <button
-            type="button"
+          <Link
+            href="/dashboard/integrations"
             className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.03]"
           >
             <RefreshCw className="h-4 w-4" />
             Sincronizar Google Calendar
-          </button>
+          </Link>
         }
       />
 

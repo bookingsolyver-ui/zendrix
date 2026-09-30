@@ -1,5 +1,5 @@
 import { CreditCard } from "lucide-react";
-import { CardNetworkBadges } from "@/components/checkout/card-network-badges";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function PaymentMethodCard() {
   return (
@@ -11,21 +11,15 @@ export function PaymentMethodCard() {
           <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-xl bg-white/10">
             <CreditCard className="h-5 w-5 text-white/60" />
           </span>
-          <div>
-            <p className="flex items-center gap-2 text-sm font-medium text-white">
-              Visa terminando em 4242
-              <CardNetworkBadges />
-            </p>
-            <p className="mt-1 text-xs text-white/40">Expira em 08/2028</p>
-          </div>
+          <p className="text-sm text-white/50">Nenhum método de pagamento associado.</p>
         </div>
 
-        <button
-          type="button"
+        <SoonButton
+          feature="Adicionar cartão"
           className="rounded-full border border-white/15 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.03]"
         >
-          Atualizar Cartão
-        </button>
+          Adicionar cartão
+        </SoonButton>
       </div>
     </div>
   );

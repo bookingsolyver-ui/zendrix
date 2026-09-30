@@ -2,6 +2,7 @@ import { Clock } from "lucide-react";
 import { WhatsAppGlyph } from "@/components/icons/whatsapp-glyph";
 import { ABANDONED_CHECKOUTS } from "@/components/dashboard/ecommerce/checkouts/checkouts-data";
 import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function CheckoutsList() {
   if (ABANDONED_CHECKOUTS.length === 0) {
@@ -33,13 +34,13 @@ export function CheckoutsList() {
 
           <div className="flex items-center gap-5">
             <p className="text-base font-semibold text-white">{checkout.amount}</p>
-            <button
+            <SoonButton feature="Recuperar via WhatsApp"
               type="button"
               className="neon-green-btn flex items-center gap-2 rounded-full bg-green-500 px-4 py-2.5 text-sm font-semibold text-background hover:bg-green-400"
             >
               <WhatsAppGlyph className="h-4 w-4" />
               Recuperar via WhatsApp
-            </button>
+            </SoonButton>
           </div>
         </div>
       ))}

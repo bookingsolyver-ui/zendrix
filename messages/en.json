@@ -90,7 +90,7 @@
       "titleHighlight": "In your brand's voice.",
       "subtitle": "Write a quick draft and let the AI rewrite it in your brand's tone, shorter, or more persuasive — without losing your variables.",
       "draftLabel": "Your draft",
-      "draftText": "Hi {{1}}, you still have items in your cart. Come back to finish your order.",
+      "draftText": "Hi '{{'1'}}', you still have items in your cart. Come back to finish your order.",
       "directions": {
         "brandVoice": "Brand voice",
         "shorter": "Shorter",
@@ -98,9 +98,9 @@
       },
       "resultLabel": "With Improve with AI",
       "results": {
-        "brandVoice": "Hi {{1}}! Still have questions about your pick? Your cart is saved and waiting for you.",
-        "shorter": "Hi {{1}}, your cart is still open. Tap here to finish up.",
-        "persuasive": "Hi {{1}}! Only a few left in your cart — check out now and lock in your order."
+        "brandVoice": "Hi '{{'1'}}'! Still have questions about your pick? Your cart is saved and waiting for you.",
+        "shorter": "Hi '{{'1'}}', your cart is still open. Tap here to finish up.",
+        "persuasive": "Hi '{{'1'}}'! Only a few left in your cart — check out now and lock in your order."
       },
       "variablePreserved": "Variable preserved"
     },
@@ -378,5 +378,43 @@
     "partnerArea": "Partner Area",
     "generateLink": "Generate my link",
     "freeTrial": "Free trial"
+  },
+  "Auth": {
+    "login": {
+      "title": "Sign in to Zentrix",
+      "subtitle": "Access your company dashboard.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account yet?",
+      "createAccount": "Create account",
+      "invalid": "Incorrect email or password.",
+      "callbackError": "We could not confirm your access. Please try signing in again.",
+      "generic": "Could not sign in. Please try again."
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Set up your company workspace.",
+      "name": "Your name",
+      "workspace": "Company name",
+      "email": "Work email",
+      "password": "Password",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Create account",
+      "submitting": "Creating...",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "confirmEmail": "Account created. Confirm your email to sign in.",
+      "exists": "An account with this email already exists.",
+      "weak": "Password must be at least 8 characters.",
+      "invalidEmail": "Enter a valid email.",
+      "rateLimited": "Too many attempts. Please wait a while and try again.",
+      "provisionFailed": "Your account was created, but setting up your company failed. Confirm your email (if asked) and sign in; it will finish on first login.",
+      "generic": "Could not create the account. Please try again."
+    }
+  },
+  "Common": {
+    "comingSoon": "“{feature}” isn’t available yet."
   }
 }

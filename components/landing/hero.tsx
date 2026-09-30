@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HeroMockupCollage } from "@/components/landing/hero-mockup-collage";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function Hero() {
   const t = useTranslations("Landing.hero");
@@ -32,12 +33,12 @@ export function Hero() {
             >
               {t("ctaPrimary")}
             </Link>
-            <button
+            <SoonButton feature={t("ctaSecondary")}
               type="button"
               className="w-full rounded-full border border-white/15 bg-background px-8 py-4 text-sm font-semibold text-foreground transition-colors hover:border-white/30 hover:bg-white/[0.03] sm:w-auto"
             >
               {t("ctaSecondary")}
-            </button>
+            </SoonButton>
           </div>
         </div>
 

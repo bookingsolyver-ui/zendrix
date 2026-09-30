@@ -1,8 +1,7 @@
 import { Users } from "lucide-react";
-import { SEATS_TOTAL, TEAM_MEMBERS } from "@/components/dashboard/settings/team/team-data";
+import { SEATS_TOTAL } from "@/components/dashboard/settings/team/team-data";
 
-export function SeatsBanner() {
-  const occupied = TEAM_MEMBERS.length;
+export function SeatsBanner({ occupied }: { occupied: number }) {
   const percentage = Math.round((occupied / SEATS_TOTAL) * 100);
 
   return (

@@ -1,5 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { CurrentUserProvider } from "@/components/dashboard/current-user-context";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 export default async function DashboardLayout({
   children,
@@ -10,6 +12,11 @@ export default async function DashboardLayout({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const user = await getCurrentUser();
 
-  return <DashboardShell>{children}</DashboardShell>;
+  return (
+    <CurrentUserProvider user={user}>
+      <DashboardShell>{children}</DashboardShell>
+    </CurrentUserProvider>
+  );
 }

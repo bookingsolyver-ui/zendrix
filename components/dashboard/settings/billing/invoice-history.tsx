@@ -1,4 +1,5 @@
 import { Download } from "lucide-react";
+import { SoonButton } from "@/components/ui/soon-button";
 
 type Invoice = {
   id: string;
@@ -7,11 +8,8 @@ type Invoice = {
   status: "paid";
 };
 
-const INVOICES: Invoice[] = [
-  { id: "inv-1", date: "15 Set 2026", amount: "Kz 34.999", status: "paid" },
-  { id: "inv-2", date: "15 Ago 2026", amount: "Kz 34.999", status: "paid" },
-  { id: "inv-3", date: "15 Jul 2026", amount: "Kz 34.999", status: "paid" },
-];
+// No billing system yet, so there are no invoices.
+const INVOICES: Invoice[] = [];
 
 export function InvoiceHistory() {
   return (
@@ -44,13 +42,13 @@ export function InvoiceHistory() {
                     </span>
                   </td>
                   <td className="py-3 text-right">
-                    <button
+                    <SoonButton feature="Descarregar fatura"
                       type="button"
                       aria-label="Descarregar fatura"
                       className="rounded-md p-1.5 text-white/40 hover:bg-white/10 hover:text-white"
                     >
                       <Download className="h-4 w-4" />
-                    </button>
+                    </SoonButton>
                   </td>
                 </tr>
               ))}

@@ -1,5 +1,4 @@
 import type { LucideIcon } from "lucide-react";
-import { Disc3, Gift } from "lucide-react";
 
 export type PopupStatus = "active" | "paused";
 
@@ -12,23 +11,7 @@ export type StorePopup = {
   gradient: string;
 };
 
-export const STORE_POPUPS: StorePopup[] = [
-  {
-    id: "roleta-descontos",
-    name: "Roleta de Descontos",
-    status: "active",
-    metric: "15% conversão",
-    icon: Disc3,
-    gradient: "from-violet-500/30 via-fuchsia-500/20 to-background",
-  },
-  {
-    id: "raspadinha-surpresa",
-    name: "Raspadinha Surpresa",
-    status: "paused",
-    icon: Gift,
-    gradient: "from-amber-500/25 via-pink-500/15 to-background",
-  },
-];
+export const STORE_POPUPS: StorePopup[] = [];
 
 export const STATUS_LABELS: Record<PopupStatus, string> = {
   active: "Ativo",

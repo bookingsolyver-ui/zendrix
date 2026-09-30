@@ -4,6 +4,7 @@ import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { DocCard } from "@/components/dashboard/crm/docs/doc-card";
 import { DOCS } from "@/components/dashboard/crm/docs/docs-data";
 import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export default async function DocsPage({
   params,
@@ -19,13 +20,13 @@ export default async function DocsPage({
         title="Docs"
         subtitle="Documentos, guiões e políticas partilhadas com a equipa."
         action={
-          <button
+          <SoonButton feature="Novo Documento"
             type="button"
             className="neon-green-btn flex items-center gap-2 rounded-full bg-green-500 px-4 py-2.5 text-sm font-semibold text-background hover:bg-green-400"
           >
             <Plus className="h-4 w-4" />
             Novo Documento
-          </button>
+          </SoonButton>
         }
       />
 

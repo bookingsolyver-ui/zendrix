@@ -1,6 +1,11 @@
+"use client";
+
 import { Smartphone } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
 
 export function WhatsappEmptyState() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-20 text-center">
       <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
@@ -15,6 +20,7 @@ export function WhatsappEmptyState() {
 
       <button
         type="button"
+        onClick={() => router.push("/dashboard/settings/whatsapp")}
         className="neon-green-btn mt-6 flex items-center gap-2 rounded-full bg-green-500 px-6 py-3 text-sm font-semibold text-background hover:bg-green-400"
       >
         <Smartphone className="h-4 w-4" />

@@ -1,4 +1,5 @@
 import { ArrowUpRight, ShieldCheck } from "lucide-react";
+import { SoonButton } from "@/components/ui/soon-button";
 
 export function CurrentPlanCard() {
   return (
@@ -12,20 +13,20 @@ export function CurrentPlanCard() {
             <p className="text-xs font-medium uppercase tracking-wide text-white/40">
               Plano atual
             </p>
-            <p className="mt-1 text-2xl font-semibold text-white">Plano Pro</p>
+            <p className="mt-1 text-2xl font-semibold text-white">Sem subscrição ativa</p>
             <p className="mt-1 text-sm text-white/50">
-              Próxima cobrança em 15 de outubro · Kz 34.999
+              Escolha um plano para desbloquear todas as funcionalidades.
             </p>
           </div>
         </div>
 
-        <button
+        <SoonButton feature="Escolher plano"
           type="button"
           className="neon-btn flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold text-background"
         >
-          Fazer Upgrade para Enterprise
+          Escolher plano
           <ArrowUpRight className="h-4 w-4" />
-        </button>
+        </SoonButton>
       </div>
     </div>
   );

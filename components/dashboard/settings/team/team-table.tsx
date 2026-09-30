@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { ROLES, TEAM_MEMBERS, type TeamRole } from "@/components/dashboard/settings/team/team-data";
+import { ROLES, type TeamMember, type TeamRole } from "@/components/dashboard/settings/team/team-data";
 
 function initials(name: string) {
   return name
@@ -13,12 +13,12 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export function TeamTable() {
+export function TeamTable({ members }: { members: TeamMember[] }) {
   const [roles, setRoles] = useState<Record<string, TeamRole>>(() =>
-    Object.fromEntries(TEAM_MEMBERS.map((member) => [member.id, member.role])),
+    Object.fromEntries(members.map((member) => [member.id, member.role])),
   );
 
-  if (TEAM_MEMBERS.length === 0) {
+  if (members.length === 0) {
     return (
       <div className="rounded-2xl border border-white/10 bg-white/5 py-16 text-center">
         <p className="text-sm text-white/50">Ainda não convidou nenhum membro para a equipa.</p>
@@ -38,7 +38,7 @@ export function TeamTable() {
           </tr>
         </thead>
         <tbody>
-          {TEAM_MEMBERS.map((member) => (
+          {members.map((member) => (
             <tr
               key={member.id}
               className="border-b border-white/5 transition-colors last:border-b-0 hover:bg-white/[0.03]"

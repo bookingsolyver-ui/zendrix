@@ -8,29 +8,7 @@ export type Campaign = {
   date: string | null;
 };
 
-export const CAMPAIGNS: Campaign[] = [
-  {
-    id: "black-friday",
-    name: "Black Friday Antecipada",
-    status: "sent",
-    metricLabel: "85% Abertura",
-    date: "22 Nov 2025",
-  },
-  {
-    id: "dia-namorados",
-    name: "Lembrete Dia dos Namorados",
-    status: "scheduled",
-    metricLabel: null,
-    date: "10 Fev 2027",
-  },
-  {
-    id: "reativacao-vip",
-    name: "Reativação VIP",
-    status: "draft",
-    metricLabel: null,
-    date: null,
-  },
-];
+export const CAMPAIGNS: Campaign[] = [];
 
 export const STATUS_LABELS: Record<CampaignStatus, string> = {
   sent: "Enviada",

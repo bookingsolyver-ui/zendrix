@@ -1,48 +1,25 @@
-type UsageItem = {
+export type UsageItem = {
   label: string;
-  used: number;
-  total: number;
-  unitLabel: string;
+  value: string;
+  hint?: string;
 };
 
-const USAGE_ITEMS: UsageItem[] = [
-  { label: "Mensagens de WhatsApp enviadas", used: 8450, total: 10000, unitLabel: "" },
-  { label: "Minutos de Áudio IA", used: 45, total: 100, unitLabel: " min" },
-  { label: "Agentes na Equipa", used: 3, total: 5, unitLabel: "" },
-];
-
-function withThousands(value: number): string {
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
-
-export function UsageBars() {
+export function UsageBars({ items }: { items: UsageItem[] }) {
+  // Plan limits depend on a subscription that does not exist yet, so this shows real usage only.
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7">
-      <h2 className="text-sm font-semibold text-white">Limites de Uso</h2>
+      <h2 className="text-sm font-semibold text-white">Utilização</h2>
 
-      <div className="mt-5 space-y-5">
-        {USAGE_ITEMS.map((item) => {
-          const percentage = Math.min(100, Math.round((item.used / item.total) * 100));
-
-          return (
-            <div key={item.label}>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-white/70">{item.label}</span>
-                <span className="font-medium text-white">
-                  {withThousands(item.used)}
-                  {item.unitLabel} / {withThousands(item.total)}
-                  {item.unitLabel}
-                </span>
-              </div>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300 transition-all"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
+      <div className="mt-5 divide-y divide-white/5">
+        {items.map((item) => (
+          <div key={item.label} className="flex items-center justify-between gap-4 py-3 text-sm">
+            <div>
+              <span className="text-white/70">{item.label}</span>
+              {item.hint && <p className="mt-0.5 text-xs text-white/40">{item.hint}</p>}
             </div>
-          );
-        })}
+            <span className="shrink-0 font-medium text-white">{item.value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
