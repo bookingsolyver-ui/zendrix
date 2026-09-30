@@ -6,7 +6,7 @@ export function ProductPreview() {
   const t = useTranslations("Landing.preview");
 
   return (
-    <section id="section-preview" className="mx-auto max-w-6xl px-6 pb-4">
+    <section id="section-preview" className="relative mx-auto max-w-6xl px-6 pb-4 pt-4 sm:pt-8">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t("title")} <span className="neon-green-text">{t("titleHighlight")}</span>

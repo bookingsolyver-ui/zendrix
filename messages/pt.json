@@ -504,7 +504,8 @@
     "partnerArea": "Área do parceiro",
     "generateLink": "Gerar meu link",
     "freeTrial": "Criar conta com trial de 14 dias",
-    "login": "Entrar"
+    "login": "Entrar",
+    "freeTrialShort": "14 dias grátis"
   },
   "Auth": {
     "login": {

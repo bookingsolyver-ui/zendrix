@@ -23,7 +23,7 @@ export function PublicHeader({
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:gap-6 sm:px-6">
         <div className="flex items-center gap-8">
           <Logo />
 
@@ -61,7 +61,7 @@ export function PublicHeader({
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <span className="hidden items-center gap-1.5 text-sm font-medium text-white/60 sm:flex">
             <Globe className="h-4 w-4" />
             {locale.toUpperCase()}
@@ -84,9 +84,14 @@ export function PublicHeader({
 
           <Link
             href={primaryCtaHref}
-            className="rounded-md bg-emerald-500 px-4 py-1.5 text-sm font-medium text-black transition-colors hover:bg-emerald-400"
+            className="whitespace-nowrap rounded-md bg-emerald-500 px-3 py-1.5 text-sm font-medium text-black sm:px-4 transition-colors hover:bg-emerald-400"
           >
-            {primaryCtaLabel ?? t("freeTrial")}
+            {primaryCtaLabel ?? (
+              <>
+                <span className="hidden sm:inline">{t("freeTrial")}</span>
+                <span className="sm:hidden">{t("freeTrialShort")}</span>
+              </>
+            )}
           </Link>
         </div>
       </div>

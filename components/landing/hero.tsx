@@ -6,7 +6,7 @@ export function Hero() {
   const t = useTranslations("Landing.hero");
 
   return (
-    <section id="section-hero" className="relative overflow-hidden pt-16 sm:pt-20">
+    <section id="section-hero" className="relative overflow-hidden pb-16 pt-16 sm:pb-24 sm:pt-20">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[42rem] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(34,197,94,0.16),transparent_70%)]"
