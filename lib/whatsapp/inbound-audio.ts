@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { transcribeAudio } from "@/lib/audio/transcribe";
-import { mediaPathFor, storageConfigured, uploadMedia } from "@/lib/storage/media";
+import {
+  mediaPathFor,
+  storageConfigured,
+  uploadMedia,
+} from "@/lib/storage/media";
 import { downloadMedia, getWhatsAppToken } from "@/lib/whatsapp/media";
+import { loadTenant } from "@/lib/tenant";
 import type { AgentEvent } from "@/lib/agent";
 
 // Processa uma nota de voz recebida: descarrega da Meta, guarda o original no Storage e transcreve.
@@ -18,11 +23,14 @@ export interface AudioJob {
   mediaId: string;
 }
 
-export const UNTRANSCRIBED_BODY = "Mensagem de voz (não foi possível transcrever)";
+export const UNTRANSCRIBED_BODY =
+  "Mensagem de voz (não foi possível transcrever)";
 
 // Nunca lança. Devolve o evento para o agente, ou null se a funcionalidade está desligada.
 // `unintelligible` = não conseguimos perceber o áudio: o agente pede ao cliente que escreva.
-export async function processInboundAudio(job: AudioJob): Promise<AgentEvent | null> {
+export async function processInboundAudio(
+  job: AudioJob,
+): Promise<AgentEvent | null> {
   if (!audioInboundEnabled()) return null;
 
   const event = (unintelligible: boolean): AgentEvent => ({
@@ -34,24 +42,42 @@ export async function processInboundAudio(job: AudioJob): Promise<AgentEvent | n
   });
 
   try {
+    // Descarregar, guardar e transcrever custa dinheiro (e envia a voz do cliente a um terceiro): só para
+    // organizações com a subscrição em dia. Nas outras a mensagem fica como "Mensagem de voz", sem áudio.
+    const tenant = await loadTenant(job.workspaceId);
+    if (!tenant?.subscriptionActive) return null;
+
     const token = await getWhatsAppToken(job.workspaceId);
     if (!token) {
-      console.error("[audio] sem token da Meta para o workspace", job.workspaceId);
+      console.error(
+        "[audio] sem token da Meta para o workspace",
+        job.workspaceId,
+      );
       return event(true);
     }
 
     const media = await downloadMedia(job.mediaId, token); // o URL da Meta só vale 5 minutos
 
     // Independentes: uma falha não deita abaixo a outra.
-    const path = mediaPathFor(job.workspaceId, job.conversationId, job.waMessageId, media.mime);
+    const path = mediaPathFor(
+      job.workspaceId,
+      job.conversationId,
+      job.waMessageId,
+      media.mime,
+    );
     const [stored, transcript] = await Promise.all([
-      storageConfigured() ? uploadMedia(path, media.buffer, media.mime) : Promise.resolve(false),
+      storageConfigured()
+        ? uploadMedia(path, media.buffer, media.mime)
+        : Promise.resolve(false),
       transcribeAudio(media.buffer, media.mime),
     ]);
 
     const message = await prisma.message.update({
       where: { waMessageId: job.waMessageId },
-      data: { body: transcript ?? UNTRANSCRIBED_BODY, mediaPath: stored ? path : null },
+      data: {
+        body: transcript ?? UNTRANSCRIBED_BODY,
+        mediaPath: stored ? path : null,
+      },
       select: { createdAt: true },
     });
 

@@ -53,3 +53,11 @@ O schema muda com `npx prisma db push`, que se corre **localmente** (usa `DIRECT
 - O limitador de pedidos, o cache de URLs assinados e o estado do TTS são **em memória, por instância**: na Vercel cada instância conta à parte.
 - O webhook pede `maxDuration = 60`, o máximo do plano gratuito; o agente tem um orçamento de 40 s para o modelo.
 - Rode as chaves que tenham passado por conversas ou terminais partilhados antes de as pôr em produção.
+
+## Stripe: teste de 14 dias e subscrições
+
+- Cada organização nova nasce `trialing` com `trial_ends_at` = agora + 14 dias. Passado esse prazo o agente (texto e voz) fica desligado até haver subscrição.
+- No Stripe, crie um endpoint `https://<o-seu-dominio>/api/stripe/webhook` com os eventos `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` e `checkout.session.completed`, e copie o `whsec_...` para `STRIPE_WEBHOOK_SECRET` na Vercel. Em local: `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
+- Estados: `active` e `trialing` ligam o agente; `past_due`, `unpaid`, `paused` e `canceled` desligam-no.
+- Para o Stripe saber a que organização pertence uma compra, o Checkout tem de enviar `client_reference_id = <id da organização>` e `subscription_data.metadata.workspace_id = <id da organização>`. Nunca se associa por e-mail.
+- A criação do Checkout ainda não está construída: enquanto não existir, as subscrições têm de ser criadas com esses campos no painel/API do Stripe.

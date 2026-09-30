@@ -6,10 +6,21 @@ datasource db {
   provider = "postgresql"
 }
 
+// Uma organização (tenant) do SaaS. Todos os dados de um cliente pendem de um Workspace.
 model Workspace {
   id                 String              @id @default(cuid())
   name               String
   createdAt          DateTime            @default(now())
+  ownerEmail         String?             @map("owner_email")
+  stripeCustomerId   String?             @unique @map("stripe_customer_id")
+  subStatus          String              @default("trialing") @map("sub_status") // trialing | active | past_due | canceled
+  plan               String?
+  trialEndsAt        DateTime?           @map("trial_ends_at")
+  agentEnabled       Boolean             @default(false) @map("agent_enabled") // interruptor do agente desta organização
+  agentKnowledge     String?             @map("agent_knowledge") // ficha do negócio: sem ela o agente não responde
+  agentProfile       Json?               @map("agent_profile") // os campos da ficha que o cliente edita (compilados para agentKnowledge)
+  stripeSubscriptionId String?           @unique @map("stripe_subscription_id") // a subscrição atual (só ela governa o estado)
+  stripeEventAt      DateTime?           @map("stripe_event_at") // último evento do Stripe aplicado (ordem não garantida)
   users              User[]
   socialIntegrations SocialIntegration[]
   contacts           Contact[]
@@ -31,11 +42,15 @@ model SocialIntegration {
   id                String    @id @default(cuid())
   workspaceId       String
   platform          String // ex: "WHATSAPP", "INSTAGRAM"
-  accessToken       String
-  providerAccountId String?
+  accessToken       String // cifrado (AES-256-GCM), nunca em texto simples
+  providerAccountId String? // phone_number_id do WhatsApp
+  wabaId            String?   @map("waba_id") // WhatsApp Business Account do cliente
   status            String    @default("ACTIVE")
   workspace         Workspace @relation(fields: [workspaceId], references: [id])
   createdAt         DateTime  @default(now())
+
+  // Um número só pode pertencer a uma organização: é o que permite encaminhar o webhook sem ambiguidade.
+  @@unique([platform, providerAccountId])
 }
 
 // A customer of a workspace, identified by their WhatsApp ID (the phone number, digits only).

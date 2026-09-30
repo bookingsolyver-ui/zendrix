@@ -39,10 +39,16 @@ export type NavGroup = {
   items: NavLeaf[];
 };
 
-export type NavEntry = ({ type: "link" } & NavLeaf) | ({ type: "group" } & NavGroup);
+export type NavEntry =
+  ({ type: "link" } & NavLeaf) | ({ type: "group" } & NavGroup);
 
 export const NAV_ENTRIES: NavEntry[] = [
-  { type: "link", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  {
+    type: "link",
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
   { type: "link", label: "Inbox", href: "/dashboard/inbox", icon: Inbox },
   {
     type: "group",
@@ -59,9 +65,21 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "Marketing",
     icon: Megaphone,
     items: [
-      { label: "Campanhas", href: "/dashboard/marketing/campaigns", icon: Megaphone },
-      { label: "Automações", href: "/dashboard/marketing/automations", icon: Workflow },
-      { label: "Templates", href: "/dashboard/marketing/templates", icon: LayoutTemplate },
+      {
+        label: "Campanhas",
+        href: "/dashboard/marketing/campaigns",
+        icon: Megaphone,
+      },
+      {
+        label: "Automações",
+        href: "/dashboard/marketing/automations",
+        icon: Workflow,
+      },
+      {
+        label: "Templates",
+        href: "/dashboard/marketing/templates",
+        icon: LayoutTemplate,
+      },
       { label: "Popups", href: "/dashboard/marketing/popups", icon: Sparkles },
     ],
   },
@@ -71,7 +89,11 @@ export const NAV_ENTRIES: NavEntry[] = [
     icon: Users,
     items: [
       { label: "Todos", href: "/dashboard/contacts", icon: Users },
-      { label: "Segmentos", href: "/dashboard/contatos/segmentos", icon: Filter },
+      {
+        label: "Segmentos",
+        href: "/dashboard/contatos/segmentos",
+        icon: Filter,
+      },
     ],
   },
   {
@@ -79,9 +101,17 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "IA",
     icon: BrainCircuit,
     items: [
-      { label: "Visão geral", href: "/dashboard/ai/overview", icon: BrainCircuit },
+      {
+        label: "Visão geral",
+        href: "/dashboard/ai/overview",
+        icon: BrainCircuit,
+      },
       { label: "Persona", href: "/dashboard/ai/settings", icon: UserCog },
-      { label: "Conhecimento", href: "/dashboard/ai/settings", icon: BookOpen },
+      {
+        label: "Conhecimento",
+        href: "/dashboard/settings/business",
+        icon: BookOpen,
+      },
     ],
   },
   {
@@ -89,9 +119,21 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "E-commerce",
     icon: ShoppingCart,
     items: [
-      { label: "Pedidos", href: "/dashboard/ecommerce/orders", icon: ShoppingCart },
-      { label: "Produtos", href: "/dashboard/ecommerce/products", icon: Package },
-      { label: "Checkouts", href: "/dashboard/ecommerce/checkouts", icon: CreditCard },
+      {
+        label: "Pedidos",
+        href: "/dashboard/ecommerce/orders",
+        icon: ShoppingCart,
+      },
+      {
+        label: "Produtos",
+        href: "/dashboard/ecommerce/products",
+        icon: Package,
+      },
+      {
+        label: "Checkouts",
+        href: "/dashboard/ecommerce/checkouts",
+        icon: CreditCard,
+      },
       { label: "Rastreio", href: "/dashboard/ecommerce/tracking", icon: Truck },
     ],
   },
@@ -100,9 +142,21 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: "Analytics",
     icon: BarChart3,
     items: [
-      { label: "Geral", href: "/dashboard/analytics/overview", icon: BarChart3 },
-      { label: "Receita", href: "/dashboard/analytics/revenue", icon: DollarSign },
-      { label: "Métricas", href: "/dashboard/analytics/metrics", icon: Activity },
+      {
+        label: "Geral",
+        href: "/dashboard/analytics/overview",
+        icon: BarChart3,
+      },
+      {
+        label: "Receita",
+        href: "/dashboard/analytics/revenue",
+        icon: DollarSign,
+      },
+      {
+        label: "Métricas",
+        href: "/dashboard/analytics/metrics",
+        icon: Activity,
+      },
       { label: "RFM", href: "/dashboard/analytics/rfm", icon: Target },
     ],
   },

@@ -1,7 +1,44 @@
 import { ArrowUpRight, ShieldCheck } from "lucide-react";
 import { SoonButton } from "@/components/ui/soon-button";
 
-export function CurrentPlanCard() {
+const COPY: Record<string, { title: string; text: string }> = {
+  active: {
+    title: "Subscrição ativa",
+    text: "O agente de IA e as notas de voz estão disponíveis.",
+  },
+  trialing: {
+    title: "Período de teste",
+    text: "Escolha um plano antes do fim do teste para manter o agente ligado.",
+  },
+  past_due: {
+    title: "Pagamento em atraso",
+    text: "O agente de IA está desligado até o pagamento ser regularizado.",
+  },
+  canceled: {
+    title: "Subscrição cancelada",
+    text: "O agente de IA está desligado. Escolha um plano para o reativar.",
+  },
+};
+
+export function CurrentPlanCard({
+  subStatus,
+  plan,
+  trialEndsAt,
+  msLeft,
+}: {
+  subStatus: string;
+  plan: string | null;
+  trialEndsAt: string | null;
+  msLeft: number | null;
+}) {
+  const copy = COPY[subStatus] ?? COPY.canceled;
+  const end = trialEndsAt ? new Date(trialEndsAt) : null;
+  const detail =
+    subStatus === "trialing" && end
+      ? (msLeft ?? 0) > 0
+        ? `Termina a ${end.toLocaleDateString("pt-PT")}. ${copy.text}`
+        : "O período de teste terminou: o agente de IA está desligado."
+      : copy.text;
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -13,14 +50,16 @@ export function CurrentPlanCard() {
             <p className="text-xs font-medium uppercase tracking-wide text-white/40">
               Plano atual
             </p>
-            <p className="mt-1 text-2xl font-semibold text-white">Sem subscrição ativa</p>
-            <p className="mt-1 text-sm text-white/50">
-              Escolha um plano para desbloquear todas as funcionalidades.
+            <p className="mt-1 text-2xl font-semibold text-white">
+              {copy.title}
+              {plan ? ` · ${plan}` : ""}
             </p>
+            <p className="mt-1 text-sm text-white/50">{detail}</p>
           </div>
         </div>
 
-        <SoonButton feature="Escolher plano"
+        <SoonButton
+          feature="Escolher plano"
           type="button"
           className="neon-btn flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold text-background"
         >

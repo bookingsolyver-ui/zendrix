@@ -1,5 +1,13 @@
 import { setRequestLocale } from "next-intl/server";
-import { CreditCard, MessageCircle, Plug, User, Users, Webhook } from "lucide-react";
+import {
+  BookOpen,
+  CreditCard,
+  MessageCircle,
+  Plug,
+  User,
+  Users,
+  Webhook,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 
@@ -9,6 +17,13 @@ const SETTINGS_LINKS = [
     icon: User,
     title: "Perfil",
     description: "Dados pessoais, fotografia e preferências de idioma.",
+  },
+  {
+    href: "/dashboard/settings/business",
+    icon: BookOpen,
+    title: "Ficha do negócio",
+    description:
+      "O que o assistente de IA sabe sobre a sua empresa: produtos, preços e regras.",
   },
   {
     href: "/dashboard/settings/billing",

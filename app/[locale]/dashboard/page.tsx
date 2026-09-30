@@ -3,6 +3,7 @@ import { TrialBanner } from "@/components/dashboard/overview/trial-banner";
 import { DashboardFilters } from "@/components/dashboard/overview/dashboard-filters";
 import { WhatsappGate } from "@/components/dashboard/overview/whatsapp-gate";
 import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-section";
+import { msUntil } from "@/lib/trial";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getWhatsAppStatus } from "@/lib/whatsapp/status";
 
@@ -19,7 +20,12 @@ export default async function DashboardPage({
 
   return (
     <>
-      <TrialBanner />
+      {user?.workspace && (
+        <TrialBanner
+          subStatus={user.workspace.subStatus}
+          msLeft={msUntil(user.workspace.trialEndsAt)}
+        />
+      )}
       <DashboardFilters />
       <WhatsappGate connected={whatsapp.connected} />
 

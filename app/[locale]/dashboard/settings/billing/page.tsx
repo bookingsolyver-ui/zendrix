@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { msUntil } from "@/lib/trial";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
@@ -24,7 +25,11 @@ export default async function BillingPage({
   const [sentThisMonth, teamMembers] = workspaceId
     ? await Promise.all([
         prisma.message.count({
-          where: { workspaceId, direction: "OUT", createdAt: { gte: monthStart } },
+          where: {
+            workspaceId,
+            direction: "OUT",
+            createdAt: { gte: monthStart },
+          },
         }),
         prisma.user.count({ where: { workspaceId } }),
       ])
@@ -38,11 +43,26 @@ export default async function BillingPage({
       />
 
       <div className="space-y-6">
-        <CurrentPlanCard />
+        {user?.workspace && (
+          <CurrentPlanCard
+            subStatus={user.workspace.subStatus}
+            plan={user.workspace.plan}
+            trialEndsAt={user.workspace.trialEndsAt}
+            msLeft={msUntil(user.workspace.trialEndsAt)}
+          />
+        )}
         <UsageBars
           items={[
-            { label: "Mensagens de WhatsApp enviadas", value: String(sentThisMonth), hint: "Este mês" },
-            { label: "Minutos de Áudio IA", value: "—", hint: "Ainda não medido" },
+            {
+              label: "Mensagens de WhatsApp enviadas",
+              value: String(sentThisMonth),
+              hint: "Este mês",
+            },
+            {
+              label: "Minutos de Áudio IA",
+              value: "—",
+              hint: "Ainda não medido",
+            },
             { label: "Membros da equipa", value: String(teamMembers) },
           ]}
         />

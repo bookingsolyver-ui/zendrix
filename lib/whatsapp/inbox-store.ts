@@ -1,21 +1,42 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 import type { InboundMessage, StatusUpdate } from "@/lib/whatsapp/webhook";
 
-// Which workspace owns a WhatsApp phone number id (the `providerAccountId` of its integration).
-async function findWorkspaceId(phoneNumberId: string) {
+// Which organization owns a WhatsApp phone number id (the `providerAccountId` of its integration).
+// This is the multi-tenant router: every Meta event carries the phone number it is about, and that alone
+// decides whose data it is. The database enforces one owner per number (unique platform + providerAccountId).
+export async function findWorkspaceId(phoneNumberId: string) {
   const integration = await prisma.socialIntegration.findFirst({
-    where: { platform: "WHATSAPP", providerAccountId: phoneNumberId, status: "ACTIVE" },
+    where: {
+      platform: "WHATSAPP",
+      providerAccountId: phoneNumberId,
+      status: "ACTIVE",
+    },
     select: { workspaceId: true },
   });
-  return integration?.workspaceId ?? null;
+  if (!integration) {
+    // A number nobody owns (disconnected client, typo in the Meta panel...): dropped, but not silently.
+    if (
+      rateLimit(`unknown-number:${phoneNumberId}`, {
+        limit: 1,
+        windowMs: 10 * 60 * 1000,
+      }).ok
+    ) {
+      console.warn(
+        `[webhook] evento para o número ${phoneNumberId}, que não pertence a nenhuma organização ativa; ignorado`,
+      );
+    }
+    return null;
+  }
+  return integration.workspaceId;
 }
 
 // Stores one inbound message. Idempotent: Meta retries deliveries, and the unique
 // `waMessageId` makes a repeated message a no-op.
 // Returns where it was stored, or null when nothing new was stored (unknown number or a retry).
 export async function saveInboundMessage(
-  msg: InboundMessage
+  msg: InboundMessage,
 ): Promise<{ workspaceId: string; conversationId: string } | null> {
   const workspaceId = await findWorkspaceId(msg.phoneNumberId);
   if (!workspaceId) return null; // a number that is not connected to any workspace
@@ -28,7 +49,9 @@ export async function saveInboundMessage(
         update: msg.contactName ? { name: msg.contactName } : {},
       });
       const conversation = await tx.conversation.upsert({
-        where: { workspaceId_contactId: { workspaceId, contactId: contact.id } },
+        where: {
+          workspaceId_contactId: { workspaceId, contactId: contact.id },
+        },
         create: { workspaceId, contactId: contact.id },
         update: {},
       });
@@ -56,7 +79,10 @@ export async function saveInboundMessage(
     });
     return { workspaceId, conversationId };
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
       return null; // already stored (webhook retry)
     }
     throw err;
@@ -65,15 +91,33 @@ export async function saveInboundMessage(
 
 // Delivery receipts for messages we sent. Never downgrades READ back to DELIVERED, since
 // Meta does not guarantee the order of status events.
-const RANK: Record<string, number> = { SENT: 1, DELIVERED: 2, READ: 3, FAILED: 4 };
+const RANK: Record<string, number> = {
+  SENT: 1,
+  DELIVERED: 2,
+  READ: 3,
+  FAILED: 4,
+};
 
 export async function applyStatusUpdate(update: StatusUpdate) {
+  // Um recibo de entrega só mexe em mensagens da organização dona desse número.
+  const workspaceId = await findWorkspaceId(update.phoneNumberId);
+  if (!workspaceId) return false;
+
   const message = await prisma.message.findUnique({
     where: { waMessageId: update.waMessageId },
-    select: { id: true, status: true, direction: true },
+    select: { id: true, status: true, direction: true, workspaceId: true },
   });
-  if (!message || message.direction !== "OUT") return false;
-  if ((RANK[message.status] ?? 0) >= RANK[update.status] && update.status !== "FAILED") return false;
+  if (
+    !message ||
+    message.direction !== "OUT" ||
+    message.workspaceId !== workspaceId
+  )
+    return false;
+  if (
+    (RANK[message.status] ?? 0) >= RANK[update.status] &&
+    update.status !== "FAILED"
+  )
+    return false;
 
   await prisma.message.update({
     where: { id: message.id },

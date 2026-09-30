@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { trialEndDate } from "@/lib/tenant";
 
 interface ProvisionInput {
   authId: string;
@@ -10,7 +11,11 @@ interface ProvisionInput {
   workspaceName?: string | null;
 }
 
-async function findExisting(authId: string, email: string, emailVerified: boolean) {
+async function findExisting(
+  authId: string,
+  email: string,
+  emailVerified: boolean,
+) {
   // 1. Primary match: the Supabase Auth user id.
   const byAuthId = await prisma.user.findUnique({ where: { authId } });
   if (byAuthId) return byAuthId;
@@ -49,16 +54,31 @@ export async function provisionUser({
     return await prisma.$transaction(async (tx) => {
       const workspace = await tx.workspace.create({
         data: {
-          name: workspaceName?.trim() || `${cleanName ?? normalizedEmail.split("@")[0]} workspace`,
+          name:
+            workspaceName?.trim() ||
+            `${cleanName ?? normalizedEmail.split("@")[0]} workspace`,
+          // Nova organização: o dono é quem a criou, em período de teste de 14 dias. O agente nasce
+          // desligado e sem ficha: só responde depois de o cliente a preencher e o ligar.
+          ownerEmail: normalizedEmail,
+          subStatus: "trialing",
+          trialEndsAt: trialEndDate(),
         },
       });
       return tx.user.create({
-        data: { authId, email: normalizedEmail, name: cleanName, workspaceId: workspace.id },
+        data: {
+          authId,
+          email: normalizedEmail,
+          name: cleanName,
+          workspaceId: workspace.id,
+        },
       });
     });
   } catch (err) {
     // Two concurrent requests for the same account: the loser reuses the winner's row.
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
       const user = await findExisting(authId, normalizedEmail, emailVerified);
       if (user) return user;
     }
