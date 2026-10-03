@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { Logo } from "@/components/Logo";
+import { AdminHeader } from "@/components/admin/admin-header";
 import { requirePlatformAdminPage } from "@/lib/admin/guard";
 import { countPendingApprovals } from "@/lib/admin/queries";
 
@@ -17,7 +16,7 @@ const NAV = [
   { href: "/admin/organizations", label: "Organizações" },
   { href: "/admin/approvals", label: "Aprovações" },
   { href: "/admin/calendar", label: "Calendário" },
-  { href: "/admin/billing", label: "Subscrições e pagamentos" },
+  { href: "/admin/billing", label: "Subscrições" },
   { href: "/admin/diagnostics", label: "Diagnóstico" },
   { href: "/admin/audit", label: "Auditoria" },
 ] as const;
@@ -28,29 +27,12 @@ export default async function AdminLayout({ children, params }: { children: Reac
   const admin = await requirePlatformAdminPage();
   const pending = await countPendingApprovals();
 
+  const items = NAV.map((item) => ({ ...item, badge: item.href === "/admin/approvals" ? pending : 0 }));
+
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
-          <Logo />
-          <span className="rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-300">Administração da plataforma</span>
-          <nav className="flex flex-wrap items-center gap-1" aria-label="Administração">
-            {NAV.map((item) => (
-              <Link key={item.href} href={item.href} className="rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white">
-                {item.label}
-                {item.href === "/admin/approvals" && pending > 0 && <span className="ml-1.5 rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">{pending}</span>}
-              </Link>
-            ))}
-          </nav>
-          <div className="ml-auto flex items-center gap-4 text-xs text-white/40">
-            <span>{admin.email}</span>
-            <Link href="/dashboard" className="text-white/60 hover:text-white">
-              Voltar ao painel
-            </Link>
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
+      <AdminHeader items={items} email={admin.email} />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</main>
     </div>
   );
 }
