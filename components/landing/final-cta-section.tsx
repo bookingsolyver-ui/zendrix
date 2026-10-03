@@ -31,6 +31,11 @@ export function FinalCtaSection() {
             {t("ctaSecondary")}
           </a>
         </div>
+        <p className="mt-6 text-sm text-white/40">
+          <Link href="/login" className="underline-offset-4 transition-colors hover:text-white hover:underline">
+            {t("login")}
+          </Link>
+        </p>
       </div>
     </section>
   );

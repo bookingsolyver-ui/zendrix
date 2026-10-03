@@ -1,106 +1,142 @@
 {
   "Metadata": {
-    "title": "Zentrix — Atendimento omnicanal com IA",
-    "description": "Responda a WhatsApp, Instagram e Messenger numa só caixa de entrada. Um assistente de IA treinado com os dados do seu negócio atende os clientes e a sua equipa assume quando quiser. 14 dias grátis, sem cartão."
+    "title": "Zentrix — Marketing, automação e CRM para WhatsApp",
+    "description": "Capte contactos com popups, envie campanhas segmentadas, automatize respostas e gira os clientes num CRM com Kanban. Com IA de vendas e Inbox para a equipa. 14 dias grátis, sem cartão."
   },
   "Landing": {
     "hero": {
-      "titleLine1": "Todos os seus canais.",
-      "titleLine2": "Uma só caixa de entrada,",
-      "titleHighlight": "com IA a atender.",
-      "subtitle": "WhatsApp, Instagram e Messenger chegam à mesma Inbox. A sua equipa responde a tudo num só sítio e um assistente de IA, treinado com os dados do seu negócio, atende os clientes por si.",
-      "ctaPrimary": "Criar conta com trial de 14 dias",
-      "ctaSecondary": "Ver preços",
-      "phoneContact": "Ana Cliente",
-      "phoneMessage1": "Olá! Atendem ao sábado?",
-      "phoneMessage2": "Olá, Ana! Sim: ao sábado estamos abertos das 9h às 13h. Em que posso ajudar?",
-      "phoneBadge": "Respondido pela IA",
-      "inboxTitle": "Inbox",
-      "inboxTimeNow": "Agora",
-      "inboxChannel": "WhatsApp",
-      "inboxOnlineLabel": "IA ativa",
-      "inboxTakeoverLabel": "Assumir conversa",
-      "inboxTakeover": "A IA pausa e a sua equipa responde.",
-      "inboxContact2Name": "João Pedro",
-      "inboxContact2Preview": "Obrigado, fico a aguardar.",
-      "inboxContact2Time": "10:00"
+      "badge": "WhatsApp · CRM · Automação · IA",
+      "title": "Marketing, automação e CRM para escalar o seu negócio",
+      "titleHighlight": "no WhatsApp.",
+      "subtitle": "Capte contactos, envie campanhas, automatize respostas e acompanhe cada cliente num só sítio. Uma IA atende e qualifica por si, a qualquer hora.",
+      "ctaPrimary": "Testar gratuitamente",
+      "ctaSecondary": "Ver funcionalidades",
+      "note": "14 dias grátis · Sem cartão · Cancele quando quiser"
     },
-    "preview": {
-      "title": "A IA responde primeiro.",
-      "titleHighlight": "A equipa assume quando quiser.",
-      "subtitle": "Veja como a IA atende com a ficha do seu negócio e como a sua equipa assume a conversa com um clique.",
-      "window": "Inbox Zentrix",
+    "mock": {
+      "window": "Painel Zentrix",
       "sample": "Exemplo ilustrativo",
-      "customerMessage": "Olá! Qual é o horário de atendimento?",
-      "aiLabel": "Agente de IA",
-      "aiMessage": "Olá! Estamos abertos de segunda a sexta, das 9h às 18h, e ao sábado até às 13h. Posso ajudar com mais alguma coisa?",
-      "handoff": "A equipa assumiu a conversa",
-      "customerFollowup": "Obrigada! Podem confirmar se têm disponibilidade amanhã de manhã?",
-      "agentLabel": "Carlos · Equipa",
-      "agentMessage": "Olá Ana, sou o Carlos. Já vi a conversa e confirmo-lhe já a disponibilidade.",
-      "c1": {
-        "name": "Ana Cliente",
-        "preview": "Obrigada! Podem confirmar se têm…"
-      },
-      "c2": {
-        "name": "João Pedro",
-        "preview": "Obrigado, fico a aguardar."
-      },
-      "c3": {
-        "name": "Marta S.",
-        "preview": "Vocês têm horário ao sábado?"
-      }
+      "navInbox": "Inbox",
+      "navCrm": "CRM",
+      "navCampaigns": "Campanhas",
+      "navAutomations": "Automações",
+      "navContacts": "Contactos",
+      "boardTitle": "Quadro de tarefas",
+      "colTodo": "A fazer",
+      "colDoing": "Em curso",
+      "colDone": "Concluído",
+      "task1": "Contactar Ana (lead qualificado)",
+      "task2": "Enviar proposta ao João",
+      "task3": "Marcar reunião com a Marta",
+      "campaign": "Campanha",
+      "campaignName": "Novidades de outubro",
+      "campaignStatus": "Concluída",
+      "sent": "Enviadas",
+      "delivered": "Entregues",
+      "read": "Lidas",
+      "automation": "Automação",
+      "automationFlow": "Novo contacto → mensagem de boas-vindas → tarefa no CRM",
+      "automationActive": "Ativa"
     },
     "features": {
-      "title": "Tudo o que precisa para atender",
-      "titleHighlight": "melhor e mais depressa.",
-      "subtitle": "Uma Inbox para a equipa, a IA e os seus canais.",
+      "title": "Tudo o que precisa para vender mais",
+      "titleHighlight": "no WhatsApp.",
+      "subtitle": "Seis ferramentas que trabalham em conjunto, na mesma plataforma e sobre os mesmos contactos.",
       "items": {
-        "team": {
-          "title": "Equipa com papéis",
-          "text": "Convide colegas por e-mail como Proprietário, Gestor ou Agente. Todos veem as mesmas conversas e cada um só faz o que o seu papel permite."
+        "inbox": {
+          "title": "Inbox e IA de vendas",
+          "text": "WhatsApp, Instagram e Messenger numa só caixa de entrada. A IA responde com os dados do seu negócio, qualifica leads, envia links de pagamento e marca reuniões. Pode pausá-la e assumir quando quiser.",
+          "points": [
+            "Equipa com papéis",
+            "Qualificação automática de leads",
+            "Pagamentos e marcações na conversa"
+          ]
         },
-        "ai": {
-          "title": "IA treinada com a ficha do seu negócio",
-          "text": "O assistente responde com o que escrever na ficha: produtos, preços, horários e regras. Sem ficha, não responde: não inventa. Pause-o em qualquer conversa para responder você."
+        "campaigns": {
+          "title": "Campanhas inteligentes",
+          "text": "Envie uma mensagem a um segmento de contactos, agora ou agendada, e acompanhe enviadas, entregues e lidas. Tudo dentro das regras e das janelas de mensagens da Meta.",
+          "points": [
+            "Segmentos como público",
+            "Agendamento",
+            "Entregues e lidas em tempo real"
+          ]
         },
-        "queue": {
-          "title": "Envio com ritmo controlado",
-          "text": "As respostas saem por uma fila com ritmo controlado e novas tentativas, para proteger o seu número de bloqueios por excesso de envios."
+        "automations": {
+          "title": "Automações de fluxo",
+          "text": "Defina um gatilho (novo contacto, mensagem, lead qualificado, pagamento, popup) e deixe o sistema responder, mudar a fase do cliente e criar tarefas por si.",
+          "points": [
+            "Sem repetições nem ciclos",
+            "Esperas entre ações",
+            "Histórico de cada execução"
+          ]
         },
-        "security": {
-          "title": "Dados isolados por empresa",
-          "text": "Cada organização só vê os seus próprios dados. O isolamento é reforçado na base de dados e as credenciais dos canais são guardadas cifradas."
+        "popups": {
+          "title": "Popups e captação de leads",
+          "text": "Crie um popup, cole um script leve no seu site e transforme visitantes em contactos. Funciona em qualquer site, sem interferir com o seu design.",
+          "points": [
+            "Instalação com uma linha",
+            "Consentimento guardado",
+            "Sites autorizados à sua escolha"
+          ]
+        },
+        "crm": {
+          "title": "CRM com quadro Kanban",
+          "text": "Quadro de tarefas com arrastar e largar, documentos partilhados com a equipa e agenda com as marcações feitas pela IA. Tudo ligado às suas conversas.",
+          "points": [
+            "Tarefas com prioridade e data",
+            "Documentos da equipa",
+            "Agenda de marcações"
+          ]
+        },
+        "contacts": {
+          "title": "Contactos e segmentos",
+          "text": "Todos os contactos de todos os canais, com a fase de cada um. Crie segmentos dinâmicos por regras e veja quem entra e sai sozinho.",
+          "points": [
+            "Listas atualizadas automaticamente",
+            "Novo contacto em segundos",
+            "Exportação em CSV"
+          ]
         }
       }
     },
-    "omnichannel": {
-      "title": "WhatsApp, Instagram e Messenger,",
-      "titleHighlight": "na mesma caixa de entrada.",
-      "subtitle": "As mensagens do WhatsApp, o Direct do Instagram e o Messenger chegam à mesma Inbox. A sua equipa responde a tudo num só lugar, sem trocar de app.",
-      "col1Label": "WhatsApp",
-      "col2Label": "Instagram Direct",
-      "col3Label": "Messenger",
-      "col1Message": "Boa tarde, vocês atendem ao sábado?",
-      "col2Message": "Olá! Qual é o vosso horário?",
-      "col3Message": "Podem enviar-me mais informações?",
-      "queueNote": "Tudo chega à mesma Inbox Zentrix, com o ícone de cada canal."
-    },
     "howItWorks": {
-      "title": "Pronto em",
+      "title": "Pronto a vender em",
       "titleHighlight": "três passos.",
-      "subtitle": "Do registo ao primeiro cliente atendido, sem instalar nada.",
+      "subtitle": "Do registo à primeira campanha, sem instalar nada.",
       "step1": {
-        "title": "Ligue um canal",
-        "text": "Ligue o WhatsApp, o Instagram ou o Messenger. As conversas passam a chegar à Inbox."
+        "title": "Ligue o seu WhatsApp",
+        "text": "Ligue o WhatsApp (e, se quiser, o Instagram e o Messenger) e organize os seus contactos. As conversas passam a chegar à Inbox."
       },
       "step2": {
-        "title": "Preencha a ficha do negócio",
-        "text": "Escreva o que vende, os preços, os horários e as regras. É só com isto que a IA responde."
+        "title": "Crie campanhas e automações",
+        "text": "Escolha um segmento e envie uma campanha, ou monte um fluxo automático em poucos minutos a partir de um modelo."
       },
       "step3": {
-        "title": "Ligue a IA",
-        "text": "Ative o assistente. Pode pausá-lo em qualquer conversa e assumir você."
+        "title": "Capte leads e feche vendas",
+        "text": "Coloque um popup no seu site, deixe a IA qualificar cada contacto e acompanhe tudo no CRM, quase no piloto automático."
+      }
+    },
+    "trust": {
+      "title": "Feito para empresas que",
+      "titleHighlight": "levam o WhatsApp a sério.",
+      "subtitle": "A confiança dos seus clientes e do seu número vem primeiro.",
+      "items": {
+        "isolation": {
+          "title": "Dados isolados por empresa",
+          "text": "Cada organização só vê os seus próprios dados. O isolamento é reforçado na própria base de dados, não apenas na aplicação."
+        },
+        "secrets": {
+          "title": "Credenciais cifradas",
+          "text": "Os acessos aos seus canais são guardados cifrados e nunca aparecem no painel. Pode eliminar a conta e todos os dados quando quiser."
+        },
+        "meta": {
+          "title": "Respeita as regras da Meta",
+          "text": "Mensagens livres só dentro da janela de 24 horas, envio com ritmo controlado e nunca a quem pediu para não receber. Protege o seu número."
+        },
+        "privacy": {
+          "title": "Consentimento e privacidade",
+          "text": "Os popups pedem e guardam o consentimento de cada pessoa. Quem pede para parar deixa de receber mensagens automáticas."
+        }
       }
     },
     "pricing": {
@@ -109,18 +145,21 @@
       "subtitle": "Comece com 14 dias de teste grátis, sem cartão. Depois, um único plano com tudo incluído.",
       "trialBadge": "14 dias de teste grátis",
       "planName": "Zentrix",
-      "planDescription": "Tudo o que precisa para atender os clientes em todos os canais.",
+      "planDescription": "Marketing, automação, CRM e IA para vender no WhatsApp.",
       "priceAtCheckout": "O preço é mostrado antes de subscrever",
       "features": [
-        "WhatsApp, Instagram e Messenger numa só Inbox",
-        "Assistente de IA treinado com a ficha do seu negócio",
+        "Inbox com WhatsApp, Instagram e Messenger",
+        "IA de vendas: qualifica leads, envia pagamentos e marca reuniões",
+        "Campanhas segmentadas, imediatas ou agendadas",
+        "Automações com gatilhos, esperas e histórico",
+        "Popups de captação com script para o seu site",
+        "CRM com Kanban, documentos e agenda",
         "Equipa até 5 pessoas, com papéis",
-        "Envio com fila e novas tentativas",
         "Dados isolados por empresa",
         "Cancele quando quiser, sem fidelização"
       ],
       "cta": "Começar o teste grátis",
-      "trialNote": "Todas as contas novas começam com 14 dias de teste. Durante o teste, o agente de IA fica disponível assim que preencher a ficha do seu negócio."
+      "trialNote": "Todas as contas novas começam com 14 dias de teste, sem cartão. Durante o teste, o agente de IA fica disponível assim que preencher a ficha do seu negócio."
     },
     "faq": {
       "title": "As suas dúvidas,",
@@ -135,48 +174,49 @@
         "answer": "O WhatsApp liga-se pela API oficial da Meta. Recomendamos um número dedicado. Se ligar um número que já usa na aplicação WhatsApp do telemóvel, esse número deixa de funcionar na aplicação."
       },
       "q3": {
-        "question": "Várias pessoas podem atender?",
-        "answer": "Sim. Convide a equipa por e-mail (até 5 pessoas) como Proprietário, Gestor ou Agente. Todos veem as mesmas conversas na Inbox."
+        "question": "Posso enviar campanhas a todos os meus contactos?",
+        "answer": "As campanhas chegam aos contactos do segmento que lhe escreveram nas últimas 24 horas, que é o que a Meta permite para mensagens livres. Os restantes ficam de fora e são contados no resultado. Quem pediu para não receber mensagens automáticas nunca recebe."
       },
       "q4": {
-        "question": "Como funciona a IA?",
-        "answer": "A IA responde com base na ficha do negócio que preencher: produtos, preços, horários e regras. Se a informação não estiver na ficha, não inventa. Pode ligá-la ou desligá-la, e pausá-la em cada conversa para responder você."
+        "question": "O que posso automatizar?",
+        "answer": "Escolha um gatilho (novo contacto, mensagem recebida com palavra-chave, lead qualificado, pagamento confirmado ou popup preenchido) e até três ações: enviar uma mensagem, mudar a fase do contacto ou criar uma tarefa no CRM. Cada execução fica registada."
       },
       "q5": {
-        "question": "A IA pode errar?",
-        "answer": "Sim. As respostas de IA podem conter erros ou omissões. Reveja a ficha, acompanhe as conversas na Inbox e assuma quando for preciso."
+        "question": "Como instalo um popup no meu site?",
+        "answer": "Crie o popup no painel, ligue-o e cole uma única linha de código no seu site. Funciona em qualquer site e não interfere com o seu design. Pode limitar o popup aos seus domínios."
       },
       "q6": {
-        "question": "Os meus dados estão seguros?",
-        "answer": "Cada empresa só vê os seus próprios dados e as credenciais dos canais são guardadas cifradas. Pode eliminar a conta e todos os dados quando quiser."
+        "question": "Como funciona a IA? Pode errar?",
+        "answer": "A IA responde com a ficha do negócio que preencher e não inventa o que não estiver lá. Qualifica contactos, envia links de pagamento e marca reuniões. As respostas de IA podem conter erros: acompanhe as conversas e assuma quando for preciso."
       },
       "q7": {
-        "question": "Preciso de cartão de crédito para testar?",
-        "answer": "Não. O teste gratuito dura 14 dias e começa sem cartão."
+        "question": "Várias pessoas podem usar a plataforma?",
+        "answer": "Sim. Convide a equipa por e-mail (até 5 pessoas) como Proprietário, Gestor ou Agente. Os agentes atendem as conversas; só proprietários e gestores gerem campanhas, automações e popups."
       },
       "q8": {
-        "question": "Quanto custa?",
-        "answer": "Depois do teste há um único plano com tudo incluído. O preço é mostrado antes de subscrever, sem surpresas."
+        "question": "Os meus dados estão seguros?",
+        "answer": "Cada empresa só vê os seus próprios dados, com isolamento reforçado na base de dados, e as credenciais dos canais são guardadas cifradas. Pode eliminar a conta e todos os dados quando quiser."
       },
       "q9": {
-        "question": "Posso cancelar quando quiser?",
-        "answer": "Sim, sem fidelização. Cancela no portal de faturação, a qualquer momento."
+        "question": "Preciso de cartão para testar? Quanto custa?",
+        "answer": "Não. O teste gratuito dura 14 dias e começa sem cartão. Depois há um único plano com tudo incluído, e o preço é mostrado antes de subscrever."
       },
       "q10": {
-        "question": "Em que língua está a plataforma?",
-        "answer": "O painel está em português. O site e o registo estão também disponíveis em inglês e espanhol."
+        "question": "Posso cancelar quando quiser?",
+        "answer": "Sim, sem fidelização. Cancela no portal de faturação, a qualquer momento."
       }
     },
     "finalCta": {
-      "title": "Comece a atender",
-      "titleHighlight": "em todos os canais.",
-      "subtitle": "Ligue os seus canais, preencha a ficha do negócio e deixe a IA começar a atender. Teste 14 dias grátis, sem cartão.",
-      "ctaPrimary": "Teste grátis",
-      "ctaSecondary": "Ver preços"
+      "title": "Comece a vender mais",
+      "titleHighlight": "no WhatsApp.",
+      "subtitle": "Ligue o seu WhatsApp, crie a primeira campanha e deixe a automação trabalhar por si. 14 dias grátis, sem cartão.",
+      "ctaPrimary": "Testar gratuitamente",
+      "ctaSecondary": "Ver preços",
+      "login": "Já tem conta? Entrar"
     }
   },
   "Footer": {
-    "tagline": "Atendimento omnicanal com IA.",
+    "tagline": "Marketing, automação e CRM para o WhatsApp.",
     "product": "Produto",
     "productPricing": "Preços",
     "company": "Empresa",
@@ -185,7 +225,10 @@
     "legalPrivacy": "Privacidade",
     "legalTerms": "Termos",
     "rights": "Todos os direitos reservados.",
-    "legalDeletion": "Eliminação de dados"
+    "legalDeletion": "Eliminação de dados",
+    "productFeatures": "Funcionalidades",
+    "productHow": "Como funciona",
+    "productFaq": "Perguntas frequentes"
   },
   "Dashboard": {
     "search": "Pesquisar...",

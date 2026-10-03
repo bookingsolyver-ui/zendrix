@@ -10,7 +10,10 @@ export function SiteFooter() {
     {
       title: t("product"),
       links: [
-        { label: t("productPricing"), href: "#pricing" },
+        { label: t("productFeatures"), href: "/#section-features" },
+        { label: t("productHow"), href: "/#section-how-it-works" },
+        { label: t("productPricing"), href: "/#pricing" },
+        { label: t("productFaq"), href: "/#faq" },
       ],
     },
     {

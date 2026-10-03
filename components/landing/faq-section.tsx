@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
@@ -20,7 +18,7 @@ export function FaqSection() {
   const t = useTranslations("Landing.faq");
 
   return (
-    <section id="faq" className="mx-auto max-w-4xl px-6 py-20 sm:py-28">
+    <section id="faq" className="mx-auto max-w-4xl scroll-mt-20 px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t("title")} <span className="neon-green-text">{t("titleHighlight")}</span>

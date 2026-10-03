@@ -11,7 +11,7 @@ export function PricingSection() {
   const priceLabel = process.env.NEXT_PUBLIC_PLAN_PRICE_LABEL?.trim();
 
   return (
-    <section id="pricing" className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
+    <section id="pricing" className="mx-auto max-w-6xl scroll-mt-20 px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {t("title")} <span className="neon-green-text">{t("titleHighlight")}</span>

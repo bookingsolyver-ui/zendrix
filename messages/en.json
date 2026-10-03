@@ -1,106 +1,142 @@
 {
   "Metadata": {
-    "title": "Zentrix — Omnichannel customer service with AI",
-    "description": "Answer WhatsApp, Instagram and Messenger from one inbox. An AI assistant trained on your business data serves customers, and your team can take over any time. 14 days free, no card."
+    "title": "Zentrix — Marketing, automation and CRM for WhatsApp",
+    "description": "Capture contacts with popups, send segmented campaigns, automate replies and manage customers in a Kanban CRM. With sales AI and a team Inbox. 14 days free, no card."
   },
   "Landing": {
     "hero": {
-      "titleLine1": "All your channels.",
-      "titleLine2": "One inbox,",
-      "titleHighlight": "with AI answering.",
-      "subtitle": "WhatsApp, Instagram and Messenger land in the same Inbox. Your team answers everything in one place, and an AI assistant trained on your business data serves customers for you.",
-      "ctaPrimary": "Create account with 14-day trial",
-      "ctaSecondary": "See pricing",
-      "phoneContact": "Ana Customer",
-      "phoneMessage1": "Hi! Are you open on Saturdays?",
-      "phoneMessage2": "Hi Ana! Yes: on Saturdays we're open from 9am to 1pm. How can I help?",
-      "phoneBadge": "Answered by AI",
-      "inboxTitle": "Inbox",
-      "inboxTimeNow": "Now",
-      "inboxChannel": "WhatsApp",
-      "inboxOnlineLabel": "AI on",
-      "inboxTakeoverLabel": "Take over",
-      "inboxTakeover": "The AI pauses and your team replies.",
-      "inboxContact2Name": "John Peter",
-      "inboxContact2Preview": "Thanks, I'll wait.",
-      "inboxContact2Time": "10:00"
+      "badge": "WhatsApp · CRM · Automation · AI",
+      "title": "Marketing, automation and CRM to scale your business",
+      "titleHighlight": "on WhatsApp.",
+      "subtitle": "Capture contacts, send campaigns, automate replies and track every customer in one place. An AI assistant answers and qualifies leads for you, around the clock.",
+      "ctaPrimary": "Try it free",
+      "ctaSecondary": "See features",
+      "note": "14 days free · No card · Cancel anytime"
     },
-    "preview": {
-      "title": "The AI answers first.",
-      "titleHighlight": "Your team takes over when you want.",
-      "subtitle": "See how the AI serves customers with your business profile and how your team takes the conversation over with one click.",
-      "window": "Zentrix Inbox",
+    "mock": {
+      "window": "Zentrix dashboard",
       "sample": "Illustrative example",
-      "customerMessage": "Hi! What are your opening hours?",
-      "aiLabel": "AI agent",
-      "aiMessage": "Hi! We're open Monday to Friday, 9am to 6pm, and Saturdays until 1pm. Can I help with anything else?",
-      "handoff": "The team took over the conversation",
-      "customerFollowup": "Thanks! Can you confirm if you have availability tomorrow morning?",
-      "agentLabel": "Carlos · Team",
-      "agentMessage": "Hi Ana, I'm Carlos. I've read the conversation and I'll confirm the availability right now.",
-      "c1": {
-        "name": "Ana Customer",
-        "preview": "Thanks! Can you confirm if you have…"
-      },
-      "c2": {
-        "name": "John Peter",
-        "preview": "Thanks, I'll wait."
-      },
-      "c3": {
-        "name": "Marta S.",
-        "preview": "Are you open on Saturdays?"
-      }
+      "navInbox": "Inbox",
+      "navCrm": "CRM",
+      "navCampaigns": "Campaigns",
+      "navAutomations": "Automations",
+      "navContacts": "Contacts",
+      "boardTitle": "Task board",
+      "colTodo": "To do",
+      "colDoing": "In progress",
+      "colDone": "Done",
+      "task1": "Contact Ana (qualified lead)",
+      "task2": "Send proposal to John",
+      "task3": "Book a meeting with Marta",
+      "campaign": "Campaign",
+      "campaignName": "October news",
+      "campaignStatus": "Completed",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "automation": "Automation",
+      "automationFlow": "New contact → welcome message → CRM task",
+      "automationActive": "Active"
     },
     "features": {
-      "title": "Everything you need to serve",
-      "titleHighlight": "better and faster.",
-      "subtitle": "One Inbox for your team, the AI and your channels.",
+      "title": "Everything you need to sell more",
+      "titleHighlight": "on WhatsApp.",
+      "subtitle": "Six tools that work together, on the same platform and the same contacts.",
       "items": {
-        "team": {
-          "title": "A team with roles",
-          "text": "Invite colleagues by email as Owner, Manager or Agent. Everyone sees the same conversations and each person can only do what their role allows."
+        "inbox": {
+          "title": "Inbox and sales AI",
+          "text": "WhatsApp, Instagram and Messenger in one inbox. The AI answers with your business data, qualifies leads, sends payment links and books meetings. Pause it and take over whenever you like.",
+          "points": [
+            "Team with roles",
+            "Automatic lead qualification",
+            "Payments and bookings in the chat"
+          ]
         },
-        "ai": {
-          "title": "AI trained on your business profile",
-          "text": "The assistant answers with what you write in the profile: products, prices, hours and rules. With no profile, it stays silent: it doesn't make things up. Pause it in any conversation to reply yourself."
+        "campaigns": {
+          "title": "Smart campaigns",
+          "text": "Send a message to a segment of contacts, now or scheduled, and track sent, delivered and read. All within Meta's rules and messaging windows.",
+          "points": [
+            "Segments as audience",
+            "Scheduling",
+            "Delivered and read in real time"
+          ]
         },
-        "queue": {
-          "title": "Paced sending",
-          "text": "Replies go out through a queue with controlled pacing and retries, to protect your number from being blocked for sending too much."
+        "automations": {
+          "title": "Flow automations",
+          "text": "Pick a trigger (new contact, message, qualified lead, payment, popup) and let the system reply, change the customer's stage and create tasks for you.",
+          "points": [
+            "No repeats or loops",
+            "Waits between actions",
+            "History of every run"
+          ]
         },
-        "security": {
-          "title": "Data isolated per company",
-          "text": "Each organization only sees its own data. Isolation is enforced in the database and channel credentials are stored encrypted."
+        "popups": {
+          "title": "Popups and lead capture",
+          "text": "Create a popup, paste a light script on your website and turn visitors into contacts. Works on any site without touching your design.",
+          "points": [
+            "One-line install",
+            "Consent is stored",
+            "Authorised sites of your choice"
+          ]
+        },
+        "crm": {
+          "title": "CRM with a Kanban board",
+          "text": "A drag-and-drop task board, documents shared with the team and a calendar of the bookings made by the AI. All linked to your conversations.",
+          "points": [
+            "Tasks with priority and due date",
+            "Team documents",
+            "Booking calendar"
+          ]
+        },
+        "contacts": {
+          "title": "Contacts and segments",
+          "text": "All contacts from every channel, with each one's stage. Build dynamic rule-based segments and see who joins and leaves automatically.",
+          "points": [
+            "Lists that update themselves",
+            "New contact in seconds",
+            "CSV export"
+          ]
         }
       }
     },
-    "omnichannel": {
-      "title": "WhatsApp, Instagram and Messenger,",
-      "titleHighlight": "in the same inbox.",
-      "subtitle": "WhatsApp messages, Instagram Direct and Messenger land in the same Inbox. Your team answers everything in one place, without switching apps.",
-      "col1Label": "WhatsApp",
-      "col2Label": "Instagram Direct",
-      "col3Label": "Messenger",
-      "col1Message": "Good afternoon, are you open on Saturdays?",
-      "col2Message": "Hi! What are your opening hours?",
-      "col3Message": "Can you send me more information?",
-      "queueNote": "Everything lands in the same Zentrix Inbox, with each channel's icon."
-    },
     "howItWorks": {
-      "title": "Ready in",
+      "title": "Ready to sell in",
       "titleHighlight": "three steps.",
-      "subtitle": "From sign-up to your first customer served, with nothing to install.",
+      "subtitle": "From sign-up to your first campaign, with nothing to install.",
       "step1": {
-        "title": "Connect a channel",
-        "text": "Connect WhatsApp, Instagram or Messenger. Conversations start arriving in the Inbox."
+        "title": "Connect your WhatsApp",
+        "text": "Connect WhatsApp (and Instagram and Messenger if you like) and organise your contacts. Conversations start arriving in the Inbox."
       },
       "step2": {
-        "title": "Fill in your business profile",
-        "text": "Write what you sell, your prices, hours and rules. This is all the AI answers with."
+        "title": "Create campaigns and automations",
+        "text": "Pick a segment and send a campaign, or build an automatic flow in minutes from a template."
       },
       "step3": {
-        "title": "Turn on the AI",
-        "text": "Activate the assistant. You can pause it in any conversation and take over yourself."
+        "title": "Capture leads and close sales",
+        "text": "Put a popup on your website, let the AI qualify every contact and follow everything in the CRM, almost on autopilot."
+      }
+    },
+    "trust": {
+      "title": "Built for companies that",
+      "titleHighlight": "take WhatsApp seriously.",
+      "subtitle": "The trust of your customers and of your number comes first.",
+      "items": {
+        "isolation": {
+          "title": "Data isolated per company",
+          "text": "Each organisation only sees its own data. Isolation is enforced in the database itself, not just in the app."
+        },
+        "secrets": {
+          "title": "Encrypted credentials",
+          "text": "Access to your channels is stored encrypted and never shown in the dashboard. You can delete your account and all data whenever you want."
+        },
+        "meta": {
+          "title": "Respects Meta's rules",
+          "text": "Free-form messages only inside the 24-hour window, paced sending and never to anyone who asked not to receive them. It protects your number."
+        },
+        "privacy": {
+          "title": "Consent and privacy",
+          "text": "Popups ask for and store each person's consent. Anyone who asks to stop no longer receives automatic messages."
+        }
       }
     },
     "pricing": {
@@ -109,74 +145,78 @@
       "subtitle": "Start with a 14-day free trial, no card. Then a single plan with everything included.",
       "trialBadge": "14-day free trial",
       "planName": "Zentrix",
-      "planDescription": "Everything you need to serve customers on every channel.",
+      "planDescription": "Marketing, automation, CRM and AI to sell on WhatsApp.",
       "priceAtCheckout": "The price is shown before you subscribe",
       "features": [
-        "WhatsApp, Instagram and Messenger in one Inbox",
-        "AI assistant trained on your business profile",
+        "Inbox with WhatsApp, Instagram and Messenger",
+        "Sales AI: qualifies leads, sends payments and books meetings",
+        "Segmented campaigns, immediate or scheduled",
+        "Automations with triggers, waits and history",
+        "Capture popups with a script for your website",
+        "CRM with Kanban, documents and calendar",
         "Team of up to 5 people, with roles",
-        "Queued sending with retries",
         "Data isolated per company",
         "Cancel anytime, no lock-in"
       ],
       "cta": "Start the free trial",
-      "trialNote": "Every new account starts with a 14-day trial. During the trial, the AI agent is available as soon as you fill in your business profile."
+      "trialNote": "Every new account starts with a 14-day trial, no card. During the trial the AI agent is available as soon as you fill in your business profile."
     },
     "faq": {
       "title": "Your questions,",
       "titleHighlight": "answered.",
-      "subtitle": "Straight answers about how Zentrix works.",
+      "subtitle": "Straight answers on how Zentrix works.",
       "q1": {
         "question": "Which channels can I connect?",
-        "answer": "WhatsApp (through Meta's official API), Instagram (professional account) and Messenger (Facebook Page). All of them land in the same Inbox."
+        "answer": "WhatsApp (through Meta's official API), Instagram (professional account) and Messenger (Facebook page). All of them arrive in the same Inbox."
       },
       "q2": {
         "question": "Will I lose my WhatsApp number?",
         "answer": "WhatsApp connects through Meta's official API. We recommend a dedicated number. If you connect a number you already use in the WhatsApp phone app, that number stops working in the app."
       },
       "q3": {
-        "question": "Can several people handle conversations?",
-        "answer": "Yes. Invite your team by email (up to 5 people) as Owner, Manager or Agent. Everyone sees the same conversations in the Inbox."
+        "question": "Can I send campaigns to all my contacts?",
+        "answer": "Campaigns reach the contacts in the segment who messaged you in the last 24 hours, which is what Meta allows for free-form messages. The others are left out and counted in the result. Anyone who asked not to receive automatic messages never receives them."
       },
       "q4": {
-        "question": "How does the AI work?",
-        "answer": "The AI answers based on the business profile you fill in: products, prices, hours and rules. If the information isn't in the profile, it doesn't make it up. You can turn it on or off, and pause it in each conversation to reply yourself."
+        "question": "What can I automate?",
+        "answer": "Pick a trigger (new contact, message received with a keyword, qualified lead, payment confirmed or popup filled in) and up to three actions: send a message, change the contact's stage or create a CRM task. Every run is logged."
       },
       "q5": {
-        "question": "Can the AI make mistakes?",
-        "answer": "Yes. AI replies can contain errors or omissions. Review your profile, follow conversations in the Inbox and take over when needed."
+        "question": "How do I install a popup on my website?",
+        "answer": "Create the popup in the dashboard, switch it on and paste a single line of code on your website. It works on any site and does not interfere with your design. You can limit the popup to your own domains."
       },
       "q6": {
-        "question": "Is my data safe?",
-        "answer": "Each company only sees its own data and channel credentials are stored encrypted. You can delete your account and all data whenever you want."
+        "question": "How does the AI work? Can it be wrong?",
+        "answer": "The AI answers using the business profile you fill in and does not make up what is not there. It qualifies contacts, sends payment links and books meetings. AI replies may contain mistakes: follow the conversations and take over when needed."
       },
       "q7": {
-        "question": "Do I need a credit card to try it?",
-        "answer": "No. The free trial lasts 14 days and starts without a card."
+        "question": "Can several people use the platform?",
+        "answer": "Yes. Invite your team by e-mail (up to 5 people) as Owner, Manager or Agent. Agents handle conversations; only owners and managers manage campaigns, automations and popups."
       },
       "q8": {
-        "question": "How much does it cost?",
-        "answer": "After the trial there is a single plan with everything included. The price is shown before you subscribe, no surprises."
+        "question": "Is my data safe?",
+        "answer": "Each company only sees its own data, with isolation enforced in the database, and channel credentials are stored encrypted. You can delete your account and all data whenever you want."
       },
       "q9": {
-        "question": "Can I cancel anytime?",
-        "answer": "Yes, no lock-in. Cancel in the billing portal at any time."
+        "question": "Do I need a card to try it? How much does it cost?",
+        "answer": "No. The free trial lasts 14 days and starts without a card. After that there is a single plan with everything included, and the price is shown before you subscribe."
       },
       "q10": {
-        "question": "What language is the platform in?",
-        "answer": "The dashboard is in Portuguese. The website and sign-up are also available in English and Spanish."
+        "question": "Can I cancel anytime?",
+        "answer": "Yes, with no lock-in. You cancel in the billing portal, at any time."
       }
     },
     "finalCta": {
-      "title": "Start serving customers",
-      "titleHighlight": "on every channel.",
-      "subtitle": "Connect your channels, fill in your business profile and let the AI start serving. Try it free for 14 days, no card.",
-      "ctaPrimary": "Free trial",
-      "ctaSecondary": "See pricing"
+      "title": "Start selling more",
+      "titleHighlight": "on WhatsApp.",
+      "subtitle": "Connect your WhatsApp, create your first campaign and let automation work for you. 14 days free, no card.",
+      "ctaPrimary": "Try it free",
+      "ctaSecondary": "See pricing",
+      "login": "Already have an account? Log in"
     }
   },
   "Footer": {
-    "tagline": "Omnichannel customer service with AI.",
+    "tagline": "Marketing, automation and CRM for WhatsApp.",
     "product": "Product",
     "productPricing": "Pricing",
     "company": "Company",
@@ -185,7 +225,10 @@
     "legalPrivacy": "Privacy",
     "legalTerms": "Terms",
     "rights": "All rights reserved.",
-    "legalDeletion": "Data deletion"
+    "legalDeletion": "Data deletion",
+    "productFeatures": "Features",
+    "productHow": "How it works",
+    "productFaq": "FAQ"
   },
   "Dashboard": {
     "search": "Search...",
