@@ -1,11 +1,15 @@
+import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import type { Role } from "@/lib/roles";
 
 export interface CurrentUser {
   authId: string;
   email: string;
   name: string | null;
+  // Papel na organização (RBAC); null só no caso de recurso, sem linha na nossa base de dados.
+  role: Role | null;
   workspace: {
     id: string;
     name: string;
@@ -35,6 +39,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
       select: {
         email: true,
         name: true,
+        role: true,
         workspace: {
           select: {
             id: true,
@@ -51,6 +56,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
         authId: user.id,
         email: dbUser.email,
         name: dbUser.name ?? metaName,
+        role: dbUser.role,
         workspace: {
           id: dbUser.workspace.id,
           name: dbUser.workspace.name,
@@ -71,6 +77,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     authId: user.id,
     email: user.email ?? "",
     name: metaName,
+    role: null,
     workspace: null,
   };
 });

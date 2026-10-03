@@ -25,7 +25,7 @@ export async function PUT(request: Request) {
   if (!me) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
   if (!me.workspace) return NextResponse.json({ error: "no_workspace" }, { status: 403 });
 
-  const limit = rateLimit(`business-profile:${me.authId}`, { limit: 30, windowMs: 10 * 60 * 1000 });
+  const limit = await rateLimit(`business-profile:${me.authId}`, { limit: 30, windowMs: 10 * 60 * 1000 });
   if (!limit.ok) {
     return NextResponse.json(
       { error: "rate_limited" },

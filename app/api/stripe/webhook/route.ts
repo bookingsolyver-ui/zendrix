@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { applyStripeEvent, verifyStripeSignature, type StripeEvent } from "@/lib/stripe/webhook";
+import { applyStripeEvent, verifyStripeSignature } from "@/lib/stripe/webhook";
+import { stripeEventSchema, type StripeEvent } from "@/lib/validations/stripe";
 
 export const maxDuration = 30;
 
@@ -21,16 +22,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_signature" }, { status: 400 });
   }
 
-  let event: StripeEvent;
+  let json: unknown;
   try {
-    const parsed = JSON.parse(rawBody);
-    if (typeof parsed?.id !== "string" || typeof parsed?.type !== "string" || typeof parsed?.created !== "number") {
-      throw new Error("shape");
-    }
-    event = parsed;
+    json = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
   }
+  const parsed = stripeEventSchema.safeParse(json);
+  if (!parsed.success) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  const event: StripeEvent = parsed.data;
 
   try {
     const outcome = await applyStripeEvent(event);

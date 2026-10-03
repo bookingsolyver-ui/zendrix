@@ -1,3 +1,4 @@
+import "server-only";
 // Transcrição de voz (Whisper) pela Groq ou pela OpenAI: a API é a mesma (compatível com a da OpenAI),
 // muda o endereço, a chave e o modelo. Recebe o áudio em memória; devolve o texto ou null.
 // Nunca lança: se falhar, quem chama continua (guarda o áudio e o agente pede ao cliente que escreva).

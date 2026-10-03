@@ -1,3 +1,4 @@
+import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
 // AES-256-GCM for secrets stored in the database (OAuth/API tokens of connected accounts).

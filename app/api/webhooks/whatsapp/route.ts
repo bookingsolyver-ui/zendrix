@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { after, NextResponse } from "next/server";
 import { extractEvents, isValidSignature } from "@/lib/whatsapp/webhook";
+import { metaPayloadSchema } from "@/lib/validations/meta-whatsapp";
 import { applyStatusUpdate, saveInboundMessage } from "@/lib/whatsapp/inbox-store";
 import { runAgentSafely, type AgentEvent } from "@/lib/agent";
 import { processInboundAudio, type AudioJob } from "@/lib/whatsapp/inbound-audio";
@@ -49,6 +50,11 @@ export async function POST(request: Request) {
     payload = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  }
+
+  // Um corpo com assinatura válida mas sem a forma da Meta (entry[]) não tem nada a processar.
+  if (!metaPayloadSchema.safeParse(payload).success) {
+    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
   }
 
   const { messages, statuses } = extractEvents(payload);

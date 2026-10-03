@@ -2,7 +2,8 @@
 // on the workspace of an existing user, so /api/whatsapp/connect can read them from the database.
 // The token is encrypted (AES-256-GCM) before it is written.
 //
-// Usage: node scripts/link-whatsapp.mjs you@example.com
+// Usage: node --conditions=react-server scripts/link-whatsapp.mjs you@example.com
+// (--conditions=react-server: lib/ usa "server-only", que só aceita ser importado assim fora do Next.)
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { encryptSecret } from "../lib/crypto.ts";

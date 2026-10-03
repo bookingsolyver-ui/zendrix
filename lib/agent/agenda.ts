@@ -1,3 +1,4 @@
+import "server-only";
 // Agendamentos pelo Cal.com (API v2).
 //
 // DESLIGADO nesta primeira versão. Não existe agenda de demonstração de propósito: sem uma agenda

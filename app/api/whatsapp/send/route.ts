@@ -1,22 +1,28 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/current-user";
+import { authErrorResponse } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { rateLimit } from "@/lib/rate-limit";
+import { requireRole } from "@/lib/rbac";
 import { REPLY_WINDOW_MS, type ChatMessage } from "@/lib/inbox/types";
-
-const MAX_TEXT_LENGTH = 4096;
+import { sendTextSchema } from "@/lib/validations/whatsapp-send";
 
 // Sends a free-text WhatsApp message in an existing conversation (Meta Cloud API).
+// Aceita a sessão do browser OU uma chave de API (cabeçalho x-api-key): qualquer papel pode enviar.
 export async function POST(request: Request) {
-  const me = await getCurrentUser();
-  if (!me) return NextResponse.json({ success: false, error: "unauthenticated" }, { status: 401 });
-  if (!me.workspace) {
-    return NextResponse.json({ success: false, error: "no_workspace" }, { status: 403 });
+  let workspaceId: string;
+  let rateKey: string;
+  try {
+    const who = await requireRole(["OWNER", "MANAGER", "STAFF"], request);
+    workspaceId = who.workspaceId;
+    rateKey = who.rateKey;
+  } catch (err) {
+    const response = authErrorResponse(err);
+    if (response) return response;
+    throw err;
   }
-  const workspaceId = me.workspace.id;
 
-  const limit = rateLimit(`wa-send:${me.authId}`, { limit: 60, windowMs: 60 * 1000 });
+  const limit = await rateLimit(`wa-send:${rateKey}`, { limit: 60, windowMs: 60 * 1000 });
   if (!limit.ok) {
     return NextResponse.json(
       { success: false, error: "rate_limited" },
@@ -24,12 +30,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json().catch(() => null);
-  const conversationId = typeof body?.conversationId === "string" ? body.conversationId : "";
-  const text = typeof body?.text === "string" ? body.text.trim() : "";
-  if (!conversationId || !text || text.length > MAX_TEXT_LENGTH) {
+  const parsed = sendTextSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
     return NextResponse.json({ success: false, error: "invalid_input" }, { status: 400 });
   }
+  const { conversationId, text } = parsed.data;
 
   try {
     // Scoped to the caller's workspace: a conversation id from another workspace is a 404.

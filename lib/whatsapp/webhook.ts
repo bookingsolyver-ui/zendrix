@@ -1,4 +1,6 @@
+import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { parseMetaPayload } from "@/lib/validations/meta-whatsapp";
 
 // Meta signs every webhook POST: header `X-Hub-Signature-256: sha256=<hmac of the raw body>`,
 // keyed with the app secret. Anything unsigned or mis-signed must be rejected, otherwise anyone
@@ -37,66 +39,45 @@ const STATUS_MAP: Record<string, StatusUpdate["status"]> = {
   failed: "FAILED",
 };
 
-// The payload comes from outside: every field is type-checked where it is read.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Json = Record<string, any>;
-
-// Flattens Meta's nested payload (entry[].changes[].value) into plain events.
+// Flattens Meta's nested payload (entry[].changes[].value) into plain events. The payload comes from
+// outside: lib/validations/meta-whatsapp.ts validates every element, and invalid ones are dropped.
 export function extractEvents(payload: unknown) {
   const messages: InboundMessage[] = [];
   const statuses: StatusUpdate[] = [];
-  const entries: Json[] = Array.isArray((payload as Json)?.entry) ? (payload as Json).entry : [];
 
-  for (const entry of entries) {
-    for (const change of Array.isArray(entry?.changes) ? entry.changes : []) {
-      if (change?.field !== "messages") continue;
-      const value: Json = change.value ?? {};
-      const phoneNumberId = value.metadata?.phone_number_id;
-      if (typeof phoneNumberId !== "string") continue;
+  for (const change of parseMetaPayload(payload)) {
+    for (const msg of change.messages) {
+      // Only text is rendered for now; other types keep a readable placeholder.
+      const audio = msg.type === "audio" ? msg.audio : undefined;
+      const body =
+        msg.type === "text" && msg.text
+          ? msg.text.body
+          : audio
+            ? "Mensagem de voz"
+            : `[${msg.type}]`;
+      messages.push({
+        phoneNumberId: change.phoneNumberId,
+        waId: msg.from,
+        contactName: change.contactNames.get(msg.from) ?? null,
+        waMessageId: msg.id,
+        type: msg.type,
+        body,
+        timestamp: msg.timestamp > 0 ? new Date(msg.timestamp * 1000) : new Date(),
+        mediaId: audio?.id ?? null,
+        mimeType: audio?.mime_type ?? null,
+      });
+    }
 
-      const names = new Map<string, string>();
-      for (const contact of Array.isArray(value.contacts) ? value.contacts : []) {
-        if (typeof contact?.wa_id === "string" && typeof contact?.profile?.name === "string") {
-          names.set(contact.wa_id, contact.profile.name);
-        }
-      }
-
-      for (const msg of Array.isArray(value.messages) ? value.messages : []) {
-        if (typeof msg?.id !== "string" || typeof msg?.from !== "string") continue;
-        const type = typeof msg.type === "string" ? msg.type : "unknown";
-        // Only text is rendered for now; other types keep a readable placeholder.
-        const isAudio = type === "audio" && typeof msg.audio?.id === "string";
-        const body =
-          type === "text" && typeof msg.text?.body === "string"
-            ? msg.text.body
-            : isAudio
-              ? "Mensagem de voz"
-              : `[${type}]`;
-        const seconds = Number(msg.timestamp);
-        messages.push({
-          phoneNumberId,
-          waId: msg.from,
-          contactName: names.get(msg.from) ?? null,
-          waMessageId: msg.id,
-          type,
-          body,
-          timestamp: Number.isFinite(seconds) && seconds > 0 ? new Date(seconds * 1000) : new Date(),
-          mediaId: isAudio ? msg.audio.id : null,
-          mimeType: isAudio && typeof msg.audio.mime_type === "string" ? msg.audio.mime_type : null,
-        });
-      }
-
-      for (const st of Array.isArray(value.statuses) ? value.statuses : []) {
-        const status = STATUS_MAP[st?.status];
-        if (typeof st?.id !== "string" || !status) continue;
-        const err = Array.isArray(st.errors) ? st.errors[0] : null;
-        statuses.push({
-          phoneNumberId,
-          waMessageId: st.id,
-          status,
-          errorMessage: err ? String(err.title ?? err.message ?? "failed").slice(0, 300) : null,
-        });
-      }
+    for (const st of change.statuses) {
+      const status = STATUS_MAP[st.status];
+      if (!status) continue;
+      const err = st.errors[0];
+      statuses.push({
+        phoneNumberId: change.phoneNumberId,
+        waMessageId: st.id,
+        status,
+        errorMessage: err ? (err.title ?? err.message ?? "failed").slice(0, 300) : null,
+      });
     }
   }
 

@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "@/lib/prisma";
 import { isSubscriptionActive } from "@/lib/tenant";
 import {

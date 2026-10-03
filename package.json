@@ -7,7 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit",
+    "test": "node --conditions=react-server --test \"lib/**/*.test.ts\"",
+    "check:server-only": "node scripts/check-server-only.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:static": "npm run lint && npm run typecheck && npm run check:server-only && npm run check:i18n && npm test",
+    "check": "npm run check:static && npm run build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -19,7 +25,9 @@
     "next-intl": "^4.14.7",
     "pg": "^8.23.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

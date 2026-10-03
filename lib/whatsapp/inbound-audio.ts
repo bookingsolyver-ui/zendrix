@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "@/lib/prisma";
 import { transcribeAudio } from "@/lib/audio/transcribe";
 import {

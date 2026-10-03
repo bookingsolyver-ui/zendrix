@@ -1,17 +1,19 @@
-// Fixed-window rate limiter kept in process memory.
-//
-// Limits apply per server instance: on a single Node server that is exact, but on serverless
-// or multi-instance hosting each instance counts separately. Callers only use `rateLimit()`,
-// so moving to a shared store (Redis/Upstash) later is a change to this file alone.
+import "server-only";
+import { prisma } from "@/lib/prisma";
 
-interface Entry {
-  count: number;
-  resetAt: number;
-}
+// Limitador de pedidos de janela fixa, guardado na base de dados (tabela RateLimitBucket).
+//
+// Em serverless (Vercel) cada instância tem a sua memória e as instâncias vão e vêm: um contador em memória
+// deixava passar N pedidos por instância. Aqui o contador é partilhado por todas, e a contagem é UMA
+// instrução atómica (INSERT ... ON CONFLICT DO UPDATE): dois pedidos simultâneos nunca leem o mesmo valor.
+// O relógio é o da base de dados, para as instâncias não discordarem sobre quando a janela acaba.
 
 interface RateLimitOptions {
   limit: number;
   windowMs: number;
+  // O que fazer se a base de dados falhar. Por omissão deixa passar (uma falha do limitador não deve
+  // deitar abaixo a app); em rotas sensíveis (registo) fecha, para o limite não se contornar à força.
+  failClosed?: boolean;
 }
 
 export interface RateLimitResult {
@@ -19,39 +21,55 @@ export interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
-const globalForLimiter = globalThis as unknown as { rateLimitStore?: Map<string, Entry> };
-const store = (globalForLimiter.rateLimitStore ??= new Map<string, Entry>());
+// Linhas expiradas são apagadas de vez em quando, na própria chamada: não exige cron.
+const CLEANUP_PROBABILITY = 1 / 200;
+const CLEANUP_GRACE_MS = 60 * 60 * 1000;
 
-const MAX_TRACKED_KEYS = 10_000;
+export async function rateLimit(
+  key: string,
+  { limit, windowMs, failClosed = false }: RateLimitOptions,
+): Promise<RateLimitResult> {
+  const windowSeconds = windowMs / 1000;
+  try {
+    const rows = await prisma.$queryRaw<{ count: number; retry: number }[]>`
+      INSERT INTO "RateLimitBucket" ("key", "count", "resetAt")
+      VALUES (
+        ${key}::text,
+        1,
+        timezone('utc', now()) + make_interval(secs => ${windowSeconds}::float8)
+      )
+      ON CONFLICT ("key") DO UPDATE SET
+        "count" = CASE
+          WHEN "RateLimitBucket"."resetAt" <= timezone('utc', now()) THEN 1
+          ELSE "RateLimitBucket"."count" + 1
+        END,
+        "resetAt" = CASE
+          WHEN "RateLimitBucket"."resetAt" <= timezone('utc', now())
+            THEN timezone('utc', now()) + make_interval(secs => ${windowSeconds}::float8)
+          ELSE "RateLimitBucket"."resetAt"
+        END
+      RETURNING
+        "count",
+        CEIL(GREATEST(EXTRACT(EPOCH FROM ("resetAt" - timezone('utc', now()))), 0))::int AS "retry"
+    `;
 
-function prune(now: number) {
-  for (const [key, entry] of store) {
-    if (entry.resetAt <= now) store.delete(key);
+    if (Math.random() < CLEANUP_PROBABILITY) {
+      void prisma.rateLimitBucket
+        .deleteMany({ where: { resetAt: { lt: new Date(Date.now() - CLEANUP_GRACE_MS) } } })
+        .catch(() => {});
+    }
+
+    const row = rows[0];
+    if (!row) return { ok: !failClosed, retryAfterSeconds: 0 };
+    return row.count <= limit
+      ? { ok: true, retryAfterSeconds: 0 }
+      : { ok: false, retryAfterSeconds: Math.max(1, Number(row.retry)) };
+  } catch (err) {
+    console.error("[rate-limit] falhou, a", failClosed ? "recusar" : "deixar passar", err);
+    return failClosed
+      ? { ok: false, retryAfterSeconds: Math.ceil(windowSeconds) }
+      : { ok: true, retryAfterSeconds: 0 };
   }
-  // Still too big after dropping expired keys: drop the oldest so memory stays bounded.
-  while (store.size > MAX_TRACKED_KEYS) {
-    const oldest = store.keys().next().value;
-    if (oldest === undefined) break;
-    store.delete(oldest);
-  }
-}
-
-export function rateLimit(key: string, { limit, windowMs }: RateLimitOptions): RateLimitResult {
-  const now = Date.now();
-  const entry = store.get(key);
-
-  if (!entry || entry.resetAt <= now) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
-    if (store.size > MAX_TRACKED_KEYS) prune(now);
-    return { ok: true, retryAfterSeconds: 0 };
-  }
-
-  if (entry.count >= limit) {
-    return { ok: false, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
-  }
-
-  entry.count += 1;
-  return { ok: true, retryAfterSeconds: 0 };
 }
 
 // Behind a trusted proxy/CDN (Vercel, Cloudflare) the first x-forwarded-for entry is the client.

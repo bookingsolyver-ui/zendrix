@@ -1,8 +1,9 @@
 // Transcreve as notas de voz que ficaram por transcrever (por exemplo, porque a conta da OpenAI
 // estava sem crédito). O original está no Storage privado, por isso não se perde nada.
 //
-//   node scripts/retranscribe-audio.mjs --dry   só lista o que há por transcrever
-//   node scripts/retranscribe-audio.mjs         transcreve e atualiza as mensagens
+//   node --conditions=react-server scripts/retranscribe-audio.mjs --dry   só lista o que há por transcrever
+//   node --conditions=react-server scripts/retranscribe-audio.mjs         transcreve e atualiza as mensagens
+// (--conditions=react-server: lib/ usa "server-only", que só aceita ser importado assim fora do Next.)
 //
 // NÃO responde aos clientes: só atualiza o texto que a equipa vê na Inbox.
 import pg from "pg";

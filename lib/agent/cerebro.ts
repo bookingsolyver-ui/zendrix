@@ -1,3 +1,5 @@
+import "server-only";
+import { prisma } from "@/lib/prisma";
 import { buildSystemPrompt } from "./negocio";
 import { AGENDAMENTO_ATIVO, agenda } from "./agenda";
 
@@ -14,6 +16,8 @@ const MAX_PASSOS = 6; // voltas modelo <-> ferramentas
 
 // O que é específico da organização a quem o agente está a responder.
 export interface ContextoDoAgente {
+  // A organização: isola os horários oferecidos de cada cliente (e de cada organização).
+  workspaceId: string;
   // Ficha do negócio (Workspace.agentKnowledge). Obrigatória: não há ficha por omissão, para o agente de
   // uma organização nunca responder com dados de outra.
   conhecimento: string;
@@ -168,9 +172,12 @@ const FERRAMENTAS = AGENDAMENTO_ATIVO
   : [];
 
 // Horários mostrados a cada cliente: só se marca o que a agenda ofereceu a ESSA pessoa.
-const ofertados = new Map<string, Set<string>>();
+// Guardados na base de dados (OfferedSlot) e não em memória: entre a pergunta do cliente e a confirmação
+// a conversa pode passar por outra instância serverless. Uma oferta caduca ao fim de OFERTA_HORAS.
+const OFERTA_HORAS = 12;
 
 async function executar(
+  workspaceId: string,
   contacto: string,
   nome: string,
   args: Record<string, string>,
@@ -179,9 +186,20 @@ async function executar(
     const erro = validarData(args.data);
     if (erro) return { erro };
     const horas = await agenda.horariosLivres(args.data, FUSO);
-    const set = ofertados.get(contacto) ?? new Set<string>();
-    horas.forEach((h) => set.add(`${args.data} ${h}`));
-    ofertados.set(contacto, set);
+    const agora = Date.now();
+    await prisma.offeredSlot.deleteMany({ where: { expiresAt: { lt: new Date(agora) } } });
+    if (horas.length) {
+      const expiresAt = new Date(agora + OFERTA_HORAS * 60 * 60 * 1000);
+      await prisma.offeredSlot.createMany({
+        data: horas.map((h) => ({ workspaceId, contact: contacto, slot: `${args.data} ${h}`, expiresAt })),
+        skipDuplicates: true,
+      });
+      // skipDuplicates não renova a validade de uma oferta repetida: renova-se aqui.
+      await prisma.offeredSlot.updateMany({
+        where: { workspaceId, contact: contacto, slot: { in: horas.map((h) => `${args.data} ${h}`) } },
+        data: { expiresAt },
+      });
+    }
     return horas.length
       ? { data: args.data, livres: horas }
       : {
@@ -194,7 +212,11 @@ async function executar(
     const erro = validarData(args.data);
     if (erro) return { erro };
     const chave = `${args.data} ${args.hora}`;
-    if (!ofertados.get(contacto)?.has(chave))
+    const oferta = await prisma.offeredSlot.findUnique({
+      where: { workspaceId_contact_slot: { workspaceId, contact: contacto, slot: chave } },
+      select: { expiresAt: true },
+    });
+    if (!oferta || oferta.expiresAt.getTime() < Date.now())
       return {
         erro: `O horário ${chave} não foi mostrado como livre. Chame ver_horarios antes.`,
       };
@@ -206,6 +228,8 @@ async function executar(
       telefone: contacto,
       fuso: FUSO,
     });
+    // Marcado: este horário já não está livre, não pode ser marcado outra vez com a mesma oferta.
+    await prisma.offeredSlot.deleteMany({ where: { workspaceId, contact: contacto, slot: chave } });
     return { ok: true, data: args.data, hora: args.hora, id: r.id };
   }
   return { erro: `Ferramenta desconhecida: ${nome}` };
@@ -386,7 +410,7 @@ export async function gerarResposta(
       }
       let saida: unknown;
       try {
-        saida = await executar(contacto, tc.function.name, args);
+        saida = await executar(contexto.workspaceId, contacto, tc.function.name, args);
       } catch (e) {
         saida = { erro: e instanceof Error ? e.message : String(e) };
       }

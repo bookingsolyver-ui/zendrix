@@ -1,6 +1,15 @@
+import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  stripeCheckoutSessionSchema,
+  stripeSubscriptionSchema,
+  workspaceIdFromMetadata,
+  type StripeEvent,
+} from "@/lib/validations/stripe";
+
+export type { StripeEvent };
 
 // Webhook do Stripe: mantém Workspace.subStatus em linha com a subscrição, e com isso liga e desliga o agente
 // e o processamento de áudio (ambos leem o estado da organização a cada mensagem: lib/tenant.ts).
@@ -70,31 +79,12 @@ export function mapStripeStatus(status: string): SubStatus | null {
 }
 
 // ---------------------------------------------------------------- eventos
-export interface StripeEvent {
-  id: string;
-  type: string;
-  created: number; // segundos
-  data: { object: Record<string, unknown> };
-}
-
 export type ApplyResult =
   | { result: "applied"; workspaceId: string; status: SubStatus }
   | { result: "linked"; workspaceId: string }
   | { result: "ignored"; reason: string }
   | { result: "stale" }
   | { result: "unknown_org" };
-
-const asRecord = (value: unknown): Record<string, unknown> =>
-  typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : {};
-
-// "customer" vem como id ("cus_…") ou, com expand, como objeto.
-const idOf = (value: unknown): string | null => {
-  if (typeof value === "string" && value) return value;
-  const id = asRecord(value).id;
-  return typeof id === "string" && id ? id : null;
-};
 
 const ORG_SELECT = {
   id: true,
@@ -107,7 +97,7 @@ const ORG_SELECT = {
 // Nunca por e-mail: quem paga com o e-mail de outra pessoa não pode mexer na subscrição dela.
 async function findOrganization(
   customerId: string | null,
-  metadataWorkspaceId: unknown,
+  metadataWorkspaceId: string | undefined,
 ) {
   if (customerId) {
     const byCustomer = await prisma.workspace.findUnique({
@@ -116,7 +106,7 @@ async function findOrganization(
     });
     if (byCustomer) return byCustomer;
   }
-  if (typeof metadataWorkspaceId === "string" && metadataWorkspaceId) {
+  if (metadataWorkspaceId) {
     return prisma.workspace.findUnique({
       where: { id: metadataWorkspaceId },
       select: ORG_SELECT,
@@ -126,25 +116,26 @@ async function findOrganization(
 }
 
 async function applySubscription(event: StripeEvent): Promise<ApplyResult> {
-  const sub = event.data.object;
-  const subscriptionId = idOf(sub.id);
-  const customerId = idOf(sub.customer);
-  if (!subscriptionId || !customerId)
+  const parsed = stripeSubscriptionSchema.safeParse(event.data.object);
+  if (!parsed.success)
     return { result: "ignored", reason: "subscrição sem id ou cliente" };
+  const sub = parsed.data;
+  const subscriptionId = sub.id;
+  const customerId = sub.customer;
 
   const nextStatus: SubStatus | null =
     event.type === "customer.subscription.deleted"
       ? "canceled"
-      : mapStripeStatus(String(sub.status));
+      : mapStripeStatus(sub.status ?? "");
   if (!nextStatus)
     return {
       result: "ignored",
-      reason: `estado "${String(sub.status)}" não altera nada`,
+      reason: `estado "${sub.status ?? ""}" não altera nada`,
     };
 
   const org = await findOrganization(
     customerId,
-    asRecord(sub.metadata).workspace_id,
+    workspaceIdFromMetadata(sub.metadata),
   );
   if (!org) return { result: "unknown_org" };
 
@@ -158,11 +149,8 @@ async function applySubscription(event: StripeEvent): Promise<ApplyResult> {
     return { result: "ignored", reason: "fim de uma subscrição antiga" };
   }
 
-  const items = asRecord(sub.items).data;
-  const price = asRecord(
-    asRecord(Array.isArray(items) ? items[0] : null).price,
-  );
-  const plan = [price.lookup_key, price.nickname].find(
+  const price = sub.items?.data[0]?.price;
+  const plan = [price?.lookup_key, price?.nickname].find(
     (v): v is string => typeof v === "string" && v.length > 0,
   );
   const trialEnd =
@@ -209,15 +197,18 @@ async function applySubscription(event: StripeEvent): Promise<ApplyResult> {
 async function applyCheckoutCompleted(
   event: StripeEvent,
 ): Promise<ApplyResult> {
-  const session = event.data.object;
+  const parsed = stripeCheckoutSessionSchema.safeParse(event.data.object);
+  if (!parsed.success)
+    return { result: "ignored", reason: "checkout sem organização ou cliente" };
+  const session = parsed.data;
   if (session.mode !== "subscription")
     return { result: "ignored", reason: "checkout que não é de subscrição" };
 
   const workspaceId = [
     session.client_reference_id,
-    asRecord(session.metadata).workspace_id,
+    workspaceIdFromMetadata(session.metadata),
   ].find((v): v is string => typeof v === "string" && v.length > 0);
-  const customerId = idOf(session.customer);
+  const customerId = session.customer;
   if (!workspaceId || !customerId)
     return { result: "ignored", reason: "checkout sem organização ou cliente" };
 
@@ -233,7 +224,7 @@ async function applyCheckoutCompleted(
     };
   }
 
-  const subscriptionId = idOf(session.subscription);
+  const subscriptionId = session.subscription ?? null;
   try {
     await prisma.workspace.updateMany({
       where: {

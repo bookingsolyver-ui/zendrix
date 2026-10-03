@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // Ficheiros de mídia dos clientes no Supabase Storage.
@@ -7,7 +8,6 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export const MEDIA_BUCKET = process.env.SUPABASE_MEDIA_BUCKET || "whatsapp-media";
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
-const REUSE_MARGIN_SECONDS = 10 * 60;
 
 export const storageConfigured = () =>
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -52,38 +52,24 @@ export async function uploadMedia(path: string, buffer: Buffer, mime: string): P
   return true;
 }
 
-// O mesmo URL enquanto for válido: a Inbox atualiza a cada poucos segundos e, se o URL mudasse a
-// cada pedido, o leitor de áudio reiniciava a meio da reprodução.
-const cache = new Map<string, { url: string; expiresAt: number }>();
-
+// Os URLs são assinados no momento, a cada pedido: não há cache. Uma cache em memória não é partilhada
+// entre instâncias serverless (cada uma assinava à mesma), e assinar é uma chamada barata ao Storage.
 export async function signedMediaUrls(workspaceId: string, paths: string[]): Promise<Record<string, string>> {
   const result: Record<string, string> = {};
   const client = admin();
   if (!client || paths.length === 0) return result;
 
-  const now = Date.now();
-  const missing: string[] = [];
-  for (const path of paths) {
-    // Defesa em profundidade: só se assina o que pertence a este workspace.
-    if (!path.startsWith(`${workspaceId}/`)) continue;
-    const hit = cache.get(path);
-    if (hit && hit.expiresAt > now) result[path] = hit.url;
-    else missing.push(path);
-  }
-  if (missing.length === 0) return result;
+  // Defesa em profundidade: só se assina o que pertence a este workspace.
+  const own = paths.filter((path) => path.startsWith(`${workspaceId}/`));
+  if (own.length === 0) return result;
 
-  const { data, error } = await client.storage.from(MEDIA_BUCKET).createSignedUrls(missing, SIGNED_URL_TTL_SECONDS);
+  const { data, error } = await client.storage.from(MEDIA_BUCKET).createSignedUrls(own, SIGNED_URL_TTL_SECONDS);
   if (error || !data) {
     console.error("[storage] assinar URLs falhou:", error?.message);
     return result;
   }
   for (const item of data) {
-    if (!item.path || !item.signedUrl) continue;
-    cache.set(item.path, {
-      url: item.signedUrl,
-      expiresAt: now + (SIGNED_URL_TTL_SECONDS - REUSE_MARGIN_SECONDS) * 1000,
-    });
-    result[item.path] = item.signedUrl;
+    if (item.path && item.signedUrl) result[item.path] = item.signedUrl;
   }
   return result;
 }

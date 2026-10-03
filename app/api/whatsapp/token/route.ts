@@ -19,7 +19,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: false, error: "unauthenticated" }, { status: 401 });
   }
 
-  const limit = rateLimit(`wa-token:${user.id}`, { limit: 10, windowMs: 10 * 60 * 1000 });
+  const limit = await rateLimit(`wa-token:${user.id}`, { limit: 10, windowMs: 10 * 60 * 1000 });
   if (!limit.ok) {
     return NextResponse.json(
       { success: false, error: "rate_limited" },

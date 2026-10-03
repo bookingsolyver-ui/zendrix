@@ -18,9 +18,10 @@ function tooManyRequests(retryAfterSeconds: number) {
 
 export async function POST(request: Request) {
   // Per-IP cap first, before doing any work, to stop mass account creation.
-  const ipLimit = rateLimit(`register:ip:${getClientIp(request)}`, {
+  const ipLimit = await rateLimit(`register:ip:${getClientIp(request)}`, {
     limit: MAX_SIGNUPS_PER_IP,
     windowMs: HOUR_MS,
+    failClosed: true,
   });
   if (!ipLimit.ok) return tooManyRequests(ipLimit.retryAfterSeconds);
 
@@ -41,9 +42,10 @@ export async function POST(request: Request) {
   }
 
   // Per-address cap: stops someone using us to flood one inbox with confirmation emails.
-  const emailLimit = rateLimit(`register:email:${email.toLowerCase()}`, {
+  const emailLimit = await rateLimit(`register:email:${email.toLowerCase()}`, {
     limit: MAX_SIGNUPS_PER_EMAIL,
     windowMs: HOUR_MS,
+    failClosed: true,
   });
   if (!emailLimit.ok) return tooManyRequests(emailLimit.retryAfterSeconds);
 

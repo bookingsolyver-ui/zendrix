@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "@/lib/prisma";
 
 // A organização (tenant) a que uma mensagem pertence e o que ela permite fazer.

@@ -50,7 +50,7 @@ O túnel (`cloudflared`) deixa de ser necessário.
 O schema muda com `npx prisma db push`, que se corre **localmente** (usa `DIRECT_URL`). Não corre na Vercel.
 
 ## Limitações a ter em conta
-- O limitador de pedidos, o cache de URLs assinados e o estado do TTS são **em memória, por instância**: na Vercel cada instância conta à parte.
+- O limitador de pedidos (tabela `RateLimitBucket`) e os horários oferecidos pelo agente (`OfferedSlot`) vivem na base de dados, partilhados por todas as instâncias. Os URLs assinados do Storage já não têm cache: assinam-se a cada pedido. O TTS passa tudo por memória dentro de um único pedido, sem estado entre instâncias.
 - O webhook pede `maxDuration = 60`, o máximo do plano gratuito; o agente tem um orçamento de 40 s para o modelo.
 - Rode as chaves que tenham passado por conversas ou terminais partilhados antes de as pôr em produção.
 
@@ -60,4 +60,17 @@ O schema muda com `npx prisma db push`, que se corre **localmente** (usa `DIRECT
 - No Stripe, crie um endpoint `https://<o-seu-dominio>/api/stripe/webhook` com os eventos `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` e `checkout.session.completed`, e copie o `whsec_...` para `STRIPE_WEBHOOK_SECRET` na Vercel. Em local: `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
 - Estados: `active` e `trialing` ligam o agente; `past_due`, `unpaid`, `paused` e `canceled` desligam-no.
 - Para o Stripe saber a que organização pertence uma compra, o Checkout tem de enviar `client_reference_id = <id da organização>` e `subscription_data.metadata.workspace_id = <id da organização>`. Nunca se associa por e-mail.
-- A criação do Checkout ainda não está construída: enquanto não existir, as subscrições têm de ser criadas com esses campos no painel/API do Stripe.
+- O Checkout e o portal já existem: `POST /api/stripe/checkout` e `POST /api/stripe/portal` (utilizador autenticado; devolvem `{ success, url }` e o cliente redireciona para esse URL). Corpo opcional `{ "locale": "pt" | "en" | "es" }`. Variáveis na Vercel: `STRIPE_SECRET_KEY` (sk_…), `STRIPE_PRICE_ID` (price_… do plano único), `STRIPE_WEBHOOK_SECRET`; opcionais `STRIPE_API_VERSION` e `NEXT_PUBLIC_APP_URL` (URL de regresso).
+- Teste grátis: quem subscreve durante o teste continua com o que resta dos 14 dias (o Stripe só cobra no fim). Se restarem menos de ~48 h (mínimo do Stripe) ou o teste já acabou, cobra logo. Quem já tem subscrição ativa recebe 409 `already_subscribed` e deve usar o portal.
+- No Stripe, ative o Customer Portal (Settings → Billing → Customer portal) antes de usar `/api/stripe/portal`.
+
+## API Keys, papéis (RBAC) e validação
+- Papéis por utilizador: `OWNER` > `MANAGER` > `STAFF` (`User.role`, por omissão `STAFF`; quem cria a organização é `OWNER`). Faturação (`/api/stripe/*`) e gestão de chaves exigem `OWNER` ou `MANAGER`. Em código: `requireRole(["OWNER", "MANAGER"], request?)` (`lib/rbac.ts`); sem `request` só aceita sessão (Server Actions).
+- **Utilizadores que já existiam ficam `STAFF`**: corra `node scripts/backfill-roles.mjs` (`--dry` para ver) depois do `db push`, senão ninguém abre o Checkout.
+- Chaves de API: `POST /api/keys` `{ "name": "CRM", "role": "STAFF", "expiresInDays": 365 }` (sessão) devolve a chave **uma única vez** (`zxk_…`); só o hash SHA-256 fica na base de dados. `GET /api/keys` lista, `DELETE /api/keys/<id>` revoga. Um cliente externo envia `x-api-key: zxk_…` (hoje aceite em `POST /api/whatsapp/send`); 120 pedidos/min por chave. Para aceitar chaves noutra rota, use `requireRole([...], request)` nela.
+- Entradas externas validadas com Zod em `lib/validations/` (webhooks do Stripe e da Meta, chaves, envio): o que não encaixa é ignorado (webhooks) ou recusado com 400.
+
+## Segurança e verificações
+- `npm run check` corre lint, typecheck, `check:server-only` (nenhum componente de cliente chega a módulos de servidor e todo o `lib/` sensível tem `import "server-only"`), `check:i18n` (mesmas chaves e placeholders em pt/en/es), testes e o build. O mesmo corre no GitHub Actions (`.github/workflows/check.yml`).
+- `supabase/migrations/20261003120000_rls_hardening.sql` fecha a base de dados à API pública do Supabase (RLS ligado e forçado em todas as tabelas, `anon`/`authenticated` sem privilégios). Correr **depois** de `npx prisma db push` e voltar a correr sempre que o schema ganhe tabelas.
+- Scripts em `scripts/` que importam `lib/` correm com `node --conditions=react-server scripts/<nome>.mjs` (o `server-only` só o permite assim fora do Next).

@@ -26,6 +26,15 @@ model Workspace {
   contacts           Contact[]
   conversations      Conversation[]
   messages           Message[]
+  apiKeys            ApiKey[]
+}
+
+// Papéis dentro de uma organização (RBAC), do mais para o menos poderoso. lib/roles.ts tem a hierarquia.
+// OWNER: tudo, incluindo faturação e chaves de API · MANAGER: gere a equipa e as chaves STAFF · STAFF: opera a inbox.
+enum Role {
+  OWNER
+  MANAGER
+  STAFF
 }
 
 model User {
@@ -35,7 +44,30 @@ model User {
   name        String?
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  // Privilégio mínimo por omissão: quem cria a organização é marcado OWNER explicitamente (lib/auth/provision.ts).
+  role        Role      @default(STAFF)
   createdAt   DateTime  @default(now())
+  apiKeys     ApiKey[]
+}
+
+// Chave de API de uma organização, para clientes externos chamarem o Zentrix (cabeçalho x-api-key).
+// Só se guarda o hash SHA-256: a chave completa é mostrada UMA vez, ao ser criada, e não se recupera.
+model ApiKey {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  prefix      String // primeiros caracteres da chave, para a reconhecer numa lista (não é segredo)
+  keyHash     String    @unique
+  role        Role      @default(STAFF) // o que esta chave pode fazer; nunca OWNER
+  createdById String?
+  createdAt   DateTime  @default(now())
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
 }
 
 model SocialIntegration {
@@ -100,4 +132,28 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
+}
+
+// Contadores do limitador de pedidos (lib/rate-limit.ts). Vivem na base de dados e não na memória: em
+// serverless cada instância tem a sua memória, e um limite por instância não limita nada.
+// Só o servidor lhes toca (RLS fechado, sem acesso pela API do Supabase).
+model RateLimitBucket {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
+// Horários que a agenda mostrou a um cliente (ferramenta ver_horarios do agente): só se marca o que foi
+// oferecido a ESSA pessoa. Na base de dados porque a conversa passa por instâncias diferentes.
+model OfferedSlot {
+  id          String   @id @default(cuid())
+  workspaceId String
+  contact     String // número do cliente (waId)
+  slot        String // "AAAA-MM-DD HH:MM"
+  expiresAt   DateTime
+
+  @@unique([workspaceId, contact, slot])
+  @@index([expiresAt])
 }

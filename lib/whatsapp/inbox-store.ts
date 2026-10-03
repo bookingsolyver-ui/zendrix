@@ -1,3 +1,4 @@
+import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -18,10 +19,12 @@ export async function findWorkspaceId(phoneNumberId: string) {
   if (!integration) {
     // A number nobody owns (disconnected client, typo in the Meta panel...): dropped, but not silently.
     if (
-      rateLimit(`unknown-number:${phoneNumberId}`, {
-        limit: 1,
-        windowMs: 10 * 60 * 1000,
-      }).ok
+      (
+        await rateLimit(`unknown-number:${phoneNumberId}`, {
+          limit: 1,
+          windowMs: 10 * 60 * 1000,
+        })
+      ).ok
     ) {
       console.warn(
         `[webhook] evento para o número ${phoneNumberId}, que não pertence a nenhuma organização ativa; ignorado`,

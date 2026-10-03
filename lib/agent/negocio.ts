@@ -1,3 +1,4 @@
+import "server-only";
 // Prompt de sistema do agente de IA. Multi-tenant: duas partes, de propósito separadas.
 //
 //   - BEHAVIOR:   COMO o assistente fala e se comporta (tom, formato, vendas, limites). É igual para todas

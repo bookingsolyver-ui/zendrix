@@ -1,3 +1,4 @@
+import "server-only";
 // Text-to-speech para o agente: transforma a resposta em áudio pronto para o WhatsApp.
 //
 // Tudo passa por memória (Buffer): uma resposta curta dá alguns KB, não há disco nem bucket.

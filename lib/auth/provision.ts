@@ -1,3 +1,4 @@
+import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { trialEndDate } from "@/lib/tenant";
@@ -70,6 +71,7 @@ export async function provisionUser({
           email: normalizedEmail,
           name: cleanName,
           workspaceId: workspace.id,
+          role: "OWNER", // quem cria a organização é o dono
         },
       });
     });

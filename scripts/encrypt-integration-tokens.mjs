@@ -1,7 +1,8 @@
 // One-off migration: encrypts any SocialIntegration.accessToken still stored in plain text.
 // Idempotent — rows that are already encrypted are skipped.
 //
-// Usage: node scripts/encrypt-integration-tokens.mjs
+// Usage: node --conditions=react-server scripts/encrypt-integration-tokens.mjs
+// (--conditions=react-server: lib/ usa "server-only", que só aceita ser importado assim fora do Next.)
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { decryptSecret, encryptSecret, isEncryptedSecret } from "../lib/crypto.ts";

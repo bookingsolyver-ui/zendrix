@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import {
@@ -31,7 +32,6 @@ const MODEL_DOWN_NOTICE_WINDOW_MS = 30 * 60 * 1000;
 
 const MAX_REPLIES_PER_HOUR = 20; // trava de custo/ciclos, por conversa
 let avisouSemChave = false;
-const semFichaAvisada = new Set<string>();
 
 export const agentEnabled = () => process.env.AGENT_ENABLED === "true";
 
@@ -89,16 +89,23 @@ async function handle(event: AgentEvent) {
   const tenant = await loadTenant(event.workspaceId);
   if (!tenant || !tenant.agentEnabled || !tenant.subscriptionActive) return;
   if (!tenant.knowledge) {
-    // Sem ficha, o agente inventaria: melhor calar-se. Avisa-se uma vez por organização.
-    if (!semFichaAvisada.has(tenant.workspaceId)) {
-      semFichaAvisada.add(tenant.workspaceId);
+    // Sem ficha, o agente inventaria: melhor calar-se. Avisa-se no máximo uma vez por dia por organização
+    // (o contador vive na base de dados: em serverless a memória de uma instância não é de todas).
+    const aviso = await rateLimit(`agent-no-profile:${tenant.workspaceId}`, {
+      limit: 1,
+      windowMs: 24 * 60 * 60 * 1000,
+    });
+    if (aviso.ok) {
       console.warn(
         `[agent] a organização "${tenant.name}" tem o agente ligado mas ainda não tem ficha do negócio; não responde`,
       );
     }
     return;
   }
-  const contexto = { conhecimento: tenant.knowledge };
+  const contexto = {
+    workspaceId: tenant.workspaceId,
+    conhecimento: tenant.knowledge,
+  };
 
   // O humano assumiu esta conversa: a mensagem já ficou gravada, o agente nem chega ao modelo.
   if (await isPaused(event.conversationId)) return;
@@ -126,7 +133,7 @@ async function handle(event: AgentEvent) {
   // Chegou outra mensagem do cliente entretanto: a execução dessa é que responde, com o contexto todo.
   if (await hasNewerInbound(event.conversationId, mine)) return;
 
-  const limit = rateLimit(`agent:${event.conversationId}`, {
+  const limit = await rateLimit(`agent:${event.conversationId}`, {
     limit: MAX_REPLIES_PER_HOUR,
     windowMs: 60 * 60 * 1000,
   });
@@ -169,7 +176,7 @@ async function handle(event: AgentEvent) {
         "[agent] todos os modelos falharam:",
         err instanceof Error ? err.message : err,
       );
-      const notice = rateLimit(`agent-down:${event.conversationId}`, {
+      const notice = await rateLimit(`agent-down:${event.conversationId}`, {
         limit: 1,
         windowMs: MODEL_DOWN_NOTICE_WINDOW_MS,
       });
