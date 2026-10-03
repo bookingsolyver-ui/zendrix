@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Headset, Inbox as InboxIcon, Plus, Tag, User, UserX, Workflow } from "lucide-react";
+import { Headset, Inbox as InboxIcon, User, UserX } from "lucide-react";
 import { WhatsAppGlyph } from "@/components/icons/whatsapp-glyph";
 import { Link, useRouter } from "@/i18n/navigation";
-import { SoonButton } from "@/components/ui/soon-button";
 import { ConversationList } from "@/components/dashboard/inbox/conversation-list";
 import { ChatWindow } from "@/components/dashboard/inbox/chat-window";
 import type { ConversationSummary } from "@/lib/inbox/types";
@@ -101,39 +100,6 @@ export function InboxShell({ whatsapp }: { whatsapp: WhatsAppStatus }) {
           })}
         </nav>
 
-        <div className="mt-6 border-t border-border pt-5">
-          <div className="flex items-center justify-between px-1">
-            <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
-              <Workflow className="h-3.5 w-3.5" />
-              Automações
-            </span>
-            <Link
-              href="/dashboard/marketing/automations"
-              aria-label="Nova automação"
-              className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-foreground"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-          <p className="mt-2 px-1 text-xs text-muted">Nenhuma automação configurada.</p>
-        </div>
-
-        <div className="mt-5 border-t border-border pt-5">
-          <div className="flex items-center justify-between px-1">
-            <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
-              <Tag className="h-3.5 w-3.5" />
-              Tags
-            </span>
-            <SoonButton
-              feature="Nova tag"
-              aria-label="Nova tag"
-              className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-foreground"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </SoonButton>
-          </div>
-          <p className="mt-2 px-1 text-xs text-muted">Nenhuma tag criada.</p>
-        </div>
       </aside>
 
       {whatsapp.connected ? (

@@ -520,7 +520,8 @@
       "createAccount": "Crear cuenta",
       "invalid": "Correo o contraseña incorrectos.",
       "callbackError": "No se pudo confirmar su acceso. Inténtelo de nuevo.",
-      "generic": "No se pudo iniciar sesión. Inténtelo de nuevo."
+      "generic": "No se pudo iniciar sesión. Inténtelo de nuevo.",
+      "forgot": "¿Olvidaste tu contraseña?"
     },
     "register": {
       "title": "Crear cuenta",
@@ -542,6 +543,44 @@
       "provisionFailed": "La cuenta se creó, pero falló la configuración de la empresa. Confirme su correo (si se pide) y entre; se completará en el primer acceso.",
       "generic": "No se pudo crear la cuenta. Inténtelo de nuevo.",
       "legalNotice": "Al crear una cuenta, aceptas los <terms>Términos de Servicio</terms> y la <privacy>Política de Privacidad</privacy>."
+    },
+    "forgot": {
+      "title": "Recuperar contraseña",
+      "subtitle": "Te enviamos un enlace para elegir una nueva.",
+      "email": "Correo de la cuenta",
+      "submit": "Enviar enlace",
+      "submitting": "Enviando...",
+      "sent": "Si existe una cuenta con este correo, enviamos un enlace para restablecer la contraseña. Revisa también el spam.",
+      "back": "Volver a entrar",
+      "invalidEmail": "Introduce un correo válido.",
+      "rateLimited": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+      "generic": "No se pudo enviar. Inténtalo de nuevo."
+    },
+    "reset": {
+      "title": "Nueva contraseña",
+      "subtitle": "Elige una contraseña nueva para tu cuenta.",
+      "password": "Nueva contraseña",
+      "passwordHint": "Mínimo 8 caracteres.",
+      "submit": "Guardar contraseña",
+      "submitting": "Guardando...",
+      "weak": "La contraseña debe tener al menos 8 caracteres.",
+      "generic": "No se pudo guardar. Solicita un nuevo enlace e inténtalo de nuevo.",
+      "expiredTitle": "Enlace caducado",
+      "expiredBody": "Este enlace ya se usó o caducó. Solicita uno nuevo para restablecer la contraseña.",
+      "requestNew": "Solicitar nuevo enlace"
+    },
+    "confirm": {
+      "signupTitle": "Confirma tu correo",
+      "signupBody": "Pulsa el botón para activar tu cuenta.",
+      "signupButton": "Confirmar correo",
+      "recoveryTitle": "Restablecer contraseña",
+      "recoveryBody": "Pulsa el botón para elegir una nueva contraseña.",
+      "recoveryButton": "Continuar",
+      "working": "Verificando...",
+      "invalid": "Este enlace ya se usó o caducó.",
+      "invalidTitle": "Enlace no válido",
+      "backToLogin": "Ir al inicio de sesión",
+      "requestNew": "Solicitar nuevo enlace"
     }
   },
   "Common": {

@@ -1,17 +1,12 @@
 import { setRequestLocale } from "next-intl/server";
-import { Layers, Smartphone } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { SummaryCard } from "@/components/dashboard/billing/summary-card";
-import { WhatsAppTopLinks } from "@/components/dashboard/whatsapp/top-links";
-import { PurchaseSection } from "@/components/dashboard/whatsapp/purchase-section";
-import { VideoBlock } from "@/components/dashboard/whatsapp/video-block";
 import { HowItWorksAccordion } from "@/components/dashboard/whatsapp/how-it-works-accordion";
 import { DedicatedNumberSection } from "@/components/whatsapp/dedicated-number-section";
 import { UpdateTokenForm } from "@/components/whatsapp/update-token-form";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getWhatsAppStatus } from "@/lib/whatsapp/status";
-
-const PLAN_SEATS = 3;
 
 export default async function WhatsAppSettingsPage({
   params,
@@ -31,7 +26,6 @@ export default async function WhatsAppSettingsPage({
       <DashboardPageHeader
         title="WhatsApp"
         subtitle="Ligue e gira os números de WhatsApp Business da sua conta."
-        action={<WhatsAppTopLinks />}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -40,13 +34,6 @@ export default async function WhatsAppSettingsPage({
           label="Números conectados"
           value={String(count)}
           hint={count === 0 ? "Nenhum número ligado ainda" : "Número ligado à sua conta"}
-        />
-        <SummaryCard
-          icon={Layers}
-          label="Vagas do plano"
-          value={`${count} / ${PLAN_SEATS}`}
-          hint={`${Math.max(PLAN_SEATS - count, 0)} vagas livres no plano Pro`}
-          accent
         />
       </div>
 
@@ -73,14 +60,6 @@ export default async function WhatsAppSettingsPage({
           </div>
         </div>
       )}
-
-      <div className="mt-10">
-        <PurchaseSection />
-      </div>
-
-      <div className="mt-10">
-        <VideoBlock />
-      </div>
 
       <div className="mt-10">
         <HowItWorksAccordion />

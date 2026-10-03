@@ -2,7 +2,6 @@ import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { AvatarSection } from "@/components/dashboard/settings/profile/avatar-section";
 import { ProfileForm } from "@/components/dashboard/settings/profile/profile-form";
-import { PreferencesSection } from "@/components/dashboard/settings/profile/preferences-section";
 import { DeleteAccountCard } from "@/components/dashboard/settings/profile/delete-account-card";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
@@ -31,14 +30,13 @@ export default async function ProfilePage({
   return (
     <>
       <DashboardPageHeader
-        title="Perfil e Preferências"
-        subtitle="Gira os seus dados pessoais e a forma como usa a Zentrix."
+        title="Perfil"
+        subtitle="Gira os seus dados pessoais."
       />
 
       <div className="space-y-6">
-        <AvatarSection initials={getInitials(user?.name ?? null, user?.email ?? "")} />
+        <AvatarSection initials={getInitials(user?.name ?? null, user?.email ?? "")} name={user?.name ?? null} email={user?.email ?? ""} />
         <ProfileForm />
-        <PreferencesSection />
         {/* Só o proprietário elimina a organização (a API também o exige). */}
         {user?.role === "OWNER" && <DeleteAccountCard />}
       </div>

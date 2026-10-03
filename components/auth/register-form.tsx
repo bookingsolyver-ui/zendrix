@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { AuthField } from "@/components/auth/auth-field";
 
@@ -17,6 +17,7 @@ const ERROR_KEYS: Record<string, "exists" | "weak" | "invalidEmail" | "rateLimit
 export function RegisterForm() {
   const t = useTranslations("Auth.register");
   const router = useRouter();
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
@@ -37,6 +38,7 @@ export function RegisterForm() {
           workspaceName: form.get("workspace"),
           email: form.get("email"),
           password: form.get("password"),
+          locale,
         }),
       });
       const data = await res.json().catch(() => null);

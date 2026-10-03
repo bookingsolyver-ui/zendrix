@@ -71,7 +71,7 @@ const privacyPt: Builder = (e, c) => ({
         [
           "Conta: nome, e-mail e palavra-passe (guardada pelo Supabase Auth apenas sob a forma de hash), organização a que pertence e o seu papel (Proprietário, Gestor ou Agente).",
           "Organização: nome, ficha do negócio (texto que a empresa escreve para orientar o assistente de IA) e definições.",
-          "Canais ligados: identificadores das contas e páginas (WhatsApp, Instagram, Messenger) e os tokens de acesso, que guardamos cifrados (AES-256-GCM).",
+          "Canais ligados: identificadores das contas e páginas (WhatsApp Business, Instagram, Messenger), incluindo o identificador da conta WhatsApp Business e do número de telefone, e os tokens de acesso, que guardamos cifrados (AES-256-GCM).",
           "Conversas: as mensagens enviadas e recebidas, o identificador do cliente final em cada canal (número de telefone, ou identificador do Instagram/Messenger) e o nome de perfil, quando o canal o fornece. Se a transcrição de voz estiver ativa, também as notas de voz recebidas e o respetivo texto.",
           "Faturação: o identificador de cliente e de subscrição no Stripe e o estado do plano. Não guardamos dados de cartão: são tratados pelo Stripe.",
           "Chaves de API: guardamos apenas o hash; a chave completa só é mostrada uma vez.",
@@ -82,7 +82,7 @@ const privacyPt: Builder = (e, c) => ({
     {
       heading: "3. Dados recebidos da Meta",
       body: [
-        "Quando liga o Instagram ou o Messenger através do Login do Facebook, recebemos a lista das páginas e contas profissionais de Instagram a que deu acesso e os respetivos tokens, e passamos a receber as mensagens que os clientes enviam a essas contas. Usamos estes dados apenas para receber, apresentar e responder a essas conversas. Não os vendemos nem os usamos para publicidade.",
+        "Quando liga o Instagram ou o Messenger através do Login do Facebook, ou o WhatsApp através do registo incorporado (Embedded Signup) da Meta, recebemos a lista das páginas, contas profissionais de Instagram ou contas WhatsApp Business a que deu acesso e os respetivos tokens, e passamos a receber as mensagens que os clientes enviam a essas contas. Usamos estes dados apenas para receber, apresentar e responder a essas conversas. Não os vendemos nem os usamos para publicidade.",
         "Pode retirar o acesso a qualquer momento, desligando o canal na plataforma ou removendo a aplicação nas definições do Facebook (ver secção 8).",
       ],
     },
@@ -171,7 +171,7 @@ const privacyEn: Builder = (e, c) => ({
         [
           "Account: name, email and password (stored by Supabase Auth only as a hash), the organization you belong to and your role (Owner, Manager or Agent).",
           "Organization: name, business profile (text the business writes to guide the AI assistant) and settings.",
-          "Connected channels: identifiers of accounts and pages (WhatsApp, Instagram, Messenger) and access tokens, which we store encrypted (AES-256-GCM).",
+          "Connected channels: identifiers of accounts and pages (WhatsApp Business, Instagram, Messenger), including the WhatsApp Business account and phone number identifiers, and access tokens, which we store encrypted (AES-256-GCM).",
           "Conversations: messages sent and received, the end customer's identifier on each channel (phone number, or Instagram/Messenger identifier) and profile name when the channel provides it. If voice transcription is enabled, also received voice notes and their text.",
           "Billing: the Stripe customer and subscription identifiers and the plan status. We do not store card data: it is handled by Stripe.",
           "API keys: we only store the hash; the full key is shown once.",
@@ -182,7 +182,7 @@ const privacyEn: Builder = (e, c) => ({
     {
       heading: "3. Data received from Meta",
       body: [
-        "When you connect Instagram or Messenger through Facebook Login, we receive the list of pages and Instagram professional accounts you granted access to and their tokens, and we start receiving the messages customers send to those accounts. We use this data only to receive, display and reply to those conversations. We do not sell it or use it for advertising.",
+        "When you connect Instagram or Messenger through Facebook Login, or WhatsApp through Meta's Embedded Signup, we receive the list of pages, Instagram professional accounts or WhatsApp Business accounts you granted access to and their tokens, and we start receiving the messages customers send to those accounts. We use this data only to receive, display and reply to those conversations. We do not sell it or use it for advertising.",
         "You can withdraw access at any time by disconnecting the channel in the platform or by removing the app in your Facebook settings (see section 8).",
       ],
     },

@@ -80,6 +80,23 @@ O schema muda com `npx prisma db push`, que se corre **localmente** (usa `DIRECT
 - **Desligar canal:** em cada conta ligada há "Desligar" (dois cliques; só OWNER/MANAGER). Apaga a ligação e as credenciais, deixa de receber os eventos da página na Meta (se nenhum outro canal a usar) e mantém o histórico de conversas. `DELETE /api/channels/<id>`.
 - **Token recusado pela Meta (erro 190):** a integração passa a `TOKEN_EXPIRED`. Os eventos recebidos continuam a entrar (não precisam do token), os envios falham logo e um aviso no topo do dashboard pede para voltar a ligar. Ligar de novo (OAuth, ou novo token no ecrã do WhatsApp) reativa-a.
 
+## E-mail (Resend): registo, boas-vindas, recuperação e convites
+- **Configurar o Resend:** crie uma conta em resend.com, adicione o seu domínio e crie no DNS os registos que ele pede (SPF e DKIM) até ficar **Verified**. Crie uma API key. Na Vercel: `RESEND_API_KEY` e `EMAIL_FROM` (`Zentrix <no-reply@o-seu-dominio>`, do domínio verificado), opcional `EMAIL_REPLY_TO`. Valide com `node scripts/test-email.mjs o-seu-email@exemplo.com`.
+- **O que passa a sair pelo Resend** (se `RESEND_API_KEY`, `EMAIL_FROM` e `SUPABASE_SERVICE_ROLE_KEY` estão definidas): confirmação do registo, e-mail de **boas-vindas** (depois de confirmar), **recuperação de palavra-passe** ("Esqueceu a palavra-passe?" no login) e **convites de equipa**. O utilizador é criado com `admin.generateLink`, que não envia nada, e o e-mail vai pelo nosso modelo (pt/en), com repetições em falhas passageiras e chave de idempotência.
+- **Os links dos e-mails levam a `/<lingua>/confirm`**, que pede um clique antes de gastar o token de uso único (os antivírus de e-mail abrem os links e consumiriam-no). A palavra-passe nova invalida as outras sessões.
+- **Recurso:** sem Resend, tudo continua a funcionar como antes, pelo SMTP do Supabase (com os limites dele). Se o Resend falhar a enviar a confirmação do registo, o Supabase envia o dele.
+- **No Supabase (Authentication → URL Configuration):** *Site URL* = o seu domínio e, em *Redirect URLs*, `https://<dominio>/auth/callback`. Mantenha *Confirm email* ligado.
+- Os modelos estão em `lib/email/templates.ts`.
+
+## Módulos escondidos e polimento do painel
+- O painel só mostra o que está operacional: Dashboard, Inbox, Contactos, IA (visão geral e ficha), Configurações (Primeiros passos, Canais, Faturação, Equipa, Perfil, WhatsApp). CRM, Marketing, E-commerce, Análises, Integrações, Webhooks, Persona e Segmentos estão **escondidos** (fora do menu e com a rota a 404) em `lib/features.ts`. Para lançar um, ponha-o a `true`; para os ver em desenvolvimento, `NEXT_PUBLIC_SHOW_UNFINISHED=true` (ignorado em produção).
+- `npm run check:features` (parte do `check:static`) falha se aparecer um botão "Em breve" fora dos módulos escondidos.
+
+## Meta: App Review e Embedded Signup
+- Guia completo, textos para o revisor e roteiro do vídeo: **`docs/META_APP_REVIEW.md`**. Verificador: `npm run check:meta -- --url https://<dominio>` (configuração + páginas legais, cabeçalhos, callback de eliminação, webhook).
+- **WhatsApp Embedded Signup:** com `NEXT_PUBLIC_META_WA_CONFIG_ID` o cartão do WhatsApp abre o popup da Meta (`POST /api/meta/whatsapp/signup` confirma os ids na Graph API, subscreve a conta e guarda o token cifrado). Sem ele, fica o ecrã manual.
+- Cabeçalhos de segurança em todas as respostas (`next.config.ts`): `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`. Sem CSP, de propósito (o SDK do Facebook).
+
 ## Legal, Meta App Review e eliminação de dados
 - Páginas públicas: `/<lingua>/terms`, `/<lingua>/privacy` (pt e en; es mostra a versão em inglês) e `/<lingua>/data-deletion` (instruções + formulário) com estado em `/data-deletion/status?code=…`. Definam `NEXT_PUBLIC_COMPANY_NAME`, `NEXT_PUBLIC_COMPANY_ADDRESS` e `NEXT_PUBLIC_SUPPORT_EMAIL` na Vercel. **O texto é uma base e deve ser revisto por um advogado antes de lançar.** Mantenha `lib/legal/content.ts` em linha com o que o produto faz (novos subcontratantes, finalidades).
 - **Painel da Meta (Definições da app → Básico):** URL da Política de Privacidade = `https://<dominio>/en/privacy`; URL dos Termos = `https://<dominio>/en/terms`; **Callback de eliminação de dados** = `https://<dominio>/api/meta/data-deletion` (verifica a assinatura com `META_APP_SECRET`, apaga as ligações feitas pelo utilizador e devolve `{url, confirmation_code}`). Só as ligações feitas DEPOIS desta versão ficam associadas ao utilizador do Facebook (`SocialIntegration.metaUserId`).

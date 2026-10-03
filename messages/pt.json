@@ -520,7 +520,8 @@
       "createAccount": "Criar conta",
       "invalid": "E-mail ou palavra-passe incorretos.",
       "callbackError": "Não foi possível confirmar o seu acesso. Tente entrar novamente.",
-      "generic": "Não foi possível entrar. Tente novamente."
+      "generic": "Não foi possível entrar. Tente novamente.",
+      "forgot": "Esqueceu a palavra-passe?"
     },
     "register": {
       "title": "Criar conta",
@@ -542,6 +543,44 @@
       "provisionFailed": "A conta foi criada, mas a configuração da empresa falhou. Confirme o e-mail (se pedido) e entre; será concluída no primeiro acesso.",
       "generic": "Não foi possível criar a conta. Tente novamente.",
       "legalNotice": "Ao criar conta, aceita os <terms>Termos de Serviço</terms> e a <privacy>Política de Privacidade</privacy>."
+    },
+    "forgot": {
+      "title": "Recuperar palavra-passe",
+      "subtitle": "Enviamos-lhe um link para escolher uma nova.",
+      "email": "E-mail da conta",
+      "submit": "Enviar link",
+      "submitting": "A enviar...",
+      "sent": "Se existir uma conta com este e-mail, enviámos um link para redefinir a palavra-passe. Verifique também o spam.",
+      "back": "Voltar a entrar",
+      "invalidEmail": "Introduza um e-mail válido.",
+      "rateLimited": "Demasiados pedidos. Aguarde um pouco e tente novamente.",
+      "generic": "Não foi possível enviar. Tente novamente."
+    },
+    "reset": {
+      "title": "Nova palavra-passe",
+      "subtitle": "Escolha uma palavra-passe nova para a sua conta.",
+      "password": "Nova palavra-passe",
+      "passwordHint": "Mínimo de 8 caracteres.",
+      "submit": "Guardar palavra-passe",
+      "submitting": "A guardar...",
+      "weak": "A palavra-passe deve ter pelo menos 8 caracteres.",
+      "generic": "Não foi possível guardar. Peça um novo link e tente novamente.",
+      "expiredTitle": "Link expirado",
+      "expiredBody": "Este link já foi usado ou expirou. Peça um novo para redefinir a palavra-passe.",
+      "requestNew": "Pedir novo link"
+    },
+    "confirm": {
+      "signupTitle": "Confirmar o seu e-mail",
+      "signupBody": "Carregue no botão para ativar a sua conta.",
+      "signupButton": "Confirmar e-mail",
+      "recoveryTitle": "Redefinir palavra-passe",
+      "recoveryBody": "Carregue no botão para escolher uma nova palavra-passe.",
+      "recoveryButton": "Continuar",
+      "working": "A verificar...",
+      "invalid": "Este link já foi usado ou expirou.",
+      "invalidTitle": "Link inválido",
+      "backToLogin": "Ir para o login",
+      "requestNew": "Pedir novo link"
     }
   },
   "Common": {

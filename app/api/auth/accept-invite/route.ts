@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { provisionUser } from "@/lib/auth/provision";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
-import { createClient } from "@/lib/supabase/server";
+import { signUpUser } from "@/lib/auth/signup";
+import { appOrigin } from "@/lib/http/origin";
 import { findInviteByToken } from "@/lib/team/invites";
 import { acceptInviteSchema } from "@/lib/validations/team";
 
@@ -20,7 +21,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = acceptInviteSchema.safeParse(await request.json().catch(() => null));
+  const raw = await request.json().catch(() => null);
+  const rawLocale = raw?.locale;
+  const body = acceptInviteSchema.safeParse(raw ? { token: raw.token, name: raw.name, password: raw.password } : null);
   if (!body.success) {
     const weak = body.error.issues.some((issue) => issue.path[0] === "password");
     return NextResponse.json({ success: false, error: weak ? "weak_password" : "invalid_input" }, { status: 400 });
@@ -30,33 +33,26 @@ export async function POST(request: Request) {
   const invite = await findInviteByToken(token);
   if (!invite) return NextResponse.json({ success: false, error: "invite_invalid" }, { status: 410 });
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  const signup = await signUpUser({
     email: invite.email,
     password,
-    options: {
-      data: { name },
-      emailRedirectTo: `${new URL(request.url).origin}/auth/callback`,
-    },
+    name,
+    origin: appOrigin(request),
+    locale: typeof rawLocale === "string" ? rawLocale : undefined,
   });
-  if (error) {
-    console.error("[auth/accept-invite] supabase signUp falhou", error.status, error.code);
-    if (error.status === 429) {
-      return NextResponse.json({ success: false, error: "rate_limited" }, { status: 429 });
-    }
-    return NextResponse.json({ success: false, error: "signup_failed" }, { status: 400 });
-  }
-  // Já existe uma conta com este e-mail (Supabase devolve um utilizador sem identidades): é só iniciar sessão,
-  // e o convite é reconhecido pelo e-mail verificado (lib/auth/provision.ts).
-  if (!data.user || data.user.identities?.length === 0) {
-    return NextResponse.json({ success: false, error: "email_exists" }, { status: 409 });
+  if (!signup.ok) {
+    if (signup.error === "rate_limited") return NextResponse.json({ success: false, error: "rate_limited" }, { status: 429 });
+    // Já existe uma conta com este e-mail: é só iniciar sessão, e o convite é reconhecido pelo e-mail verificado
+    // (lib/auth/provision.ts).
+    if (signup.error === "email_exists") return NextResponse.json({ success: false, error: "email_exists" }, { status: 409 });
+    return NextResponse.json({ success: false, error: signup.error === "weak_password" ? "weak_password" : "signup_failed" }, { status: 400 });
   }
 
   try {
     await provisionUser({
-      authId: data.user.id,
+      authId: signup.userId,
       email: invite.email,
-      emailVerified: Boolean(data.user.email_confirmed_at),
+      emailVerified: signup.emailVerified,
       name,
       inviteToken: token,
     });
@@ -64,5 +60,5 @@ export async function POST(request: Request) {
     console.error("[auth/accept-invite] provisionamento falhou", err);
     return NextResponse.json({ success: false, error: "provision_failed" }, { status: 500 });
   }
-  return NextResponse.json({ success: true, needsConfirmation: !data.session });
+  return NextResponse.json({ success: true, needsConfirmation: !signup.hasSession });
 }

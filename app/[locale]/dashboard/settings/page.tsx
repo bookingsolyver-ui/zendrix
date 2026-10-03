@@ -3,12 +3,10 @@ import {
   BookOpen,
   CreditCard,
   MessageCircle,
-  Plug,
   Rocket,
   Share2,
   User,
   Users,
-  Webhook,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
@@ -50,18 +48,6 @@ const SETTINGS_LINKS = [
     icon: Share2,
     title: "Canais",
     description: "Ligue o WhatsApp, o Instagram e o Messenger à sua conta.",
-  },
-  {
-    href: "/dashboard/integrations",
-    icon: Plug,
-    title: "Integrações",
-    description: "Ligue a Zentrix às ferramentas que já utiliza.",
-  },
-  {
-    href: "/dashboard/webhooks",
-    icon: Webhook,
-    title: "Webhooks",
-    description: "Configure endpoints para receber eventos em tempo real.",
   },
   {
     href: "/dashboard/settings/team",

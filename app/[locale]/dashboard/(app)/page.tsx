@@ -1,8 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { TrialBanner } from "@/components/dashboard/overview/trial-banner";
-import { DashboardFilters } from "@/components/dashboard/overview/dashboard-filters";
+import { OverviewStatsCards } from "@/components/dashboard/overview/overview-stats";
+import { getOverviewStats } from "@/lib/overview/stats";
 import { WhatsappGate } from "@/components/dashboard/overview/whatsapp-gate";
-import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-section";
 import { msUntil } from "@/lib/trial";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { requireActivePlanForPage } from "@/lib/billing/access";
@@ -23,7 +23,12 @@ export default async function DashboardPage({
   const whatsapp = await getWhatsAppStatus(user?.workspace?.id);
   // Quem acabou de chegar não cai numa painel vazio: vê os primeiros passos (só quem os pode fazer).
   const canSetup = user?.role === "OWNER" || user?.role === "MANAGER";
-  const setup = user?.workspace && canSetup ? await getSetupProgress(user.workspace.id) : null;
+  const [setup, stats] = user?.workspace
+    ? await Promise.all([
+        canSetup ? getSetupProgress(user.workspace.id) : Promise.resolve(null),
+        getOverviewStats(user.workspace.id),
+      ])
+    : [null, null];
 
   return (
     <>
@@ -34,12 +39,13 @@ export default async function DashboardPage({
         />
       )}
       {setup && <SetupChecklist progress={setup} />}
-      <DashboardFilters />
+      <h1 className="mb-6 text-2xl font-semibold tracking-tight text-white">Dashboard</h1>
       <WhatsappGate connected={whatsapp.connected} />
-
-      <div className="mt-6">
-        <FaqVideoSection />
-      </div>
+      {stats && (
+        <div className="mt-6">
+          <OverviewStatsCards stats={stats} />
+        </div>
+      )}
     </>
   );
 }

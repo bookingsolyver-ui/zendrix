@@ -520,7 +520,8 @@
       "createAccount": "Create account",
       "invalid": "Incorrect email or password.",
       "callbackError": "We could not confirm your access. Please try signing in again.",
-      "generic": "Could not sign in. Please try again."
+      "generic": "Could not sign in. Please try again.",
+      "forgot": "Forgot your password?"
     },
     "register": {
       "title": "Create account",
@@ -542,6 +543,44 @@
       "provisionFailed": "Your account was created, but setting up your company failed. Confirm your email (if asked) and sign in; it will finish on first login.",
       "generic": "Could not create the account. Please try again.",
       "legalNotice": "By creating an account, you accept the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>."
+    },
+    "forgot": {
+      "title": "Reset password",
+      "subtitle": "We'll email you a link to choose a new one.",
+      "email": "Account email",
+      "submit": "Send link",
+      "submitting": "Sending...",
+      "sent": "If an account exists for this email, we sent a link to reset the password. Check your spam folder too.",
+      "back": "Back to sign in",
+      "invalidEmail": "Enter a valid email.",
+      "rateLimited": "Too many requests. Please wait a moment and try again.",
+      "generic": "We couldn't send it. Please try again."
+    },
+    "reset": {
+      "title": "New password",
+      "subtitle": "Choose a new password for your account.",
+      "password": "New password",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Save password",
+      "submitting": "Saving...",
+      "weak": "Password must be at least 8 characters.",
+      "generic": "We couldn't save it. Request a new link and try again.",
+      "expiredTitle": "Link expired",
+      "expiredBody": "This link was already used or has expired. Request a new one to reset your password.",
+      "requestNew": "Request new link"
+    },
+    "confirm": {
+      "signupTitle": "Confirm your email",
+      "signupBody": "Click the button to activate your account.",
+      "signupButton": "Confirm email",
+      "recoveryTitle": "Reset password",
+      "recoveryBody": "Click the button to choose a new password.",
+      "recoveryButton": "Continue",
+      "working": "Verifying...",
+      "invalid": "This link was already used or has expired.",
+      "invalidTitle": "Invalid link",
+      "backToLogin": "Go to sign in",
+      "requestNew": "Request new link"
     }
   },
   "Common": {

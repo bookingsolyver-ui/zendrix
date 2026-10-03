@@ -16,9 +16,6 @@ export function PublicHeader({
   const navLinks = [
     { label: t("resources"), href: "/#section-features" },
     { label: t("pricing"), href: "/#pricing" },
-    { label: t("services"), href: "#" },
-    { label: t("docs"), href: "#" },
-    { label: t("blog"), href: "#" },
   ];
 
   return (
@@ -28,7 +25,7 @@ export function PublicHeader({
           <Logo />
 
           <nav className="hidden items-center gap-6 lg:flex">
-            {navLinks.slice(0, 2).map((link) => (
+            {navLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
@@ -37,27 +34,12 @@ export function PublicHeader({
                 {link.label}
               </a>
             ))}
-            <a
-              href={navLinks[2].href}
-              className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-            >
-              {navLinks[2].label}
-            </a>
             <Link
               href="/parceiros"
               className="text-sm font-medium text-emerald-400 underline decoration-emerald-400/40 decoration-2 underline-offset-4"
             >
               {t("referral")}
             </Link>
-            {navLinks.slice(3).map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
           </nav>
         </div>
 

@@ -20,8 +20,10 @@ export const META_OAUTH_SCOPES = [
 ] as const;
 
 // Versão da Graph API usada no login. META_GRAPH_VERSION permite subir sem código.
-const version = () => process.env.META_GRAPH_VERSION?.trim() || "v23.0";
-const graph = () => `https://graph.facebook.com/${version()}`;
+export const graphVersion = () => process.env.META_GRAPH_VERSION?.trim() || "v23.0";
+const version = graphVersion;
+export const graphBase = () => `https://graph.facebook.com/${version()}`;
+const graph = graphBase;
 const TIMEOUT_MS = 15_000;
 const MAX_PAGES = 25;
 
@@ -90,11 +92,12 @@ async function graphPost(step: "exchange" | "extend", path: string, params: Reco
 }
 
 // 1) code -> token de curta duração do utilizador
-export const exchangeCode = (config: MetaOAuthConfig, code: string, redirectUri: string) =>
+// `redirectUri` só existe no fluxo por redirecionamento; o código do FB.login (JS SDK, Embedded Signup) troca-se sem ele.
+export const exchangeCode = (config: MetaOAuthConfig, code: string, redirectUri?: string) =>
   graphPost("exchange", "/oauth/access_token", {
     client_id: config.appId,
     client_secret: config.appSecret,
-    redirect_uri: redirectUri,
+    ...(redirectUri ? { redirect_uri: redirectUri } : {}),
     code,
   });
 

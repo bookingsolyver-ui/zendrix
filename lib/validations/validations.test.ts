@@ -166,3 +166,37 @@ test("OAuth: state anti-CSRF (cookie ida-e-volta, comparação, rejeição de co
     assert.equal(decodeStateCookie(bad), null, String(bad));
   }
 });
+
+import { embeddedSignupRequestSchema, isFacebookOrigin, parseEmbeddedSession } from "./meta-embedded.ts";
+
+test("Embedded Signup: só o fim do fluxo, com ids numéricos", () => {
+  const finish = { type: "WA_EMBEDDED_SIGNUP", event: "FINISH", data: { phone_number_id: "123456789", waba_id: "987654321" } };
+  assert.deepEqual(parseEmbeddedSession(finish), { wabaId: "987654321", phoneNumberId: "123456789" });
+  assert.deepEqual(parseEmbeddedSession(JSON.stringify(finish)), { wabaId: "987654321", phoneNumberId: "123456789" }); // o popup envia texto ou objeto
+  assert.deepEqual(parseEmbeddedSession({ ...finish, event: "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING" }), { wabaId: "987654321", phoneNumberId: "123456789" });
+  for (const bad of [
+    { ...finish, event: "CANCEL" },
+    { ...finish, type: "OUTRA_COISA" },
+    { ...finish, data: { phone_number_id: "abc", waba_id: "987654321" } },
+    { ...finish, data: { phone_number_id: "123456789" } },
+    "não é json", null, undefined, 42, {},
+  ]) {
+    assert.equal(parseEmbeddedSession(bad), null, JSON.stringify(bad));
+  }
+});
+
+test("Embedded Signup: só se confia em mensagens do Facebook", () => {
+  for (const ok of ["https://www.facebook.com", "https://web.facebook.com", "https://facebook.com"]) assert.ok(isFacebookOrigin(ok), ok);
+  for (const bad of ["https://evil.com", "https://facebook.com.evil.com", "https://notfacebook.com", "http://localhost:3000", "", "null"]) {
+    assert.ok(!isFacebookOrigin(bad), bad);
+  }
+});
+
+test("Embedded Signup: o pedido ao servidor é estrito", () => {
+  const ok = { code: "AQD123", wabaId: "123456789", phoneNumberId: "987654321" };
+  assert.ok(embeddedSignupRequestSchema.safeParse(ok).success);
+  assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, workspaceId: "outra" }).success);
+  assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, wabaId: "12 34" }).success);
+  assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, phoneNumberId: "../etc" }).success);
+  assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, code: "" }).success);
+});

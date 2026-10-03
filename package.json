@@ -12,8 +12,10 @@
     "test": "node --conditions=react-server --test \"lib/**/*.test.ts\"",
     "check:server-only": "node scripts/check-server-only.mjs",
     "check:i18n": "node scripts/check-i18n.mjs",
-    "check:static": "npm run lint && npm run typecheck && npm run check:server-only && npm run check:i18n && npm test",
-    "check": "npm run check:static && npm run build"
+    "check:static": "npm run lint && npm run typecheck && npm run check:server-only && npm run check:i18n && npm run check:features && npm test",
+    "check": "npm run check:static && npm run build",
+    "check:features": "node scripts/check-features.mjs",
+    "check:meta": "node scripts/check-meta-readiness.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

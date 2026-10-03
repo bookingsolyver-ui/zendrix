@@ -83,11 +83,6 @@ export default async function BillingPage({
               value: String(sentThisMonth),
               hint: "Este mês",
             },
-            {
-              label: "Minutos de Áudio IA",
-              value: "—",
-              hint: "Ainda não medido",
-            },
             { label: "Membros da equipa", value: String(teamMembers) },
           ]}
         />

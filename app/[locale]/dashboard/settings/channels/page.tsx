@@ -6,7 +6,8 @@ import { ChannelCard, type ChannelAction } from "@/components/dashboard/settings
 import { ResultBanner } from "@/components/dashboard/settings/channels/result-banner";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getChannelsStatus } from "@/lib/meta/channels-status";
-import { metaOAuthConfig } from "@/lib/meta/oauth";
+import { graphVersion, metaOAuthConfig } from "@/lib/meta/oauth";
+import { WhatsAppEmbeddedSignup } from "@/components/dashboard/settings/channels/whatsapp-embedded-signup";
 import { evaluateAccess } from "@/lib/billing/policy";
 
 export default async function ChannelsPage({
@@ -53,20 +54,41 @@ export default async function ChannelsPage({
     };
   };
 
-  // O WhatsApp tem o seu próprio ecrã (número, token e Phone ID da API oficial).
+  // WhatsApp: com NEXT_PUBLIC_META_WA_CONFIG_ID (Embedded Signup configurado na Meta) o cliente liga o número num
+  // popup, sem copiar tokens. Sem ele (ou como alternativa) fica o ecrã próprio, com número, token e Phone ID.
+  const waConfigId = process.env.NEXT_PUBLIC_META_WA_CONFIG_ID?.trim();
+  const appId = process.env.NEXT_PUBLIC_META_APP_ID?.trim();
+  const hasWhatsApp = status.WHATSAPP.length > 0;
   const whatsappAction: ChannelAction = !planActive
     ? { kind: "disabled", label: "Ligar conta", reason: "Ative o seu plano em Faturação para ligar novos canais." }
-    : canManage
-    ? {
-        kind: "link",
-        node: (className) => (
-          <Link href="/dashboard/settings/whatsapp" className={className}>
-            {status.WHATSAPP.length > 0 ? "Gerir números" : "Ligar conta"}
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        ),
-      }
-    : { kind: "disabled", label: "Ligar conta", reason: "Apenas o proprietário ou um gestor pode ligar canais." };
+    : !canManage
+      ? { kind: "disabled", label: "Ligar conta", reason: "Apenas o proprietário ou um gestor pode ligar canais." }
+      : {
+          kind: "link",
+          node: (className) => (
+            <div className="space-y-2">
+              {waConfigId && appId && metaReady ? (
+                <WhatsAppEmbeddedSignup
+                  appId={appId}
+                  configId={waConfigId}
+                  graphVersion={graphVersion()}
+                  className={`${className} w-full`}
+                  label={hasWhatsApp ? "Ligar outro número" : "Ligar conta"}
+                />
+              ) : (
+                <Link href="/dashboard/settings/whatsapp" className={className}>
+                  {hasWhatsApp ? "Gerir números" : "Ligar conta"}
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              )}
+              {waConfigId && appId && metaReady && (
+                <Link href="/dashboard/settings/whatsapp" className="block text-center text-xs text-white/40 hover:text-white/70">
+                  {hasWhatsApp ? "Gerir números e token" : "Ligar manualmente com token"}
+                </Link>
+              )}
+            </div>
+          ),
+        };
 
   return (
     <>

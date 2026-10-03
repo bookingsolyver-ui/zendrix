@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { isFeatureEnabled, type FeatureId } from "@/lib/features";
 import {
   Activity,
   BarChart3,
@@ -31,18 +32,21 @@ export type NavLeaf = {
   label: string;
   href: string;
   icon: LucideIcon;
+  // Só aparece se esta funcionalidade estiver pronta (lib/features.ts).
+  feature?: FeatureId;
 };
 
 export type NavGroup = {
   label: string;
   icon: LucideIcon;
+  feature?: FeatureId;
   items: NavLeaf[];
 };
 
 export type NavEntry =
   ({ type: "link" } & NavLeaf) | ({ type: "group" } & NavGroup);
 
-export const NAV_ENTRIES: NavEntry[] = [
+const ALL_NAV_ENTRIES: NavEntry[] = [
   {
     type: "link",
     label: "Dashboard",
@@ -54,6 +58,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     type: "group",
     label: "CRM",
     icon: KanbanSquare,
+    feature: "crm",
     items: [
       { label: "Quadros", href: "/dashboard/crm/boards", icon: KanbanSquare },
       { label: "Agenda", href: "/dashboard/crm/agenda", icon: Calendar },
@@ -64,6 +69,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     type: "group",
     label: "Marketing",
     icon: Megaphone,
+    feature: "marketing",
     items: [
       {
         label: "Campanhas",
@@ -93,6 +99,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         label: "Segmentos",
         href: "/dashboard/contatos/segmentos",
         icon: Filter,
+        feature: "segments",
       },
     ],
   },
@@ -106,7 +113,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         href: "/dashboard/ai/overview",
         icon: BrainCircuit,
       },
-      { label: "Persona", href: "/dashboard/ai/settings", icon: UserCog },
+      { label: "Persona", href: "/dashboard/ai/settings", icon: UserCog, feature: "aiPersona" },
       {
         label: "Conhecimento",
         href: "/dashboard/settings/business",
@@ -118,6 +125,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     type: "group",
     label: "E-commerce",
     icon: ShoppingCart,
+    feature: "ecommerce",
     items: [
       {
         label: "Pedidos",
@@ -141,6 +149,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     type: "group",
     label: "Analytics",
     icon: BarChart3,
+    feature: "analytics",
     items: [
       {
         label: "Geral",
@@ -162,8 +171,23 @@ export const NAV_ENTRIES: NavEntry[] = [
   },
 ];
 
-export const NAV_FOOTER_ENTRIES: NavLeaf[] = [
-  { label: "Integrações", href: "/dashboard/integrations", icon: Plug },
-  { label: "Webhooks", href: "/dashboard/webhooks", icon: Webhook },
+const ALL_NAV_FOOTER_ENTRIES: NavLeaf[] = [
+  { label: "Integrações", href: "/dashboard/integrations", icon: Plug, feature: "integrations" },
+  { label: "Webhooks", href: "/dashboard/webhooks", icon: Webhook, feature: "webhooks" },
   { label: "Configurações", href: "/dashboard/settings", icon: Settings },
 ];
+
+// O que o menu mostra: só as funcionalidades prontas. Um grupo que fica sem itens desaparece, e um grupo com um
+// único item vira uma ligação direta (sem submenu de um só item).
+const enabled = (item: { feature?: FeatureId }) => !item.feature || isFeatureEnabled(item.feature);
+
+export const NAV_ENTRIES: NavEntry[] = ALL_NAV_ENTRIES.flatMap((entry): NavEntry[] => {
+  if (!enabled(entry)) return [];
+  if (entry.type === "link") return [entry];
+  const items = entry.items.filter(enabled);
+  if (items.length === 0) return [];
+  if (items.length === 1 && entry.label === "Contatos") return [{ type: "link", ...items[0], label: "Contatos" }];
+  return [{ ...entry, items }];
+});
+
+export const NAV_FOOTER_ENTRIES: NavLeaf[] = ALL_NAV_FOOTER_ENTRIES.filter(enabled);

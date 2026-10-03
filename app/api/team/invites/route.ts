@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireRole } from "@/lib/rbac";
 import { grantableRoles, TEAM_SEATS } from "@/lib/roles";
-import { inviteEmail } from "@/lib/team/invites";
+import { emailLang, inviteEmail } from "@/lib/email/templates";
 import { generateInviteToken, INVITE_TTL_DAYS } from "@/lib/team/invite-token";
 import { inviteSchema } from "@/lib/validations/team";
 
@@ -93,8 +93,12 @@ export async function POST(request: Request) {
       inviterName: inviter?.name ?? who.userEmail ?? "Um colega",
       role,
       url: inviteUrl,
+      lang: emailLang(locale),
     });
-    const emailSent = emailConfigured() ? await sendEmail({ to: email, ...message }) : false;
+    // A chave de idempotência evita um segundo e-mail se o envio for repetido por uma falha de rede.
+    const emailSent = emailConfigured()
+      ? (await sendEmail({ to: email, ...message, idempotencyKey: `invite-${invite.id}` })).ok
+      : false;
 
     return NextResponse.json({ success: true, invite, inviteUrl, emailSent }, { status: 201 });
   } catch (err) {

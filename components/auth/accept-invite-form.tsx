@@ -57,7 +57,7 @@ export function AcceptInviteForm({ token, email, lang }: { token: string; email:
       const res = await fetch("/api/auth/accept-invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, name: form.get("name"), password: form.get("password") }),
+        body: JSON.stringify({ token, name: form.get("name"), password: form.get("password"), locale: lang }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.success) {

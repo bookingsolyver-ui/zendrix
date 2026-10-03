@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { signUpUser } from "@/lib/auth/signup";
+import { appOrigin } from "@/lib/http/origin";
 import { provisionUser } from "@/lib/auth/provision";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
@@ -49,35 +50,21 @@ export async function POST(request: Request) {
   });
   if (!emailLimit.ok) return tooManyRequests(emailLimit.retryAfterSeconds);
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { name },
-      // Where the confirmation link in the email lands (must be in Supabase's redirect allow-list).
-      emailRedirectTo: `${new URL(request.url).origin}/auth/callback`,
-    },
-  });
-
-  if (error) {
-    console.error("[auth/register] supabase signUp failed", error.status, error.code, error.message);
+  const origin = appOrigin(request);
+  const signup = await signUpUser({ email, password, name, origin, locale: typeof body?.locale === "string" ? body.locale : undefined });
+  if (!signup.ok) {
     // Supabase throttles confirmation emails per address (~60s); tell the user to wait, not "failed".
-    if (error.status === 429) return tooManyRequests(60);
+    if (signup.error === "rate_limited") return tooManyRequests(60);
+    if (signup.error === "email_exists") return NextResponse.json({ success: false, error: "email_exists" }, { status: 409 });
+    if (signup.error === "weak_password") return NextResponse.json({ success: false, error: "weak_password" }, { status: 400 });
     return NextResponse.json({ success: false, error: "signup_failed" }, { status: 400 });
-  }
-
-  // With email confirmation on, Supabase returns an obfuscated user with no identities
-  // when the address is already registered.
-  if (!data.user || data.user.identities?.length === 0) {
-    return NextResponse.json({ success: false, error: "email_exists" }, { status: 409 });
   }
 
   try {
     await provisionUser({
-      authId: data.user.id,
+      authId: signup.userId,
       email,
-      emailVerified: Boolean(data.user.email_confirmed_at),
+      emailVerified: signup.emailVerified,
       name,
       workspaceName,
     });
@@ -87,5 +74,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "provision_failed" }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, needsConfirmation: !data.session });
+  return NextResponse.json({ success: true, needsConfirmation: !signup.hasSession });
 }

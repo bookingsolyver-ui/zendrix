@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AuthField } from "@/components/auth/auth-field";
 
@@ -64,6 +64,11 @@ export function LoginForm({ next, callbackError }: { next?: string; callbackErro
         label={t("password")}
         autoComplete="current-password"
       />
+      <div className="-mt-1 text-right">
+        <Link href="/forgot-password" className="text-xs text-muted hover:text-foreground">
+          {t("forgot")}
+        </Link>
+      </div>
 
       {error && (
         <p role="alert" className="text-sm text-danger">

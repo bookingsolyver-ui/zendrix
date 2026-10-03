@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, Search, SlidersHorizontal } from "lucide-react";
-import { SoonButton } from "@/components/ui/soon-button";
+import { Download, Search } from "lucide-react";
 import { visibleName } from "@/lib/inbox/display";
 
 export type ContactRow = {
@@ -78,13 +77,6 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <SoonButton feature="Filtros"
-            type="button"
-            className="glow-border flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Filtros
-          </SoonButton>
           <button
             type="button"
             onClick={exportCsv}
