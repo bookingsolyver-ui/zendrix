@@ -439,7 +439,8 @@
     "legal": "Legal",
     "legalPrivacy": "Privacy",
     "legalTerms": "Terms",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "legalDeletion": "Data deletion"
   },
   "Dashboard": {
     "search": "Search...",
@@ -539,7 +540,8 @@
       "invalidEmail": "Enter a valid email.",
       "rateLimited": "Too many attempts. Please wait a while and try again.",
       "provisionFailed": "Your account was created, but setting up your company failed. Confirm your email (if asked) and sign in; it will finish on first login.",
-      "generic": "Could not create the account. Please try again."
+      "generic": "Could not create the account. Please try again.",
+      "legalNotice": "By creating an account, you accept the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>."
     }
   },
   "Common": {

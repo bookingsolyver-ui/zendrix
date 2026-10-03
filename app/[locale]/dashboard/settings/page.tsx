@@ -4,6 +4,7 @@ import {
   CreditCard,
   MessageCircle,
   Plug,
+  Rocket,
   Share2,
   User,
   Users,
@@ -13,6 +14,12 @@ import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 
 const SETTINGS_LINKS = [
+  {
+    href: "/dashboard/settings/setup",
+    icon: Rocket,
+    title: "Primeiros passos",
+    description: "Ligue um canal, preencha a ficha do negócio e ative a IA.",
+  },
   {
     href: "/dashboard/settings/profile",
     icon: User,

@@ -43,6 +43,7 @@ model Workspace {
   messages             Message[]
   apiKeys              ApiKey[]
   outbox               OutboxMessage[]
+  invites              TeamInvite[]
 }
 
 // Papéis dentro de uma organização (RBAC), do mais para o menos poderoso. lib/roles.ts tem a hierarquia.
@@ -101,12 +102,16 @@ model SocialIntegration {
   wabaId            String?   @map("waba_id") // WhatsApp Business Account do cliente
   pageId            String?   @map("page_id") // Instagram: página do Facebook ligada à conta, usada para enviar
   tokenExpiresAt    DateTime? @map("token_expires_at") // tokens de utilizador do Instagram expiram (~60 dias)
+  // O id (da app) do utilizador do Facebook que ligou este canal. Serve para cumprir o pedido de eliminação de
+  // dados da Meta: quando essa pessoa remove a app, apagamos o que ela ligou.
+  metaUserId        String?   @map("meta_user_id")
   status            String    @default("ACTIVE")
   workspace         Workspace @relation(fields: [workspaceId], references: [id])
   createdAt         DateTime  @default(now())
 
   // Um número só pode pertencer a uma organização: é o que permite encaminhar o webhook sem ambiguidade.
   @@unique([platform, providerAccountId])
+  @@index([metaUserId])
 }
 
 // A customer of a workspace, identified by their WhatsApp ID (the phone number, digits only).
@@ -206,4 +211,38 @@ model OutboxMessage {
 
   @@index([status, nextAttemptAt])
   @@index([workspaceId, createdAt])
+}
+
+// Convite para entrar numa organização. O token só existe no link enviado ao convidado: aqui guarda-se o
+// hash, como as chaves de API. Um convite vale 7 dias e uma vez (acceptedAt).
+model TeamInvite {
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String // em minúsculas
+  role        Role      @default(STAFF) // nunca OWNER
+  tokenHash   String    @unique
+  invitedById String? // User.id de quem convidou
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, email])
+}
+
+// Pedidos de eliminação de dados: o callback da Meta, o formulário público e a eliminação de conta.
+// O `code` é o código de confirmação que se mostra ao titular e que a página de estado aceita.
+model DataDeletionRequest {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  source      String // "meta_callback" | "web_form" | "account"
+  contact     String? // e-mail de quem pediu (só no formulário público)
+  metaUserId  String?
+  status      String    @default("received") // received | completed
+  detail      String? // o que foi apagado, sem dados pessoais
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([status, createdAt])
 }

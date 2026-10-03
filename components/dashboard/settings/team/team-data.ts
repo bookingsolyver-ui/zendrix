@@ -1,13 +1,20 @@
-export type TeamRole = "Administrador" | "Atendente" | "Visualizador";
+import type { Role } from "@/lib/roles";
+import { TEAM_SEATS } from "@/lib/roles";
 
 export type TeamMember = {
   id: string;
   name: string;
   email: string;
-  role: TeamRole;
+  role: Role;
   lastAccess: string;
+  isSelf: boolean;
 };
 
-export const ROLES: TeamRole[] = ["Administrador", "Atendente", "Visualizador"];
+export type PendingInvite = {
+  id: string;
+  email: string;
+  role: Role;
+  expiresAt: string; // ISO
+};
 
-export const SEATS_TOTAL = 5;
+export const SEATS_TOTAL = TEAM_SEATS;

@@ -6,6 +6,8 @@ import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-secti
 import { msUntil } from "@/lib/trial";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { requireActivePlanForPage } from "@/lib/billing/access";
+import { SetupChecklist } from "@/components/dashboard/onboarding/setup-checklist";
+import { getSetupProgress } from "@/lib/onboarding/progress";
 import { getWhatsAppStatus } from "@/lib/whatsapp/status";
 
 export default async function DashboardPage({
@@ -19,6 +21,9 @@ export default async function DashboardPage({
 
   const user = await getCurrentUser();
   const whatsapp = await getWhatsAppStatus(user?.workspace?.id);
+  // Quem acabou de chegar não cai numa painel vazio: vê os primeiros passos (só quem os pode fazer).
+  const canSetup = user?.role === "OWNER" || user?.role === "MANAGER";
+  const setup = user?.workspace && canSetup ? await getSetupProgress(user.workspace.id) : null;
 
   return (
     <>
@@ -28,6 +33,7 @@ export default async function DashboardPage({
           msLeft={msUntil(user.workspace.trialEndsAt)}
         />
       )}
+      {setup && <SetupChecklist progress={setup} />}
       <DashboardFilters />
       <WhatsappGate connected={whatsapp.connected} />
 

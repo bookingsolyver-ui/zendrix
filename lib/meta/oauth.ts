@@ -121,6 +121,20 @@ export async function fetchPages(longLivedToken: string): Promise<MetaPage[]> {
   return parsePages(json).slice(0, MAX_PAGES);
 }
 
+// O id (da app) do utilizador do Facebook que autorizou: serve para o pedido de eliminação de dados da Meta.
+export async function fetchMetaUserId(token: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${graph()}/me?fields=id`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    const json = (await res.json().catch(() => null)) as { id?: unknown } | null;
+    return res.ok && typeof json?.id === "string" ? json.id : null;
+  } catch {
+    return null;
+  }
+}
+
 // 4) subscreve a página aos eventos de mensagens: sem isto a Meta não envia ao nosso webhook as mensagens dela.
 // Devolve false (sem lançar) se falhar: a conta fica ligada, mas há que avisar.
 export async function subscribePage(page: MetaPage): Promise<boolean> {

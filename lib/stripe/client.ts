@@ -63,3 +63,16 @@ export async function stripePost<T>(
   }
   return json;
 }
+
+// DELETE na API do Stripe (ex.: cancelar uma subscrição de imediato). 404 = já não existe: conta como feito.
+export async function stripeDelete(path: string): Promise<void> {
+  const secret = requireEnv("STRIPE_SECRET_KEY");
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${secret}` },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (res.ok || res.status === 404) return;
+  const json = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+  throw new StripeApiError(res.status, json?.error?.code, json?.error?.message ?? `Stripe respondeu ${res.status}`);
+}

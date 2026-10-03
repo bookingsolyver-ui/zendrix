@@ -73,3 +73,26 @@ export async function signedMediaUrls(workspaceId: string, paths: string[]): Pro
   }
   return result;
 }
+
+// Apaga TODOS os ficheiros de uma organização (notas de voz dos clientes), ao eliminar a conta. A estrutura é
+// <organização>/<conversa>/<ficheiro>. Devolve quantos apagou; nunca lança (falhas ficam no log).
+export async function deleteWorkspaceMedia(workspaceId: string): Promise<number> {
+  const client = admin();
+  if (!client) return 0;
+  const bucket = client.storage.from(MEDIA_BUCKET);
+  let removed = 0;
+  try {
+    const { data: folders } = await bucket.list(workspaceId, { limit: 1000 });
+    for (const folder of folders ?? []) {
+      const { data: files } = await bucket.list(`${workspaceId}/${folder.name}`, { limit: 1000 });
+      const paths = (files ?? []).map((file) => `${workspaceId}/${folder.name}/${file.name}`);
+      if (paths.length === 0) continue;
+      const { error } = await bucket.remove(paths);
+      if (error) console.error("[storage] apagar ficheiros falhou:", error.message);
+      else removed += paths.length;
+    }
+  } catch (err) {
+    console.error("[storage] apagar ficheiros da organização falhou:", err instanceof Error ? err.name : "unknown");
+  }
+  return removed;
+}

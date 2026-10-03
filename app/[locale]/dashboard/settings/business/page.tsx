@@ -13,7 +13,9 @@ export default async function BusinessSettingsPage({
   setRequestLocale(locale);
 
   const user = await getCurrentUser();
-  const state = user?.workspace
+  // A ficha define o que a IA diz aos clientes: só o proprietário e os gestores a editam (a API também o exige).
+  const canEdit = user?.role === "OWNER" || user?.role === "MANAGER";
+  const state = user?.workspace && canEdit
     ? await loadBusinessState(user.workspace.id)
     : null;
 
@@ -23,7 +25,11 @@ export default async function BusinessSettingsPage({
         title="Ficha do negócio"
         subtitle="O que o assistente de IA sabe sobre a sua empresa. Só responde com o que estiver aqui."
       />
-      {state ? (
+      {!canEdit && user?.workspace ? (
+        <p className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-white/60">
+          Apenas o proprietário e os gestores podem editar a ficha do negócio. Peça-lhes para fazerem as alterações.
+        </p>
+      ) : state ? (
         <BusinessForm initial={state} />
       ) : (
         <p className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-white/60">

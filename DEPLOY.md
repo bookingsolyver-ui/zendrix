@@ -80,6 +80,19 @@ O schema muda com `npx prisma db push`, que se corre **localmente** (usa `DIRECT
 - **Desligar canal:** em cada conta ligada há "Desligar" (dois cliques; só OWNER/MANAGER). Apaga a ligação e as credenciais, deixa de receber os eventos da página na Meta (se nenhum outro canal a usar) e mantém o histórico de conversas. `DELETE /api/channels/<id>`.
 - **Token recusado pela Meta (erro 190):** a integração passa a `TOKEN_EXPIRED`. Os eventos recebidos continuam a entrar (não precisam do token), os envios falham logo e um aviso no topo do dashboard pede para voltar a ligar. Ligar de novo (OAuth, ou novo token no ecrã do WhatsApp) reativa-a.
 
+## Legal, Meta App Review e eliminação de dados
+- Páginas públicas: `/<lingua>/terms`, `/<lingua>/privacy` (pt e en; es mostra a versão em inglês) e `/<lingua>/data-deletion` (instruções + formulário) com estado em `/data-deletion/status?code=…`. Definam `NEXT_PUBLIC_COMPANY_NAME`, `NEXT_PUBLIC_COMPANY_ADDRESS` e `NEXT_PUBLIC_SUPPORT_EMAIL` na Vercel. **O texto é uma base e deve ser revisto por um advogado antes de lançar.** Mantenha `lib/legal/content.ts` em linha com o que o produto faz (novos subcontratantes, finalidades).
+- **Painel da Meta (Definições da app → Básico):** URL da Política de Privacidade = `https://<dominio>/en/privacy`; URL dos Termos = `https://<dominio>/en/terms`; **Callback de eliminação de dados** = `https://<dominio>/api/meta/data-deletion` (verifica a assinatura com `META_APP_SECRET`, apaga as ligações feitas pelo utilizador e devolve `{url, confirmation_code}`). Só as ligações feitas DEPOIS desta versão ficam associadas ao utilizador do Facebook (`SocialIntegration.metaUserId`).
+- **Eliminar conta:** Configurações → Perfil → Eliminar conta (só o proprietário; escrever ELIMINAR). Cancela a subscrição no Stripe (se falhar, não apaga nada), apaga ficheiros de áudio, canais, utilizadores, conversas, mensagens, contactos, chaves e convites, e as contas de Auth. Funciona mesmo sem plano ativo.
+- **Pedidos do formulário público** ficam em `DataDeletionRequest` (estado `received`) e exigem tratamento manual **depois de verificar o e-mail**: `node scripts/list-deletion-requests.mjs`. Prazo legal: 30 dias.
+
+## Equipa, convites e onboarding
+- Papéis: Proprietário (OWNER), Gestor (MANAGER), Agente (STAFF, o nome visível). Convidar (Configurações → Equipa): o proprietário convida gestores e agentes; o gestor só agentes. Cada pessoa pertence a **uma** organização (um e-mail com conta noutra organização não pode ser convidado). Lugares: 5 (membros + convites pendentes). Convites valem 7 dias e uma vez; só o hash do token fica guardado.
+- **E-mail dos convites:** configure `RESEND_API_KEY` e `EMAIL_FROM` (domínio verificado no Resend). Sem isso o convite é criado e o ecrã mostra o link para copiar e enviar.
+- O convidado abre `/<lingua>/invite/<token>`, escolhe a palavra-passe e entra na organização com o papel do convite. Quem já tinha conta e inicia sessão com o e-mail convidado (verificado) também o recebe.
+- **Papéis nas rotas:** ficha do negócio (escrita), ligar IA, credenciais do WhatsApp, canais, chaves de API, faturação e equipa exigem OWNER/MANAGER; mudar papéis e eliminar a conta, só OWNER.
+- **Primeiros passos:** o painel mostra "ligar canal → preencher ficha → ligar a IA" (estado real, lido da base de dados) enquanto houver passos por fazer; também em `/dashboard/settings/setup`.
+
 ## API Keys, papéis (RBAC) e validação
 - Papéis por utilizador: `OWNER` > `MANAGER` > `STAFF` (`User.role`, por omissão `STAFF`; quem cria a organização é `OWNER`). Faturação (`/api/stripe/*`) e gestão de chaves exigem `OWNER` ou `MANAGER`. Em código: `requireRole(["OWNER", "MANAGER"], request?)` (`lib/rbac.ts`); sem `request` só aceita sessão (Server Actions).
 - **Utilizadores que já existiam ficam `STAFF`**: corra `node scripts/backfill-roles.mjs` (`--dry` para ver) depois do `db push`, senão ninguém abre o Checkout.

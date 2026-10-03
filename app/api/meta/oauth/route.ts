@@ -7,6 +7,7 @@ import {
   decodeStateCookie,
   exchangeCode,
   extendToken,
+  fetchMetaUserId,
   fetchPages,
   MetaOAuthError,
   metaOAuthConfig,
@@ -80,7 +81,8 @@ export async function GET(request: Request) {
 
     // Sem a subscrição a Meta não nos envia as mensagens da página: tenta-se, e avisa-se se falhar.
     const subscribed = await Promise.all(pages.map((page) => subscribePage(page)));
-    const result = await saveChannels({ workspaceId, platform: saved.platform, pages });
+    const metaUserId = await fetchMetaUserId(longLived);
+    const result = await saveChannels({ workspaceId, platform: saved.platform, pages, metaUserId });
 
     return done({
       connected: saved.platform,

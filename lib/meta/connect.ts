@@ -19,8 +19,10 @@ export async function saveChannels(input: {
   workspaceId: string;
   platform: OAuthPlatform;
   pages: MetaPage[];
+  // Quem autorizou no Facebook (para a eliminação de dados da Meta); null se não se conseguiu obter.
+  metaUserId?: string | null;
 }): Promise<SaveChannelsResult> {
-  const { workspaceId, platform, pages } = input;
+  const { workspaceId, platform, pages, metaUserId = null } = input;
   const dbPlatform = platform === "instagram" ? "INSTAGRAM" : "MESSENGER";
   const result: SaveChannelsResult = { connected: 0, conflicts: 0 };
 
@@ -32,6 +34,7 @@ export async function saveChannels(input: {
       accessToken: encryptSecret(page.access_token),
       pageId: page.id,
       status: "ACTIVE",
+      metaUserId,
       tokenExpiresAt: null, // tokens de página obtidos de um token de longa duração não expiram
     };
 

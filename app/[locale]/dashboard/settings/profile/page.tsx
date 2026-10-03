@@ -3,6 +3,7 @@ import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { AvatarSection } from "@/components/dashboard/settings/profile/avatar-section";
 import { ProfileForm } from "@/components/dashboard/settings/profile/profile-form";
 import { PreferencesSection } from "@/components/dashboard/settings/profile/preferences-section";
+import { DeleteAccountCard } from "@/components/dashboard/settings/profile/delete-account-card";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
 function getInitials(name: string | null, email: string) {
@@ -38,6 +39,8 @@ export default async function ProfilePage({
         <AvatarSection initials={getInitials(user?.name ?? null, user?.email ?? "")} />
         <ProfileForm />
         <PreferencesSection />
+        {/* Só o proprietário elimina a organização (a API também o exige). */}
+        {user?.role === "OWNER" && <DeleteAccountCard />}
       </div>
     </>
   );

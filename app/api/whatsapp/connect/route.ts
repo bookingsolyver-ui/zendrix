@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { authErrorResponse } from "@/lib/api-auth";
+import { requireRole } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { getAccess, subscriptionRequiredResponse } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
@@ -7,6 +9,15 @@ import { GRAPH_BASE } from "@/lib/meta/send";
 import { markIntegrationExpired } from "@/lib/meta/integration-health";
 
 export async function POST() {
+  // Credenciais do canal: só OWNER e MANAGER (um Agente não troca o token da empresa).
+  try {
+    await requireRole(["OWNER", "MANAGER"]);
+  } catch (err) {
+    const response = authErrorResponse(err);
+    if (response) return response;
+    throw err;
+  }
+
   // 1. Require an authenticated session (validated against Supabase, not just the cookie).
   const supabase = await createClient();
   const {

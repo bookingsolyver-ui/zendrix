@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
+import { Link } from "@/i18n/navigation";
 
 export function SiteFooter() {
   const t = useTranslations("Footer");
@@ -23,8 +24,9 @@ export function SiteFooter() {
     {
       title: t("legal"),
       links: [
-        { label: t("legalPrivacy"), href: "#" },
-        { label: t("legalTerms"), href: "#" },
+        { label: t("legalPrivacy"), href: "/privacy" },
+        { label: t("legalTerms"), href: "/terms" },
+        { label: t("legalDeletion"), href: "/data-deletion" },
       ],
     },
   ];
@@ -47,12 +49,21 @@ export function SiteFooter() {
                 <ul className="mt-3 space-y-2">
                   {column.links.map((link) => (
                     <li key={link.label}>
-                      <a
-                        href={link.href}
-                        className="text-sm text-white/50 transition-colors hover:text-white"
-                      >
-                        {link.label}
-                      </a>
+                      {link.href.startsWith("/") && !link.href.startsWith("/#") ? (
+                        <Link
+                          href={link.href}
+                          className="text-sm text-white/50 transition-colors hover:text-white"
+                        >
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          href={link.href}
+                          className="text-sm text-white/50 transition-colors hover:text-white"
+                        >
+                          {link.label}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>

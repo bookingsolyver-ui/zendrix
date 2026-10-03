@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { authErrorResponse } from "@/lib/api-auth";
+import { requireRole } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { getAccess, subscriptionRequiredResponse } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
@@ -11,6 +13,15 @@ const MAX_TOKEN_LENGTH = 2000;
 // Replaces the WhatsApp access token of the caller's workspace (e.g. when Meta's 24h test token
 // expires). The new token is checked against Meta first and stored encrypted.
 export async function PATCH(request: Request) {
+  // Credenciais do canal: só OWNER e MANAGER (um Agente não troca o token da empresa).
+  try {
+    await requireRole(["OWNER", "MANAGER"]);
+  } catch (err) {
+    const response = authErrorResponse(err);
+    if (response) return response;
+    throw err;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

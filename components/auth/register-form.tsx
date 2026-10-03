@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { AuthField } from "@/components/auth/auth-field";
 
 const ERROR_KEYS: Record<string, "exists" | "weak" | "invalidEmail" | "rateLimited" | "provisionFailed" | "generic"> = {
@@ -88,6 +88,21 @@ export function RegisterForm() {
           {error}
         </p>
       )}
+
+      <p className="text-xs text-muted">
+        {t.rich("legalNotice", {
+          terms: (chunks) => (
+            <Link href="/terms" target="_blank" className="underline hover:text-foreground">
+              {chunks}
+            </Link>
+          ),
+          privacy: (chunks) => (
+            <Link href="/privacy" target="_blank" className="underline hover:text-foreground">
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
 
       <button
         type="submit"

@@ -23,6 +23,8 @@ export default async function WhatsAppSettingsPage({
 
   const user = await getCurrentUser();
   const { count } = await getWhatsAppStatus(user?.workspace?.id);
+  // Ligar e trocar o token do número: só o proprietário e os gestores (as rotas também o exigem).
+  const canManage = user?.role === "OWNER" || user?.role === "MANAGER";
 
   return (
     <>
@@ -48,21 +50,29 @@ export default async function WhatsAppSettingsPage({
         />
       </div>
 
-      {count > 0 && (
+      {!canManage && (
+        <p className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/60">
+          Apenas o proprietário e os gestores podem ligar números e alterar o token. Peça-lhes para o fazerem.
+        </p>
+      )}
+
+      {canManage && count > 0 && (
         <div className="mt-6">
           <UpdateTokenForm />
         </div>
       )}
 
-      <div className="mt-10">
-        <h2 className="text-lg font-semibold">Número dedicado</h2>
-        <p className="mt-1 text-sm text-muted">
-          Ligue um número que já é seu à API oficial do WhatsApp.
-        </p>
-        <div className="mt-5">
-          <DedicatedNumberSection />
+      {canManage && (
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold">Número dedicado</h2>
+          <p className="mt-1 text-sm text-muted">
+            Ligue um número que já é seu à API oficial do WhatsApp.
+          </p>
+          <div className="mt-5">
+            <DedicatedNumberSection />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-10">
         <PurchaseSection />
