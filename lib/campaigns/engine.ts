@@ -195,10 +195,10 @@ export async function runCampaigns(options: { deadlineAt?: number } = {}): Promi
   });
   summary.stale = stale.count;
 
-  const due = await prisma.campaign.findMany({ where: { status: "SCHEDULED", scheduledAt: { lte: new Date() } }, orderBy: { scheduledAt: "asc" }, take: 10, select: { id: true } });
+  const due = await prisma.campaign.findMany({ where: { status: "SCHEDULED", scheduledAt: { lte: new Date() }, workspace: { blockedAt: null } }, orderBy: { scheduledAt: "asc" }, take: 10, select: { id: true } });
   for (const campaign of due) if (await startCampaign(campaign.id)) summary.started++;
 
-  const sending = await prisma.campaign.findMany({ where: { status: "SENDING" }, orderBy: { startedAt: "asc" }, take: 10, select: { id: true } });
+  const sending = await prisma.campaign.findMany({ where: { status: "SENDING", workspace: { blockedAt: null } }, orderBy: { startedAt: "asc" }, take: 10, select: { id: true } });
   let budget = PER_RUN();
   for (const campaign of sending) {
     if (budget <= 0 || (options.deadlineAt !== undefined && Date.now() >= options.deadlineAt)) break;

@@ -13,11 +13,11 @@ import { prisma } from "@/lib/prisma";
 export const getAccess = cache(async (workspaceId: string): Promise<Access> => {
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
-    select: { subStatus: true, trialEndsAt: true },
+    select: { subStatus: true, trialEndsAt: true, blockedAt: true },
   });
   // Organização que não existe: nada a que dar acesso.
   if (!workspace) return { active: false, reason: "canceled" };
-  return evaluateAccess(workspace.subStatus, workspace.trialEndsAt);
+  return evaluateAccess(workspace.subStatus, workspace.trialEndsAt, new Date(), workspace.blockedAt !== null);
 });
 
 // Resposta das rotas de API para quem não tem plano ativo. 402 = Payment Required.
@@ -32,6 +32,8 @@ export async function requireActivePlanForPage(locale: string) {
   const access = evaluateAccess(
     user.workspace.subStatus,
     user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null,
+    new Date(),
+    user.workspace.blocked,
   );
   if (!access.active) redirect(`/${locale}/dashboard/settings/billing?paywall=${access.reason}`);
 }

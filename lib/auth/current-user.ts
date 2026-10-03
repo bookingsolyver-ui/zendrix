@@ -16,6 +16,8 @@ export interface CurrentUser {
     subStatus: string;
     trialEndsAt: string | null; // ISO
     plan: string | null;
+    // Suspensa pela administração da plataforma (sem acesso).
+    blocked: boolean;
   } | null;
 }
 
@@ -47,6 +49,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
             subStatus: true,
             trialEndsAt: true,
             plan: true,
+            blockedAt: true,
           },
         },
       },
@@ -63,6 +66,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
           subStatus: dbUser.workspace.subStatus,
           trialEndsAt: dbUser.workspace.trialEndsAt?.toISOString() ?? null,
           plan: dbUser.workspace.plan,
+          blocked: dbUser.workspace.blockedAt !== null,
         },
       };
     }

@@ -43,7 +43,7 @@ export async function runFollowUps(options: { deadlineAt?: number } = {}): Promi
 
   const now = Date.now();
   const workspaces = await prisma.workspace.findMany({
-    where: { agentEnabled: true, followUpConfig: { not: Prisma.DbNull }, subStatus: { in: ["trialing", "active"] } },
+    where: { agentEnabled: true, blockedAt: null, followUpConfig: { not: Prisma.DbNull }, subStatus: { in: ["trialing", "active"] } },
     select: { id: true, agentKnowledge: true, subStatus: true, trialEndsAt: true, followUpConfig: true },
   });
 

@@ -85,3 +85,17 @@ export async function stripeDelete(path: string): Promise<void> {
   const json = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
   throw new StripeApiError(res.status, json?.error?.code, json?.error?.message ?? `Stripe respondeu ${res.status}`);
 }
+
+// GET na API do Stripe (só leitura). Usado, por exemplo, pelo painel de administração para ler o preço do plano.
+export async function stripeGet<T>(path: string): Promise<T> {
+  const secret = requireEnv("STRIPE_SECRET_KEY");
+  const version = process.env.STRIPE_API_VERSION?.trim();
+  const response = await fetch(`${apiBase()}${path}`, {
+    headers: { Authorization: `Bearer ${secret}`, ...(version ? { "Stripe-Version": version } : {}) },
+    signal: AbortSignal.timeout(8_000),
+    cache: "no-store",
+  });
+  const json = (await response.json().catch(() => null)) as (T & { error?: { code?: string; message?: string } }) | null;
+  if (!response.ok || !json) throw new StripeApiError(response.status, json?.error?.code, json?.error?.message ?? `Stripe respondeu ${response.status}`);
+  return json;
+}

@@ -15,7 +15,8 @@ function splitLocale(pathname: string) {
 }
 
 function isProtectedPath(path: string) {
-  return path === "/dashboard" || path.startsWith("/dashboard/");
+  // /admin também exige sessão aqui; quem tem sessão mas não é administrador da plataforma recebe 404 do layout.
+  return path === "/dashboard" || path.startsWith("/dashboard/") || path === "/admin" || path.startsWith("/admin/");
 }
 
 export default async function proxy(request: NextRequest) {

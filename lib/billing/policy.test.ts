@@ -27,3 +27,10 @@ test("paywall: past_due e cancelada bloqueiam de imediato; estados desconhecidos
 test("paywall: um trial por acabar com subscrição active (ex.: pagou durante o teste) não é bloqueado", () => {
   assert.equal(isSubscriptionActive("active", inDays(-5), now), true);
 });
+
+test("uma organização suspensa pela administração não tem acesso, tenha o plano que tiver", async () => {
+  const { evaluateAccess } = await import("./policy.ts");
+  assert.deepEqual(evaluateAccess("active", null, new Date(), true), { active: false, reason: "blocked" });
+  assert.deepEqual(evaluateAccess("trialing", new Date(Date.now() + 86_400_000), new Date(), true), { active: false, reason: "blocked" });
+  assert.deepEqual(evaluateAccess("active", null, new Date(), false), { active: true });
+});

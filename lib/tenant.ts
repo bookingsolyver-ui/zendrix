@@ -39,6 +39,7 @@ export async function loadTenant(
       trialEndsAt: true,
       agentEnabled: true,
       agentKnowledge: true,
+      blockedAt: true,
     },
   });
   if (!workspace) return null;
@@ -49,6 +50,8 @@ export async function loadTenant(
     subscriptionActive: isSubscriptionActive(
       workspace.subStatus,
       workspace.trialEndsAt,
+      new Date(),
+      workspace.blockedAt !== null,
     ),
     agentEnabled: workspace.agentEnabled,
     knowledge: workspace.agentKnowledge?.trim()

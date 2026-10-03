@@ -70,6 +70,9 @@ model Workspace {
   paymentLinks           PaymentLink[]
   followUps              FollowUp[]
   appointments           Appointment[]
+  // Suspensão pela administração da plataforma: sem acesso, sem envios, sem automações. Não apaga nada.
+  blockedAt              DateTime?           @map("blocked_at")
+  blockedReason          String?             @map("blocked_reason")
 }
 
 // Papéis dentro de uma organização (RBAC), do mais para o menos poderoso. lib/roles.ts tem a hierarquia.
@@ -81,16 +84,19 @@ enum Role {
 }
 
 model User {
-  id          String    @id @default(cuid())
-  authId      String?   @unique // Supabase Auth user id (auth.users.id)
-  email       String    @unique
-  name        String?
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  id              String    @id @default(cuid())
+  authId          String?   @unique // Supabase Auth user id (auth.users.id)
+  email           String    @unique
+  name            String?
+  workspaceId     String
+  workspace       Workspace @relation(fields: [workspaceId], references: [id])
   // Privilégio mínimo por omissão: quem cria a organização é marcado OWNER explicitamente (lib/auth/provision.ts).
-  role        Role      @default(STAFF)
-  createdAt   DateTime  @default(now())
-  apiKeys     ApiKey[]
+  role            Role      @default(STAFF)
+  createdAt       DateTime  @default(now())
+  apiKeys         ApiKey[]
+  // Administrador da PLATAFORMA (não de uma organização). Só se concede por script no servidor
+  // (scripts/make-platform-admin.mjs): nenhuma rota, formulário ou convite escreve este campo.
+  isPlatformAdmin Boolean   @default(false) @map("is_platform_admin")
 }
 
 // Chave de API de uma organização, para clientes externos chamarem o Zentrix (cabeçalho x-api-key).
@@ -601,5 +607,20 @@ model PopupSubmission {
   popup       Popup    @relation(fields: [popupId], references: [id], onDelete: Cascade)
 
   @@index([popupId, createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+// Registo de tudo o que um administrador da plataforma faz sobre as organizações (e de cada vez que abre uma para
+// a inspecionar). Sem chave estrangeira: o histórico sobrevive à eliminação da organização ou do administrador.
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  adminEmail  String
+  workspaceId String?
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
   @@index([workspaceId, createdAt])
 }
