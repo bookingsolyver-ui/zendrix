@@ -34,12 +34,6 @@ export function PublicHeader({
                 {link.label}
               </a>
             ))}
-            <Link
-              href="/parceiros"
-              className="text-sm font-medium text-emerald-400 underline decoration-emerald-400/40 decoration-2 underline-offset-4"
-            >
-              {t("referral")}
-            </Link>
           </nav>
         </div>
 

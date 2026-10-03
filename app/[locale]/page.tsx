@@ -14,7 +14,6 @@ import { UseCasesSection } from "@/components/landing/use-cases-section";
 import { IntegrationsMarquee } from "@/components/landing/integrations-marquee";
 import { WorkWithSection } from "@/components/landing/work-with-section";
 import { PricingSection } from "@/components/landing/pricing-section";
-import { ReferralSection } from "@/components/landing/referral-section";
 import { FaqSection } from "@/components/landing/faq-section";
 import { FinalCtaSection } from "@/components/landing/final-cta-section";
 import { SiteFooter } from "@/components/landing/site-footer";
@@ -45,7 +44,6 @@ export default async function HomePage({
         <IntegrationsMarquee />
         <WorkWithSection />
         <PricingSection />
-        <ReferralSection />
         <FaqSection />
         <FinalCtaSection />
       </main>

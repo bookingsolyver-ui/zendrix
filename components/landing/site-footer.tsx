@@ -17,7 +17,6 @@ export function SiteFooter() {
     {
       title: t("company"),
       links: [
-        { label: t("companyPartners"), href: "#section-refer-and-earn" },
         // Só com um e-mail de contacto configurado: sem ele não há para onde levar a ligação.
         ...(process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim()
           ? [{ label: t("companyContact"), href: `mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL.trim()}` }]
