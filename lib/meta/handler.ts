@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { runAgentSafely, type AgentEvent } from "@/lib/agent";
+import { drainOutbox } from "@/lib/outbox/process";
 import { META_OBJECTS, metaWebhookSchema } from "@/lib/validations/meta-whatsapp";
 import { applyStatusUpdate, saveInboundMessage } from "@/lib/whatsapp/inbox-store";
 import { processInboundAudio, type AudioJob } from "@/lib/whatsapp/inbound-audio";
@@ -121,6 +122,9 @@ export async function handleMetaPost(request: Request) {
       if (event) events.push(event);
     }
     await runAgentSafely(events);
+    // Qualquer evento da Meta aproveita para reenviar o que ficou na fila (tentativas por fazer, etc.): num
+    // plano sem cron por minuto, é o tráfego real que mantém a fila a andar.
+    await drainOutbox(8_000);
   });
 
   return NextResponse.json({ success: true });

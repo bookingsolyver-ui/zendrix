@@ -75,6 +75,7 @@ export default async function ChannelsPage({
             description="Atenda e responda no número de WhatsApp Business da sua empresa, com a API oficial."
             connected={status.WHATSAPP}
             action={whatsappAction}
+            canManage={canManage}
           />
           <ChannelCard
             platform="INSTAGRAM"
@@ -82,6 +83,7 @@ export default async function ChannelsPage({
             description="Receba e responda às mensagens directas da sua conta profissional de Instagram."
             connected={status.INSTAGRAM}
             action={oauthAction("instagram", status.INSTAGRAM.length > 0)}
+            canManage={canManage}
           />
           <ChannelCard
             platform="MESSENGER"
@@ -89,6 +91,7 @@ export default async function ChannelsPage({
             description="Converse com os clientes que lhe escrevem na sua página do Facebook."
             connected={status.MESSENGER}
             action={oauthAction("messenger", status.MESSENGER.length > 0)}
+            canManage={canManage}
           />
         </div>
 

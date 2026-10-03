@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
+import { GRAPH_BASE } from "@/lib/meta/send";
+import { markIntegrationExpired } from "@/lib/meta/integration-health";
 
 export async function POST() {
   // 1. Require an authenticated session (validated against Supabase, not just the cookie).
@@ -28,7 +30,7 @@ export async function POST() {
     const integration = await prisma.socialIntegration.findFirst({
       where: { workspaceId: dbUser.workspaceId, platform: "WHATSAPP", status: "ACTIVE" },
       orderBy: { createdAt: "desc" },
-      select: { accessToken: true, providerAccountId: true },
+      select: { id: true, accessToken: true, providerAccountId: true },
     });
     if (!integration?.providerAccountId) {
       return NextResponse.json({ success: false, error: "no_integration" }, { status: 404 });
@@ -43,20 +45,13 @@ export async function POST() {
       return NextResponse.json({ success: false, error: "integration_unreadable" }, { status: 500 });
     }
 
+    // Teste de ligação SÓ DE LEITURA: pergunta à Meta pelo próprio número. Prova que o token e o Phone ID
+    // funcionam sem enviar nenhuma mensagem (antes enviava um template a um número fixo, de cada vez).
     const res = await fetch(
-      `https://graph.facebook.com/v17.0/${integration.providerAccountId}/messages`,
+      `${GRAPH_BASE}/${integration.providerAccountId}?fields=id,display_phone_number,verified_name`,
       {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: "351932793264",
-          type: "template",
-          template: { name: "hello_world", language: { code: "en_US" } },
-        }),
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: AbortSignal.timeout(15_000),
       }
     );
 
@@ -69,6 +64,7 @@ export async function POST() {
     // Meta code 190 = invalid/expired access token. Report it distinctly (and not as a 401,
     // which the client would confuse with "not signed in").
     if (res.status === 401 || error?.error?.code === 190) {
+      await markIntegrationExpired(integration.id);
       return NextResponse.json({ success: false, error: "token_expired" }, { status: 502 });
     }
     return NextResponse.json({ success: false, error }, { status: res.status });

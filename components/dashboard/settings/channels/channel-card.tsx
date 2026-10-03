@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
 import type { ChannelPlatform } from "@/lib/inbox/channels";
 import type { ConnectedChannel } from "@/lib/meta/channels-status";
+import { DisconnectButton } from "@/components/dashboard/settings/channels/disconnect-button";
 
 // O botão do cartão: um link (o fluxo OAuth é uma navegação do browser, não um fetch) ou um botão desativado
 // com o motivo.
@@ -20,12 +21,14 @@ export function ChannelCard({
   description,
   connected,
   action,
+  canManage,
 }: {
   platform: ChannelPlatform;
   title: string;
   description: string;
   connected: ConnectedChannel[];
   action: ChannelAction;
+  canManage: boolean;
 }) {
   const hasAccounts = connected.length > 0;
   return (
@@ -43,12 +46,17 @@ export function ChannelCard({
       <p className="mt-1.5 text-sm text-white/50">{description}</p>
 
       {hasAccounts && (
-        <ul className="mt-4 space-y-1.5 text-xs text-white/60">
-          {connected.map((account, index) => (
-            <li key={index} className="flex items-center gap-2">
+        <ul className="mt-4 space-y-2 text-xs text-white/60">
+          {connected.map((account) => (
+            <li key={account.id} className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className={`h-1.5 w-1.5 rounded-full ${account.active ? "bg-emerald-400" : "bg-amber-400"}`} />
-              Conta …{account.idTail}
-              {!account.active && <span className="text-amber-300">(inativa)</span>}
+              <span>Conta …{account.idTail}</span>
+              {account.expired && <span className="text-amber-300">· acesso expirado, volte a ligar</span>}
+              {canManage && (
+                <span className="ml-auto">
+                  <DisconnectButton integrationId={account.id} />
+                </span>
+              )}
             </li>
           ))}
         </ul>

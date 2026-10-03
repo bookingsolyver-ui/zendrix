@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
+import { markIntegrationExpired } from "@/lib/meta/integration-health";
 import { enqueueText } from "@/lib/outbox/enqueue";
 
 export type SendResult = { ok: true } | { ok: false; error: string };
@@ -57,7 +58,7 @@ export async function sendAudioInConversation(input: {
   const integration = await prisma.socialIntegration.findFirst({
     where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE" },
     orderBy: { createdAt: "desc" },
-    select: { accessToken: true, providerAccountId: true },
+    select: { id: true, accessToken: true, providerAccountId: true },
   });
   if (!integration?.providerAccountId) return { ok: false, error: "no_integration" };
 
@@ -83,7 +84,10 @@ export async function sendAudioInConversation(input: {
   });
   const uploaded = await upload.json().catch(() => null);
   if (!upload.ok || typeof uploaded?.id !== "string") {
-    if (upload.status === 401 || uploaded?.error?.code === 190) return { ok: false, error: "token_expired" };
+    if (upload.status === 401 || uploaded?.error?.code === 190) {
+      await markIntegrationExpired(integration.id);
+      return { ok: false, error: "token_expired" };
+    }
     return { ok: false, error: "media_upload_failed" };
   }
 
@@ -102,7 +106,10 @@ export async function sendAudioInConversation(input: {
   });
   const data = await res.json().catch(() => null);
   if (!res.ok) {
-    if (res.status === 401 || data?.error?.code === 190) return { ok: false, error: "token_expired" };
+    if (res.status === 401 || data?.error?.code === 190) {
+      await markIntegrationExpired(integration.id);
+      return { ok: false, error: "token_expired" };
+    }
     if (data?.error?.code === 131047) return { ok: false, error: "window_closed" };
     return { ok: false, error: "meta_error" };
   }

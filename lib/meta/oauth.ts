@@ -136,3 +136,17 @@ export async function subscribePage(page: MetaPage): Promise<boolean> {
     return false;
   }
 }
+
+// Ao desligar uma página: deixa de receber as mensagens dela (reverte subscribePage). Best-effort, nunca lança.
+export async function unsubscribePage(pageId: string, pageToken: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${graph()}/${pageId}/subscribed_apps`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${pageToken}` },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

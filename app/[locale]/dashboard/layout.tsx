@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { CurrentUserProvider } from "@/components/dashboard/current-user-context";
+import { ChannelsHealthBanner } from "@/components/dashboard/channels-health-banner";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
 export default async function DashboardLayout({
@@ -16,7 +17,10 @@ export default async function DashboardLayout({
 
   return (
     <CurrentUserProvider user={user}>
-      <DashboardShell>{children}</DashboardShell>
+      <DashboardShell>
+        <ChannelsHealthBanner workspaceId={user?.workspace?.id} />
+        {children}
+      </DashboardShell>
     </CurrentUserProvider>
   );
 }

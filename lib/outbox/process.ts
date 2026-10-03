@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { backoffSeconds, MAX_ATTEMPTS } from "@/lib/meta/errors";
+import { markIntegrationExpired } from "@/lib/meta/integration-health";
 import { sendTextToMeta } from "@/lib/meta/send";
 import { rateLimit } from "@/lib/rate-limit";
 import type { PlatformName } from "@/lib/outbox/split-text";
@@ -51,6 +52,7 @@ interface ClaimedRow {
 type Outcome = "sent" | "retried" | "failed" | "deferred";
 
 interface Credentials {
+  integrationId: string;
   accessToken: string;
   accountId: string;
   pageId: string | null;
@@ -121,12 +123,13 @@ async function credentialsFor(cache: Map<string, Credentials | null>, row: Claim
   const integration = await prisma.socialIntegration.findFirst({
     where: { workspaceId: row.workspaceId, platform: row.platform, status: "ACTIVE", providerAccountId: { not: null } },
     orderBy: { createdAt: "desc" },
-    select: { accessToken: true, providerAccountId: true, pageId: true },
+    select: { id: true, accessToken: true, providerAccountId: true, pageId: true },
   });
   let credentials: Credentials | null = null;
   if (integration?.providerAccountId) {
     try {
       credentials = {
+        integrationId: integration.id,
         accessToken: decryptSecret(integration.accessToken),
         accountId: integration.providerAccountId,
         pageId: integration.pageId,
@@ -164,7 +167,7 @@ async function processOne(row: ClaimedRow, cache: Map<string, Credentials | null
     throw err;
   }
   if (typeof ready === "string") return ready;
-  return deliver(row, ready.payload, ready.credentials);
+  return deliver(row, ready.payload, ready.credentials, cache);
 }
 
 async function prepare(
@@ -195,7 +198,12 @@ async function prepare(
   return { payload, credentials };
 }
 
-async function deliver(row: ClaimedRow, payload: OutboxPayload, credentials: Credentials): Promise<Outcome> {
+async function deliver(
+  row: ClaimedRow,
+  payload: OutboxPayload,
+  credentials: Credentials,
+  cache: Map<string, Credentials | null>,
+): Promise<Outcome> {
   const result = await sendTextToMeta(row.platform, credentials, payload.to, payload.text);
 
   if (result.ok) {
@@ -211,6 +219,13 @@ async function deliver(row: ClaimedRow, payload: OutboxPayload, credentials: Cre
       }),
     ]);
     return "sent";
+  }
+
+  // A Meta recusou o token: marca a integração (os envios seguintes falham logo e o painel avisa) e limpa
+  // a cache desta execução, para as mensagens seguintes nem tentarem.
+  if (result.failure.reason === "token_expired") {
+    await markIntegrationExpired(credentials.integrationId);
+    cache.set(`${row.workspaceId}|${row.platform}`, null);
   }
 
   const attempts = row.retryCount + 1;

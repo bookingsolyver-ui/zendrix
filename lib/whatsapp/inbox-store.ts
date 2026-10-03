@@ -2,6 +2,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { LINKED_STATUSES } from "@/lib/meta/integration-health";
 import type { InboundMessage, StatusUpdate } from "@/lib/whatsapp/webhook";
 import type { PlatformName } from "@/lib/outbox/split-text";
 
@@ -14,7 +15,8 @@ export async function findWorkspaceId(platform: PlatformName, accountId: string)
     where: {
       platform,
       providerAccountId: accountId,
-      status: "ACTIVE",
+      // Também com o token expirado: receber não precisa do token, e assim nenhuma mensagem do cliente se perde.
+      status: { in: LINKED_STATUSES },
     },
     select: { workspaceId: true },
   });
