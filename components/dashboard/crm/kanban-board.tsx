@@ -42,9 +42,9 @@ export function KanbanBoard() {
                 {column.cards.length}
               </span>
             </div>
-            <SoonButton feature={`Adicionar negócio em ${column.title}`}
+            <SoonButton feature={`Adicionar tarefa em ${column.title}`}
               type="button"
-              aria-label={`Adicionar negócio em ${column.title}`}
+              aria-label={`Adicionar tarefa em ${column.title}`}
               className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-foreground"
             >
               <Plus className="h-4 w-4" />
@@ -56,7 +56,7 @@ export function KanbanBoard() {
               <DealCardView key={card.id} card={card} />
             ))}
             {column.cards.length === 0 && (
-              <p className="px-2 py-8 text-center text-xs text-muted">Sem negócios nesta fase.</p>
+              <p className="px-2 py-8 text-center text-xs text-muted">Sem tarefas nesta etapa.</p>
             )}
           </div>
         </div>

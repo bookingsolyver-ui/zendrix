@@ -14,10 +14,9 @@ export type KanbanColumn = {
   cards: DealCard[];
 };
 
-// The pipeline stages are the structure; there is no deals table yet, so every column is empty.
+// As etapas são a estrutura; ainda não há tabela de tarefas, por isso todas as colunas estão vazias.
 export const KANBAN_COLUMNS: KanbanColumn[] = [
-  { id: "novos-leads", title: "Novos Leads", cards: [] },
-  { id: "em-negociacao", title: "Em negociação", cards: [] },
-  { id: "aguardando-pagamento", title: "Aguardando Pagamento", cards: [] },
+  { id: "a-fazer", title: "A fazer", cards: [] },
+  { id: "em-curso", title: "Em curso", cards: [] },
   { id: "concluido", title: "Concluído", cards: [] },
 ];
