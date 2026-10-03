@@ -1,72 +1,69 @@
 import { setRequestLocale } from "next-intl/server";
-import { CalendarClock, FlaskConical, Megaphone, Plus, Send, Timer } from "lucide-react";
+import { CalendarClock, Clock, Gauge, Megaphone, ShieldCheck } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { MarketingHero } from "@/components/dashboard/marketing/hero-banner";
-import { StarterGrid } from "@/components/dashboard/marketing/starter-grid";
-import { FilterBar } from "@/components/dashboard/marketing/filter-bar";
-import { HowItWorks } from "@/components/dashboard/marketing/how-it-works";
-import { CampaignsTable } from "@/components/dashboard/marketing/campaigns/campaigns-table";
-import { SoonButton } from "@/components/ui/soon-button";
+import { FeatureGrid } from "@/components/dashboard/crm/feature-grid";
+import { CampaignsManager, type CampaignView, type SegmentOption } from "@/components/dashboard/marketing/campaigns-manager";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { listCampaigns } from "@/lib/campaigns/engine";
+import { prisma } from "@/lib/prisma";
+import { BUILT_IN_SEGMENTS } from "@/lib/segments/builtin";
+import { parseRules, rulesToFilter } from "@/lib/segments/rules";
 
-const CAMPAIGN_TYPES = [
-  { icon: Send, title: "Campanha padrão", description: "Um template aprovado para um público, agora ou agendada." },
-  { icon: FlaskConical, title: "Teste A/B de conteúdo", description: "Dois ou mais templates para uma amostra; o vencedor segue para os restantes." },
-  { icon: Timer, title: "Teste A/B de horário", description: "O mesmo template em horas diferentes, para descobrir quando o seu público lê." },
-  { icon: CalendarClock, title: "Agendada", description: "Deixe tudo pronto hoje e dispare na data e hora que escolher." },
+const FEATURES = [
+  { icon: Clock, title: "Janela de 24 horas", description: "Só recebe quem escreveu nas últimas 24 h, como a Meta exige. Os restantes são ignorados e contados." },
+  { icon: CalendarClock, title: "Agora ou agendada", description: "Envie já ou escolha o dia e a hora. A audiência calcula-se no momento do envio." },
+  { icon: Gauge, title: "Envio com ritmo", description: "As mensagens saem pela fila de saída, com ritmo controlado para proteger o seu número." },
+  { icon: ShieldCheck, title: "Quem pede para parar, para", description: "Contactos que pediram para não receber mensagens automáticas nunca entram numa campanha." },
 ];
+
+const dateFormat = new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Lisbon" });
+const nowDate = () => new Date();
 
 export default async function CampaignsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const user = await getCurrentUser();
+  const workspaceId = user?.workspace?.id;
+  const canManage = user?.role === "OWNER" || user?.role === "MANAGER";
+  const now = nowDate();
+
+  const rows = workspaceId ? await listCampaigns(workspaceId) : [];
+  const custom = workspaceId ? await prisma.segment.findMany({ where: { workspaceId }, orderBy: { createdAt: "asc" }, select: { id: true, name: true, rules: true } }) : [];
+
+  const defs = [
+    ...BUILT_IN_SEGMENTS.map((segment) => ({ value: `builtin:${segment.key}`, label: segment.name, rules: segment.rules })),
+    ...custom.map((segment) => ({ value: `custom:${segment.id}`, label: segment.name, rules: parseRules(segment.rules) })),
+  ];
+  const counts = workspaceId ? await Promise.all(defs.map((def) => prisma.contact.count({ where: { workspaceId, ...rulesToFilter(def.rules, now) } }))) : defs.map(() => 0);
+  const segments: SegmentOption[] = defs.map((def, index) => ({ value: def.value, label: def.label, members: counts[index] }));
+
+  const templates = workspaceId && canManage ? await prisma.messageTemplate.findMany({ where: { workspaceId }, orderBy: { name: "asc" }, select: { id: true, name: true, body: true } }) : [];
+
+  const campaigns: CampaignView[] = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    segmentName: row.segmentName,
+    message: row.message,
+    status: row.status,
+    scheduledLabel: dateFormat.format(row.scheduledAt),
+    counters: row.counters,
+    skipped: row.skipped,
+  }));
+
   return (
     <>
-      <DashboardPageHeader
-        title="Campanhas"
-        subtitle="Envie e meça campanhas de WhatsApp."
-        action={
-          <SoonButton
-            feature="Nova campanha"
-            className="neon-btn flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-background"
-          >
-            <Plus className="h-4 w-4" />
-            Nova campanha
-          </SoonButton>
-        }
-      />
-
+      <DashboardPageHeader title="Campanhas" subtitle="Envie uma mensagem a um segmento de contactos e acompanhe os resultados." />
       <div className="space-y-8">
         <MarketingHero
           icon={Megaphone}
           title="Campanhas de WhatsApp"
-          description="Uma mensagem para muitos contactos, com template aprovado pela Meta. Escolha o público, veja a mensagem como o cliente a vai ver e agende ou envie logo."
-          bullets={[
-            "Segmentos e listas com contagem de contactos",
-            "Teste A/B de conteúdo ou de horário",
-            "Leitura e cliques na mesma página",
-          ]}
-          cta="Nova campanha"
+          description="Escolha um segmento, escreva a mensagem e envie agora ou agende. Os números de envio, entrega e leitura vêm do próprio WhatsApp."
+          bullets={["Segmentos predefinidos e os seus", "Envio imediato ou agendado", "Entregues e lidas em tempo real"]}
         />
-
-        <StarterGrid
-          title="Comece por um tipo"
-          subtitle="Cada atalho abre o editor já configurado. Pode mudar tudo depois."
-          options={CAMPAIGN_TYPES}
-        />
-
-        <section className="space-y-4">
-          <FilterBar filters={["Últimos 30 dias", "Qualquer estado"]} />
-          <CampaignsTable />
-        </section>
-
-        <HowItWorks
-          steps={[
-            "Selecione um template aprovado",
-            "Segmente os contactos por etiquetas",
-            "Agende o envio para a melhor hora",
-            "Acompanhe as taxas de entrega e leitura",
-          ]}
-        />
+        <CampaignsManager campaigns={campaigns} segments={segments} templates={templates} canManage={canManage} />
+        <FeatureGrid title="Como funciona" features={FEATURES} />
       </div>
     </>
   );

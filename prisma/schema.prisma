@@ -64,6 +64,7 @@ model Workspace {
   docs                   Doc[]
   segments               Segment[]
   messageTemplates       MessageTemplate[]
+  campaigns              Campaign[]
   paymentLinks           PaymentLink[]
   followUps              FollowUp[]
   appointments           Appointment[]
@@ -432,4 +433,61 @@ model MessageTemplate {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, name])
+}
+
+// ─── Campanhas ───
+
+enum CampaignStatus {
+  SCHEDULED // à espera da hora marcada (ou de arrancar)
+  SENDING // destinatários a ser enfileirados e enviados
+  COMPLETED
+  FAILED // nenhuma mensagem chegou a ser enfileirada por falha
+  CANCELLED
+}
+
+enum RecipientStatus {
+  PENDING
+  PROCESSING
+  QUEUED // enfileirada na fila de saída (o estado real de entrega está na Message)
+  SKIPPED // não elegível (fora da janela de 24 h, pediu para não receber, sem conversa...)
+  FAILED
+}
+
+// Um envio em massa a partir de um segmento. As regras do segmento ficam copiadas (`rules`): apagar ou editar o
+// segmento depois não muda o que esta campanha faz. A audiência só se calcula quando a campanha arranca.
+model Campaign {
+  id              String              @id @default(cuid())
+  workspaceId     String
+  name            String
+  message         String // texto com {{nome}}; é o que se envia
+  segmentName     String
+  rules           Json
+  scheduledAt     DateTime
+  status          CampaignStatus      @default(SCHEDULED)
+  totalRecipients Int                 @default(0)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdById     String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  workspace       Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  recipients      CampaignRecipient[]
+
+  @@index([workspaceId, createdAt])
+  @@index([status, scheduledAt])
+}
+
+model CampaignRecipient {
+  id          String          @id @default(cuid())
+  campaignId  String
+  workspaceId String
+  contactId   String
+  status      RecipientStatus @default(PENDING)
+  reason      String? // motivo de SKIPPED/FAILED
+  messageId   String? // a Message criada (ligada à fila de saída)
+  updatedAt   DateTime        @updatedAt
+  campaign    Campaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, contactId])
+  @@index([campaignId, status])
 }

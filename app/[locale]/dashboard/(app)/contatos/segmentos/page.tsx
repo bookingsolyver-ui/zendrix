@@ -3,18 +3,8 @@ import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { SegmentsManager, type SegmentRow } from "@/components/dashboard/contacts/segments-manager";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
-import { describeRules, parseRules, rulesToFilter, type SegmentRules } from "@/lib/segments/rules";
-
-// As listas predefinidas: também são regras, por isso contam-se da mesma forma.
-const BUILT_IN: { name: string; description: string; rules: Partial<SegmentRules> }[] = [
-  { name: "Todos os contactos", description: "A lista padrão, com todas as pessoas que já falaram consigo.", rules: {} },
-  { name: "Novos (últimos 7 dias)", description: "Contactos criados nos últimos 7 dias.", rules: { createdWithinDays: 7 } },
-  { name: "Em conversa", description: "Responderam e estão a ser acompanhados.", rules: { stages: ["ENGAGED"] } },
-  { name: "Qualificados", description: "Têm interesse real e dados de contacto confirmados.", rules: { stages: ["QUALIFIED"] } },
-  { name: "Pagamento enviado", description: "Receberam um link de pagamento que ainda não foi pago.", rules: { stages: ["PAYMENT_SENT"] } },
-  { name: "Clientes", description: "Pagamento confirmado.", rules: { stages: ["WON"] } },
-  { name: "Sem mensagens automáticas", description: "Pediram para não receber mais mensagens automáticas.", rules: { optedOut: "yes" } },
-];
+import { BUILT_IN_SEGMENTS } from "@/lib/segments/builtin";
+import { describeRules, parseRules, rulesToFilter } from "@/lib/segments/rules";
 
 const countNow = () => new Date();
 
@@ -28,7 +18,7 @@ export default async function ContactsSegmentsPage({ params }: { params: Promise
 
   const now = countNow();
   const definitions = [
-    ...BUILT_IN.map((item) => ({ id: null, name: item.name, type: (item.name === "Todos os contactos" ? "Lista" : "Dinâmico") as SegmentRow["type"], description: item.description, note: "", rules: null, filter: rulesToFilter(parseRules(item.rules), now) })),
+    ...BUILT_IN_SEGMENTS.map((item) => ({ id: null, name: item.name, type: item.type as SegmentRow["type"], description: item.description, note: "", rules: null, filter: rulesToFilter(item.rules, now) })),
     ...custom.map((item) => {
       const rules = parseRules(item.rules);
       return { id: item.id, name: item.name, type: "Dinâmico" as const, description: describeRules(rules), note: item.description ?? "", rules, filter: rulesToFilter(rules, now) };
