@@ -2,8 +2,7 @@ import { after, NextResponse } from "next/server";
 import { adminGuarded, logAdminAction } from "@/lib/admin/guard";
 import { adminActionSchema, extendedTrialEnd } from "@/lib/admin/schema";
 import { appOrigin } from "@/lib/http/origin";
-import { emailConfigured, sendEmail } from "@/lib/email/send";
-import { accountApprovedEmail } from "@/lib/email/templates";
+import { notify, ownerRecipients } from "@/lib/email/notify";
 import { prisma } from "@/lib/prisma";
 import { stripeGet } from "@/lib/stripe/client";
 import { idSchema } from "@/lib/validations/team";
@@ -63,12 +62,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           data: { approvalStatus: "APPROVED", approvalDecidedAt: new Date(), approvalDecidedBy: admin.userId, approvalNote: null, ...(before.subStatus === "trialing" ? { trialEndsAt: extendedTrialEnd(null, 14) } : {}) },
         });
         extra = { notified: false };
-        if (data.notify && before.ownerEmail && emailConfigured()) {
-          const to = before.ownerEmail;
-          const dashboardUrl = `${appOrigin(request)}/pt/dashboard`;
-          const owner = await prisma.user.findFirst({ where: { workspaceId: id.data, role: "OWNER" }, select: { name: true } });
+        // E-mail «conta aprovada» (opcional), com o link direto para entrar. Regista-se e envia-se depois da resposta;
+        // se o envio falhar, o cron repete. Nunca faz a aprovação falhar.
+        if (data.notify) {
+          const origin = appOrigin(request);
+          const decidedKey = Date.now();
+          const workspaceId = id.data;
           after(async () => {
-            await sendEmail({ to, ...accountApprovedEmail({ name: owner?.name, dashboardUrl, lang: "pt" }), idempotencyKey: `approved-${id.data}` });
+            for (const recipient of await ownerRecipients(workspaceId)) {
+              const lang = recipient.locale === "en" || recipient.locale === "es" ? recipient.locale : "pt";
+              await notify({ kind: "account_approved", dedupeKey: `approved:${workspaceId}:${decidedKey}`, to: recipient.email, locale: recipient.locale, workspaceId, payload: { name: recipient.name, loginUrl: `${origin}/${lang}/login` } });
+            }
           });
           extra = { notified: true };
         }
@@ -77,7 +81,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       case "reject":
         if (before.approvalStatus !== "PENDING_APPROVAL") return fail("not_pending", 409);
         await prisma.workspace.update({ where: { id: id.data }, data: { approvalStatus: "REJECTED", approvalDecidedAt: new Date(), approvalDecidedBy: admin.userId, approvalNote: data.reason } });
-        extra = { reason: data.reason };
+        extra = { reason: data.reason, notified: false };
+        // E-mail «não aprovada» com o motivo que o administrador escreveu (transparente e cordial).
+        if (data.notify) {
+          const workspaceId = id.data;
+          const reason = data.reason;
+          const decidedKey = Date.now();
+          const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || null;
+          after(async () => {
+            for (const recipient of await ownerRecipients(workspaceId)) {
+              await notify({ kind: "account_rejected", dedupeKey: `rejected:${workspaceId}:${decidedKey}`, to: recipient.email, locale: recipient.locale, workspaceId, payload: { name: recipient.name, reason, supportEmail } });
+            }
+          });
+          extra = { reason: data.reason, notified: true };
+        }
         break;
       case "sync_stripe": {
         if (!before.stripeSubscriptionId) return fail("no_stripe_subscription", 409);

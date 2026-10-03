@@ -39,7 +39,7 @@ export const adminActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("suspend_subscription") }),
   // Moderação de contas novas.
   z.object({ action: z.literal("approve"), notify: z.boolean().default(false) }),
-  z.object({ action: z.literal("reject"), reason: z.string().trim().min(3).max(200) }),
+  z.object({ action: z.literal("reject"), reason: z.string().trim().min(3).max(200), notify: z.boolean().default(true) }),
   // Lê a subscrição no Stripe e atualiza a data de renovação (não altera o estado).
   z.object({ action: z.literal("sync_stripe") }),
 ]);

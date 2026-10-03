@@ -114,6 +114,8 @@ model User {
   // Administrador da PLATAFORMA (não de uma organização). Só se concede por script no servidor
   // (scripts/make-platform-admin.mjs): nenhuma rota, formulário ou convite escreve este campo.
   isPlatformAdmin Boolean   @default(false) @map("is_platform_admin")
+  // A língua do utilizador (pt | en | es), para os e-mails que lhe enviamos. Vem do registo; null = português.
+  locale          String?
 }
 
 // Chave de API de uma organização, para clientes externos chamarem o Zetrix (cabeçalho x-api-key).
@@ -640,4 +642,43 @@ model AdminAuditLog {
 
   @@index([createdAt])
   @@index([workspaceId, createdAt])
+}
+
+// ─── E-mails de notificação ───
+
+// Cada e-mail de notificação é uma linha: fica registado (para não se enviar duas vezes, para repetir se o envio
+// falhar e para o administrador ver o resultado). A chave única (tipo + chave + destinatário) é o que impede o
+// mesmo aviso de sair duas vezes, mesmo com vários workers ou eventos repetidos.
+model EmailNotification {
+  id          String    @id @default(cuid())
+  workspaceId String?
+  kind        String // pending_review | account_approved | account_rejected | ending_soon | subscription_renewed | system_notice
+  dedupeKey   String
+  toEmail     String
+  locale      String    @default("pt")
+  payload     Json // tudo o que o modelo precisa (nomes, datas, textos): o envio não depende de mais nada
+  status      String    @default("PENDING") // PENDING | SENT | FAILED
+  attempts    Int       @default(0)
+  lastError   String?
+  noticeId    String? // se pertence a um aviso do administrador
+  createdAt   DateTime  @default(now())
+  sentAt      DateTime?
+
+  @@unique([kind, dedupeKey, toEmail])
+  @@index([status, createdAt])
+  @@index([noticeId])
+}
+
+// Um aviso do sistema escrito por um administrador da plataforma (manutenção programada, novidades importantes).
+model SystemNotice {
+  id              String    @id @default(cuid())
+  kind            String // maintenance | notice
+  audience        String // all | paying
+  content         Json // { pt: {subject, body}, en: {...}, es: {...} }
+  startsAt        DateTime?
+  endsAt          DateTime?
+  createdById     String
+  createdByEmail  String
+  totalRecipients Int       @default(0)
+  createdAt       DateTime  @default(now())
 }

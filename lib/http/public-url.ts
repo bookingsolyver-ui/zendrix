@@ -8,3 +8,9 @@ export function publicOrigin(): string | null {
   if (configured?.startsWith("https://") || configured?.startsWith("http://localhost")) return configured;
   return null;
 }
+
+// A base dos links dos e-mails enviados fora de um pedido (cron, webhooks). Sem NEXT_PUBLIC_APP_URL não há como
+// saber o endereço certo: usa-se um valor de recurso claramente inválido em vez de um link a apontar para o sítio errado.
+export function appBaseUrl(): string {
+  return publicOrigin() ?? "https://app.invalid";
+}

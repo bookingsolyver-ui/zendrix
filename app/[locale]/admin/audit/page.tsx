@@ -4,7 +4,7 @@ import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { TABLE, TD, TH, dateTime } from "@/components/admin/ui";
 import { loadAudit } from "@/lib/admin/queries";
 
-const ACTION_LABEL: Record<string, string> = { view_organization: "Abriu a organização", block: "Bloqueou", unblock: "Desbloqueou", set_subscription: "Alterou a subscrição", extend_trial: "Prolongou o teste", activate_subscription: "Ativou a subscrição", suspend_subscription: "Suspendeu a subscrição", approve: "Aprovou a conta", reject: "Rejeitou a conta", sync_stripe: "Sincronizou com o Stripe", view_diagnostics: "Abriu o diagnóstico" };
+const ACTION_LABEL: Record<string, string> = { view_organization: "Abriu a organização", block: "Bloqueou", unblock: "Desbloqueou", set_subscription: "Alterou a subscrição", extend_trial: "Prolongou o teste", activate_subscription: "Ativou a subscrição", suspend_subscription: "Suspendeu a subscrição", approve: "Aprovou a conta", reject: "Rejeitou a conta", sync_stripe: "Sincronizou com o Stripe", view_diagnostics: "Abriu o diagnóstico", send_notice: "Enviou um aviso", send_notice_test: "Enviou um teste de aviso" };
 
 export default async function AdminAuditPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

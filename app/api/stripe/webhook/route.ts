@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { notifyRenewal } from "@/lib/email/billing-events";
 import { applyStripeEvent, verifyStripeSignature } from "@/lib/stripe/webhook";
 import { stripeEventSchema, type StripeEvent } from "@/lib/validations/stripe";
 
@@ -36,6 +37,11 @@ export async function POST(request: Request) {
     const outcome = await applyStripeEvent(event);
     if (outcome.result === "applied") {
       console.info(`[stripe/webhook] ${event.type}: organização ${outcome.workspaceId} → ${outcome.status}`);
+      // E-mail de renovação, depois da resposta ao Stripe: um e-mail que falha nunca faz o Stripe reenviar o evento.
+      if (outcome.renewal) {
+        const { periodEnd, plan } = outcome.renewal;
+        after(() => notifyRenewal(outcome.workspaceId, periodEnd, plan));
+      }
     } else if (outcome.result === "unknown_org") {
       console.warn(`[stripe/webhook] ${event.type} (${event.id}): nenhuma organização ligada a este cliente; ignorado`);
     }

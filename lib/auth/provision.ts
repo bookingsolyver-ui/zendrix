@@ -14,6 +14,8 @@ interface ProvisionInput {
   workspaceName?: string | null;
   // O token do link de convite, se a pessoa veio de um: entra na organização que a convidou em vez de criar uma.
   inviteToken?: string;
+  // A língua do utilizador (pt | en | es), para os e-mails que lhe enviamos.
+  locale?: string;
 }
 
 class InviteGone extends Error {}
@@ -70,9 +72,11 @@ export async function provisionUser({
   name,
   workspaceName,
   inviteToken,
+  locale,
 }: ProvisionInput) {
   const normalizedEmail = email.trim().toLowerCase();
   const cleanName = name?.trim() || null;
+  const cleanLocale = locale === "en" || locale === "es" || locale === "pt" ? locale : null;
 
   const existing = await findExisting(authId, normalizedEmail, emailVerified);
   if (existing) return existing;
@@ -89,7 +93,7 @@ export async function provisionUser({
         });
         if (claimed.count !== 1) throw new InviteGone();
         return tx.user.create({
-          data: { authId, email: normalizedEmail, name: cleanName, workspaceId: invite.workspaceId, role: invite.role },
+          data: { authId, email: normalizedEmail, name: cleanName, workspaceId: invite.workspaceId, role: invite.role, locale: cleanLocale },
         });
       });
     } catch (err) {
@@ -126,6 +130,7 @@ export async function provisionUser({
           name: cleanName,
           workspaceId: workspace.id,
           role: "OWNER", // quem cria a organização é o dono
+          locale: cleanLocale,
         },
       });
     });

@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       emailVerified: signup.emailVerified,
       name,
       workspaceName,
+      locale: typeof body?.locale === "string" ? body.locale : undefined,
     });
   } catch (err) {
     // The Supabase account exists; /api/auth/provision retries this on first login.

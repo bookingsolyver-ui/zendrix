@@ -2,7 +2,8 @@ import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { provisionUser } from "@/lib/auth/provision";
 import { emailConfigured, sendEmail } from "@/lib/email/send";
-import { emailLang, pendingReviewEmail, welcomeEmail } from "@/lib/email/templates";
+import { emailLang, welcomeEmail } from "@/lib/email/templates";
+import { notify } from "@/lib/email/notify";
 import { prisma } from "@/lib/prisma";
 import { appOrigin } from "@/lib/http/origin";
 import { safeNextPath } from "@/lib/http/safe-next";
@@ -45,27 +46,28 @@ export async function POST(request: Request) {
   const name = typeof data.user.user_metadata?.name === "string" ? data.user.user_metadata.name : null;
   if (data.user.email) {
     try {
-      await provisionUser({ authId: data.user.id, email: data.user.email, emailVerified: true, name });
+      await provisionUser({ authId: data.user.id, email: data.user.email, emailVerified: true, name, locale });
     } catch (err) {
       // A sessão é válida; /api/auth/provision repete isto no próximo início de sessão.
       console.error("[auth/confirm] provisioning failed", err);
     }
-    // Boas-vindas: uma vez, quando a conta fica ativa. Depois da resposta, para nunca atrasar nem falhar o acesso.
-    if (emailConfigured()) {
+    // E-mail depois da resposta, para nunca atrasar nem falhar o acesso. Conta por aprovar: aviso de que o registo foi
+    // recebido (e será revisto); conta ativa: boas-vindas. Ambos ficam registados e repetem-se se o envio falhar.
+    {
       const to = data.user.email;
       const userId = data.user.id;
       const dashboardUrl = `${appOrigin(request)}/${locale ?? "pt"}/dashboard`;
-      // Conta por aprovar: em vez das boas-vindas (a conta ainda não está ativa), um aviso de que foi recebida.
-      const pending = await prisma.user
-        .findUnique({ where: { authId: userId }, select: { workspace: { select: { approvalStatus: true } } } })
-        .then((row) => row?.workspace.approvalStatus === "PENDING_APPROVAL")
-        .catch(() => false);
+      const row = await prisma.user
+        .findUnique({ where: { authId: userId }, select: { locale: true, workspaceId: true, workspace: { select: { approvalStatus: true } } } })
+        .catch(() => null);
+      const pending = row?.workspace.approvalStatus === "PENDING_APPROVAL";
+      const lang = emailLang(row?.locale ?? locale);
       after(async () => {
-        await sendEmail({
-          to,
-          ...(pending ? pendingReviewEmail({ name, lang: emailLang(locale) }) : welcomeEmail({ name, dashboardUrl, lang: emailLang(locale) })),
-          idempotencyKey: `${pending ? "pending" : "welcome"}-${userId}`,
-        });
+        if (pending) {
+          await notify({ kind: "pending_review", dedupeKey: `pending:${userId}`, to, locale: lang, workspaceId: row?.workspaceId, payload: { name } });
+        } else if (emailConfigured()) {
+          await sendEmail({ to, ...welcomeEmail({ name, dashboardUrl, lang }), idempotencyKey: `welcome-${userId}` });
+        }
       });
     }
   }

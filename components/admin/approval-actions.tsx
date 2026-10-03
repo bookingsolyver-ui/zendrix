@@ -35,7 +35,7 @@ export function ApprovalActions({ id, name, hasEmail }: { id: string; name: stri
   const onReject = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const reason = String(new FormData(event.currentTarget).get("reason") ?? "");
-    if (window.confirm(`Rejeitar o registo de «${name}»?`)) void run("reject", { action: "reject", reason });
+    if (window.confirm(`Rejeitar o registo de «${name}»${notify ? " e avisar por e-mail" : ""}?`)) void run("reject", { action: "reject", reason, notify });
   };
 
   return (

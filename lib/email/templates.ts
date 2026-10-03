@@ -1,7 +1,9 @@
-// Modelos de e-mail. Puro (sem servidor): só constroem texto, por isso são testáveis. Tudo o que vem de
-// fora (nomes, URLs) é escapado. Línguas: pt e en (o espanhol usa en, como as páginas legais).
-import { legalLang, legalEntityFromEnv, type LegalLang } from "../legal/content.ts";
-import { ROLE_LABEL, type Role } from "../roles.ts";
+// Modelos de e-mail da Zetrix. Puro (sem servidor): só constroem assunto, texto e HTML, por isso são testáveis.
+// Todos existem em português (PT-PT), inglês e espanhol. Tudo o que vem de fora (nomes, motivos, URLs, textos do
+// administrador) é escapado. O HTML usa só estilos inline e uma coluna de largura fixa, que funciona em
+// computador, telemóvel e nos clientes de e-mail mais antigos.
+import { legalEntityFromEnv } from "../legal/content.ts";
+import type { Role } from "../roles.ts";
 
 export interface EmailContent {
   subject: string;
@@ -9,144 +11,232 @@ export interface EmailContent {
   html: string;
 }
 
-const esc = (value: string) =>
-  value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+export type EmailLang = "pt" | "en" | "es";
+export const EMAIL_LANGS: readonly EmailLang[] = ["pt", "en", "es"];
 
-export const emailLang = (locale: string | undefined): LegalLang => legalLang(locale ?? "pt");
+// A língua de um destinatário: a que guardámos (ou a do pedido). Qualquer outra coisa cai no português.
+export const emailLang = (locale: string | null | undefined): EmailLang => (locale === "en" || locale === "es" ? locale : "pt");
 
-// A moldura comum: cartão simples, botão, rodapé com a entidade. Só estilos inline (os clientes de e-mail
-// ignoram folhas de estilo) e uma largura que funciona no telemóvel.
-function layout(input: { preheader: string; heading: string; paragraphs: string[]; cta?: { label: string; url: string }; footnote?: string; lang: LegalLang }): string {
+const esc = (value: string) => value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const unesc = (value: string) => value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+// Texto simples a partir de um bloco de HTML já seguro (para a parte «text» do e-mail).
+const toText = (html: string) => unesc(html.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, ""));
+const b = (value: string) => `<strong>${esc(value)}</strong>`;
+
+const LOCALES: Record<EmailLang, string> = { pt: "pt-PT", en: "en-GB", es: "es-ES" };
+export function formatDate(date: Date, lang: EmailLang, withTime = false): string {
+  return new Intl.DateTimeFormat(LOCALES[lang], { day: "numeric", month: "long", year: "numeric", ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}), timeZone: "Europe/Lisbon" }).format(date);
+}
+
+const PHRASES: Record<EmailLang, { copyLink: string; notification: string; hello: (name: string | null | undefined) => string }> = {
+  pt: { copyLink: "Se o botão não funcionar, copie este endereço para o browser:", notification: "Recebeu este e-mail porque tem uma conta na Zetrix.", hello: (n) => (n?.trim() ? `Olá, ${n.trim()}!` : "Olá!") },
+  en: { copyLink: "If the button doesn't work, copy this address into your browser:", notification: "You received this email because you have a Zetrix account.", hello: (n) => (n?.trim() ? `Hi ${n.trim()}!` : "Hi!") },
+  es: { copyLink: "Si el botón no funciona, copia esta dirección en tu navegador:", notification: "Recibes este correo porque tienes una cuenta en Zetrix.", hello: (n) => (n?.trim() ? `¡Hola, ${n.trim()}!` : "¡Hola!") },
+};
+
+const ROLE_NAMES: Record<EmailLang, Record<Role, string>> = {
+  pt: { OWNER: "Proprietário", MANAGER: "Gestor", STAFF: "Agente" },
+  en: { OWNER: "Owner", MANAGER: "Manager", STAFF: "Agent" },
+  es: { OWNER: "Propietario", MANAGER: "Gestor", STAFF: "Agente" },
+};
+
+// O que cada modelo declara; o resto (moldura, texto simples) é comum.
+interface Spec {
+  subject: string;
+  preheader: string;
+  heading: string;
+  paragraphs: string[]; // HTML seguro
+  cta?: { label: string; url: string };
+  footnote?: string; // HTML seguro
+  notification?: boolean; // acrescenta «recebeu este e-mail porque tem uma conta»
+}
+
+// A moldura comum: cartão, botão, rodapé com a entidade.
+function frame(lang: EmailLang, spec: Spec): string {
   const entity = legalEntityFromEnv();
-  const paragraphs = input.paragraphs
-    .map((p) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#374151">${p}</p>`)
-    .join("");
-  const button = input.cta
-    ? `<p style="margin:24px 0"><a href="${esc(input.cta.url)}" style="display:inline-block;background:#10b981;color:#06281d;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:999px">${esc(input.cta.label)}</a></p>` +
-      `<p style="margin:0 0 16px;font-size:12px;line-height:1.5;color:#6b7280">${input.lang === "pt" ? "Se o botão não funcionar, copie este endereço para o browser:" : "If the button doesn't work, copy this address into your browser:"}<br><span style="word-break:break-all">${esc(input.cta.url)}</span></p>`
+  const phrases = PHRASES[lang];
+  const paragraphs = spec.paragraphs.map((p) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#374151">${p}</p>`).join("");
+  const button = spec.cta
+    ? `<p style="margin:24px 0"><a href="${esc(spec.cta.url)}" style="display:inline-block;background:#10b981;color:#06281d;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:999px">${esc(spec.cta.label)}</a></p>` +
+      `<p style="margin:0 0 16px;font-size:12px;line-height:1.5;color:#6b7280">${phrases.copyLink}<br><span style="word-break:break-all">${esc(spec.cta.url)}</span></p>`
     : "";
-  const footnote = input.footnote ? `<p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#6b7280">${input.footnote}</p>` : "";
+  const foot = [spec.footnote, spec.notification ? esc(phrases.notification) : null].filter(Boolean).map((p) => `<p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#6b7280">${p}</p>`).join("");
   const sender = [entity.name, entity.address].filter(Boolean).map((v) => esc(v as string)).join(" · ");
   return (
-    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(input.heading)}</title></head>` +
-    `<body style="margin:0;padding:0;background:#f3f4f6"><span style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(input.preheader)}</span>` +
+    `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(spec.heading)}</title></head>` +
+    `<body style="margin:0;padding:0;background:#f3f4f6"><span style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(spec.preheader)}</span>` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6"><tr><td align="center" style="padding:32px 16px">` +
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:32px">` +
     `<tr><td style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">` +
     `<p style="margin:0 0 24px;font-size:18px;font-weight:700;color:#111827">Zetrix</p>` +
-    `<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#111827">${esc(input.heading)}</h1>` +
-    `${paragraphs}${button}${footnote}</td></tr></table>` +
+    `<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#111827">${esc(spec.heading)}</h1>` +
+    `${paragraphs}${button}${foot}</td></tr></table>` +
     `<p style="max-width:520px;margin:16px auto 0;font-family:-apple-system,Arial,sans-serif;font-size:12px;color:#9ca3af">${sender}</p>` +
     `</td></tr></table></body></html>`
   );
 }
 
-const greeting = (name: string | null | undefined, lang: LegalLang) =>
-  name?.trim() ? (lang === "pt" ? `Olá, ${name.trim()}!` : `Hi ${name.trim()}!`) : lang === "pt" ? "Olá!" : "Hi!";
+function render(lang: EmailLang, spec: Spec): EmailContent {
+  const phrases = PHRASES[lang];
+  const parts = [spec.heading, ...spec.paragraphs.map(toText), spec.cta ? `${spec.cta.label}: ${spec.cta.url}` : null, spec.footnote ? toText(spec.footnote) : null, spec.notification ? phrases.notification : null];
+  return { subject: spec.subject, text: parts.filter(Boolean).join("\n\n"), html: frame(lang, spec) };
+}
+
+// Escolhe o texto da língua do destinatário.
+const pick = <T>(lang: EmailLang, copy: Record<EmailLang, T>): T => copy[lang];
 
 // ------------------------------------------------------------------------------------------ confirmar o registo
-export function confirmSignupEmail(input: { name?: string | null; url: string; lang: LegalLang }): EmailContent {
+export function confirmSignupEmail(input: { name?: string | null; url: string; lang: EmailLang }): EmailContent {
   const { lang, url } = input;
-  const hello = greeting(input.name, lang);
-  if (lang === "pt") {
-    return {
-      subject: "Confirme o seu e-mail para ativar a conta Zetrix",
-      text: `${hello}\n\nPara ativar a sua conta Zetrix, confirme o seu e-mail:\n${url}\n\nSe não criou uma conta, ignore esta mensagem.`,
-      html: layout({ lang, preheader: "Confirme o seu e-mail para ativar a conta.", heading: "Confirme o seu e-mail", paragraphs: [esc(hello), "Falta só um passo para ativar a sua conta Zetrix."], cta: { label: "Confirmar e-mail", url }, footnote: "Se não criou uma conta, ignore esta mensagem." }),
-    };
-  }
-  return {
-    subject: "Confirm your email to activate your Zetrix account",
-    text: `${hello}\n\nTo activate your Zetrix account, confirm your email:\n${url}\n\nIf you didn't create an account, ignore this message.`,
-    html: layout({ lang, preheader: "Confirm your email to activate your account.", heading: "Confirm your email", paragraphs: [esc(hello), "One last step to activate your Zetrix account."], cta: { label: "Confirm email", url }, footnote: "If you didn't create an account, ignore this message." }),
-  };
+  const hello = esc(PHRASES[lang].hello(input.name));
+  return render(lang, pick(lang, {
+    pt: { subject: "Confirme o seu e-mail para ativar a conta Zetrix", preheader: "Confirme o seu e-mail para ativar a conta.", heading: "Confirme o seu e-mail", paragraphs: [hello, "Falta só um passo para ativar a sua conta Zetrix."], cta: { label: "Confirmar e-mail", url }, footnote: "Se não criou uma conta, ignore esta mensagem." },
+    en: { subject: "Confirm your email to activate your Zetrix account", preheader: "Confirm your email to activate your account.", heading: "Confirm your email", paragraphs: [hello, "One last step to activate your Zetrix account."], cta: { label: "Confirm email", url }, footnote: "If you didn't create an account, ignore this message." },
+    es: { subject: "Confirma tu correo para activar tu cuenta de Zetrix", preheader: "Confirma tu correo para activar la cuenta.", heading: "Confirma tu correo", paragraphs: [hello, "Solo falta un paso para activar tu cuenta de Zetrix."], cta: { label: "Confirmar correo", url }, footnote: "Si no creaste una cuenta, ignora este mensaje." },
+  }));
 }
 
 // --------------------------------------------------------------------------------------------- boas-vindas
-export function welcomeEmail(input: { name?: string | null; dashboardUrl: string; lang: LegalLang }): EmailContent {
+export function welcomeEmail(input: { name?: string | null; dashboardUrl: string; lang: EmailLang }): EmailContent {
   const { lang, dashboardUrl } = input;
-  const hello = greeting(input.name, lang);
-  if (lang === "pt") {
-    return {
-      subject: "Bem-vindo à Zetrix",
-      text: `${hello}\n\nA sua conta está ativa, com 14 dias grátis. Para começar:\n1. Ligue um canal (WhatsApp, Instagram ou Messenger)\n2. Preencha a ficha do negócio\n3. Ligue a IA\n\nAbra o painel: ${dashboardUrl}`,
-      html: layout({ lang, preheader: "A sua conta está ativa. Três passos para começar.", heading: "Bem-vindo à Zetrix", paragraphs: [esc(hello), "A sua conta está ativa, com <strong>14 dias grátis</strong>. Para começar a atender os seus clientes:", "<strong>1.</strong> Ligue um canal (WhatsApp, Instagram ou Messenger)<br><strong>2.</strong> Preencha a ficha do negócio<br><strong>3.</strong> Ligue a IA"], cta: { label: "Abrir o painel", url: dashboardUrl } }),
-    };
-  }
-  return {
-    subject: "Welcome to Zetrix",
-    text: `${hello}\n\nYour account is active, with a 14-day free trial. To get started:\n1. Connect a channel (WhatsApp, Instagram or Messenger)\n2. Fill in your business profile\n3. Turn on the AI\n\nOpen the dashboard: ${dashboardUrl}`,
-    html: layout({ lang, preheader: "Your account is active. Three steps to get started.", heading: "Welcome to Zetrix", paragraphs: [esc(hello), "Your account is active, with a <strong>14-day free trial</strong>. To start serving your customers:", "<strong>1.</strong> Connect a channel (WhatsApp, Instagram or Messenger)<br><strong>2.</strong> Fill in your business profile<br><strong>3.</strong> Turn on the AI"], cta: { label: "Open the dashboard", url: dashboardUrl } }),
-  };
+  const hello = esc(PHRASES[lang].hello(input.name));
+  return render(lang, pick(lang, {
+    pt: { subject: "Bem-vindo à Zetrix", preheader: "A sua conta está ativa. Três passos para começar.", heading: "Bem-vindo à Zetrix", paragraphs: [hello, `A sua conta está ativa, com ${b("14 dias grátis")}. Para começar a atender os seus clientes:`, `${b("1.")} Ligue um canal (WhatsApp, Instagram ou Messenger)<br>${b("2.")} Preencha a ficha do negócio<br>${b("3.")} Ligue a IA`], cta: { label: "Abrir o painel", url: dashboardUrl } },
+    en: { subject: "Welcome to Zetrix", preheader: "Your account is active. Three steps to get started.", heading: "Welcome to Zetrix", paragraphs: [hello, `Your account is active, with a ${b("14-day free trial")}. To start serving your customers:`, `${b("1.")} Connect a channel (WhatsApp, Instagram or Messenger)<br>${b("2.")} Fill in your business profile<br>${b("3.")} Turn on the AI`], cta: { label: "Open the dashboard", url: dashboardUrl } },
+    es: { subject: "Te damos la bienvenida a Zetrix", preheader: "Tu cuenta está activa. Tres pasos para empezar.", heading: "Te damos la bienvenida a Zetrix", paragraphs: [hello, `Tu cuenta está activa, con ${b("14 días gratis")}. Para empezar a atender a tus clientes:`, `${b("1.")} Conecta un canal (WhatsApp, Instagram o Messenger)<br>${b("2.")} Completa la ficha del negocio<br>${b("3.")} Activa la IA`], cta: { label: "Abrir el panel", url: dashboardUrl } },
+  }));
 }
 
 // ------------------------------------------------------------------------------- recuperar a palavra-passe
-export function passwordResetEmail(input: { url: string; lang: LegalLang }): EmailContent {
+export function passwordResetEmail(input: { url: string; lang: EmailLang }): EmailContent {
   const { lang, url } = input;
-  if (lang === "pt") {
-    return {
-      subject: "Redefinir a palavra-passe da Zetrix",
-      text: `Recebemos um pedido para redefinir a palavra-passe da sua conta Zetrix. Escolha uma nova aqui:\n${url}\n\nO link é de uso único e expira em breve. Se não foi você, ignore esta mensagem: a sua palavra-passe não muda.`,
-      html: layout({ lang, preheader: "Escolha uma nova palavra-passe.", heading: "Redefinir a palavra-passe", paragraphs: ["Recebemos um pedido para redefinir a palavra-passe da sua conta Zetrix."], cta: { label: "Escolher nova palavra-passe", url }, footnote: "O link é de uso único e expira em breve. Se não foi você, ignore esta mensagem: a sua palavra-passe não muda." }),
-    };
-  }
-  return {
-    subject: "Reset your Zetrix password",
-    text: `We received a request to reset your Zetrix password. Choose a new one here:\n${url}\n\nThe link is single-use and expires soon. If it wasn't you, ignore this message: your password won't change.`,
-    html: layout({ lang, preheader: "Choose a new password.", heading: "Reset your password", paragraphs: ["We received a request to reset the password of your Zetrix account."], cta: { label: "Choose a new password", url }, footnote: "The link is single-use and expires soon. If it wasn't you, ignore this message: your password won't change." }),
-  };
+  return render(lang, pick(lang, {
+    pt: { subject: "Redefinir a palavra-passe da Zetrix", preheader: "Escolha uma nova palavra-passe.", heading: "Redefinir a palavra-passe", paragraphs: ["Recebemos um pedido para redefinir a palavra-passe da sua conta Zetrix."], cta: { label: "Escolher nova palavra-passe", url }, footnote: "O link é de uso único e expira em breve. Se não foi você, ignore esta mensagem: a sua palavra-passe não muda." },
+    en: { subject: "Reset your Zetrix password", preheader: "Choose a new password.", heading: "Reset your password", paragraphs: ["We received a request to reset the password of your Zetrix account."], cta: { label: "Choose a new password", url }, footnote: "The link is single-use and expires soon. If it wasn't you, ignore this message: your password won't change." },
+    es: { subject: "Restablece tu contraseña de Zetrix", preheader: "Elige una contraseña nueva.", heading: "Restablecer la contraseña", paragraphs: ["Recibimos una solicitud para restablecer la contraseña de tu cuenta de Zetrix."], cta: { label: "Elegir una contraseña nueva", url }, footnote: "El enlace es de un solo uso y caduca pronto. Si no fuiste tú, ignora este mensaje: tu contraseña no cambia." },
+  }));
 }
 
-// ---------------------------------------------------------------------------------------------- convite
-export function inviteEmail(input: { workspaceName: string; inviterName: string; role: Role; url: string; lang?: LegalLang }): EmailContent {
+// ---------------------------------------------------------------------------------------------------- convite
+export function inviteEmail(input: { workspaceName: string; inviterName: string; role: Role; url: string; lang?: EmailLang }): EmailContent {
   const lang = input.lang ?? "pt";
-  const role = ROLE_LABEL[input.role];
-  if (lang === "pt") {
-    return {
-      subject: `${input.inviterName} convidou-o para a equipa ${input.workspaceName} na Zetrix`,
-      text: `Olá!\n\n${input.inviterName} convidou-o para a equipa "${input.workspaceName}" na Zetrix, com o papel de ${role}.\n\nPara aceitar e criar a sua conta, abra este link (válido por 7 dias):\n${input.url}\n\nSe não estava à espera deste convite, ignore esta mensagem.`,
-      html: layout({ lang, preheader: `${input.inviterName} convidou-o para a equipa ${input.workspaceName}.`, heading: "Foi convidado para uma equipa", paragraphs: [`<strong>${esc(input.inviterName)}</strong> convidou-o para a equipa <strong>${esc(input.workspaceName)}</strong> na Zetrix, com o papel de <strong>${esc(role)}</strong>.`], cta: { label: "Aceitar o convite", url: input.url }, footnote: "O link é válido por 7 dias. Se não estava à espera deste convite, ignore esta mensagem." }),
-    };
-  }
-  return {
-    subject: `${input.inviterName} invited you to the ${input.workspaceName} team on Zetrix`,
-    text: `Hi!\n\n${input.inviterName} invited you to the "${input.workspaceName}" team on Zetrix, as ${role}.\n\nTo accept and create your account, open this link (valid for 7 days):\n${input.url}\n\nIf you weren't expecting this invitation, ignore this message.`,
-    html: layout({ lang, preheader: `${input.inviterName} invited you to the ${input.workspaceName} team.`, heading: "You've been invited to a team", paragraphs: [`<strong>${esc(input.inviterName)}</strong> invited you to the <strong>${esc(input.workspaceName)}</strong> team on Zetrix, as <strong>${esc(role)}</strong>.`], cta: { label: "Accept the invitation", url: input.url }, footnote: "The link is valid for 7 days. If you weren't expecting this invitation, ignore this message." }),
-  };
+  const role = ROLE_NAMES[lang][input.role];
+  const org = input.workspaceName;
+  const who = input.inviterName;
+  return render(lang, pick(lang, {
+    pt: { subject: `${who} convidou-o para a equipa ${org} na Zetrix`, preheader: `${who} convidou-o para a equipa ${org}.`, heading: "Foi convidado para uma equipa", paragraphs: [`${b(who)} convidou-o para a equipa ${b(org)} na Zetrix, com o papel de ${b(role)}.`], cta: { label: "Aceitar o convite", url: input.url }, footnote: "O link é válido por 7 dias. Se não estava à espera deste convite, ignore esta mensagem." },
+    en: { subject: `${who} invited you to the ${org} team on Zetrix`, preheader: `${who} invited you to the ${org} team.`, heading: "You've been invited to a team", paragraphs: [`${b(who)} invited you to the ${b(org)} team on Zetrix, as ${b(role)}.`], cta: { label: "Accept the invitation", url: input.url }, footnote: "The link is valid for 7 days. If you weren't expecting this invitation, ignore this message." },
+    es: { subject: `${who} te invitó al equipo ${org} en Zetrix`, preheader: `${who} te invitó al equipo ${org}.`, heading: "Te invitaron a un equipo", paragraphs: [`${b(who)} te invitó al equipo ${b(org)} en Zetrix, con el rol de ${b(role)}.`], cta: { label: "Aceptar la invitación", url: input.url }, footnote: "El enlace es válido durante 7 días. Si no esperabas esta invitación, ignora este mensaje." },
+  }));
 }
 
 // -------------------------------------------------------------------------------- conta recebida (por aprovar)
-export function pendingReviewEmail(input: { name?: string | null; lang: LegalLang }): EmailContent {
+export function pendingReviewEmail(input: { name?: string | null; lang: EmailLang }): EmailContent {
   const { lang } = input;
-  const hello = greeting(input.name, lang);
-  if (lang === "pt") {
-    return {
-      subject: "Recebemos o seu registo na Zetrix",
-      text: `${hello}\n\nRecebemos o seu registo. Antes de ativar a conta, a nossa equipa vai revê-lo. Receberá um e-mail assim que for aprovado.`,
-      html: layout({ lang, preheader: "O seu registo está a ser revisto.", heading: "Recebemos o seu registo", paragraphs: [esc(hello), "Antes de ativar a conta, a nossa equipa vai revê-lo. Receberá um e-mail assim que for <strong>aprovado</strong>."] }),
-    };
-  }
-  return {
-    subject: "We received your Zetrix sign-up",
-    text: `${hello}\n\nWe received your sign-up. Our team will review it before activating the account. You will get an email as soon as it is approved.`,
-    html: layout({ lang, preheader: "Your sign-up is being reviewed.", heading: "We received your sign-up", paragraphs: [esc(hello), "Our team will review it before activating the account. You will get an email as soon as it is <strong>approved</strong>."] }),
-  };
+  const hello = esc(PHRASES[lang].hello(input.name));
+  return render(lang, pick(lang, {
+    pt: { subject: "Recebemos o seu registo na Zetrix", preheader: "O seu registo está a ser revisto pela nossa equipa.", heading: "Recebemos o seu registo", paragraphs: [hello, `Obrigado por se registar na Zetrix. A nossa equipa está a ${b("rever a sua conta")} antes de a ativar.`, `Não precisa de fazer nada. Receberá um novo e-mail assim que a conta for ${b("aprovada")}, e o seu teste gratuito de 14 dias começa nessa altura.`], footnote: "Se não foi você que criou esta conta, ignore esta mensagem." },
+    en: { subject: "We received your Zetrix sign-up", preheader: "Our team is reviewing your sign-up.", heading: "We received your sign-up", paragraphs: [hello, `Thank you for signing up for Zetrix. Our team is ${b("reviewing your account")} before activating it.`, `You don't need to do anything. You will get another email as soon as the account is ${b("approved")}, and your 14-day free trial starts then.`], footnote: "If you didn't create this account, ignore this message." },
+    es: { subject: "Recibimos tu registro en Zetrix", preheader: "Nuestro equipo está revisando tu registro.", heading: "Recibimos tu registro", paragraphs: [hello, `Gracias por registrarte en Zetrix. Nuestro equipo está ${b("revisando tu cuenta")} antes de activarla.`, `No necesitas hacer nada. Recibirás otro correo en cuanto la cuenta sea ${b("aprobada")}, y tu prueba gratuita de 14 días empezará en ese momento.`], footnote: "Si no creaste esta cuenta, ignora este mensaje." },
+  }));
 }
 
 // ------------------------------------------------------------------------------------------ conta aprovada
-export function accountApprovedEmail(input: { name?: string | null; dashboardUrl: string; lang: LegalLang }): EmailContent {
-  const { lang, dashboardUrl } = input;
-  const hello = greeting(input.name, lang);
-  if (lang === "pt") {
-    return {
-      subject: "A sua conta Zetrix foi aprovada",
-      text: `${hello}\n\nA sua conta foi aprovada e já está ativa, com 14 dias grátis a contar de hoje. Abra o painel: ${dashboardUrl}`,
-      html: layout({ lang, preheader: "A sua conta está ativa.", heading: "A sua conta foi aprovada", paragraphs: [esc(hello), "A sua conta já está ativa, com <strong>14 dias grátis</strong> a contar de hoje."], cta: { label: "Abrir o painel", url: dashboardUrl } }),
-    };
+export function accountApprovedEmail(input: { name?: string | null; loginUrl: string; lang: EmailLang }): EmailContent {
+  const { lang, loginUrl } = input;
+  const hello = esc(PHRASES[lang].hello(input.name));
+  return render(lang, pick(lang, {
+    pt: { subject: "A sua conta Zetrix foi aprovada", preheader: "A sua conta está ativa e o teste de 14 dias já começou.", heading: "A sua conta foi aprovada", paragraphs: [hello, `Boas notícias: a sua conta Zetrix está ${b("ativa")}. O seu ${b("teste gratuito de 14 dias começou hoje")}, sem cartão.`, `Entre, ligue o seu WhatsApp e crie a sua primeira campanha ou automação.`], cta: { label: "Entrar na Zetrix", url: loginUrl }, notification: true },
+    en: { subject: "Your Zetrix account was approved", preheader: "Your account is active and your 14-day trial has started.", heading: "Your account was approved", paragraphs: [hello, `Good news: your Zetrix account is ${b("active")}. Your ${b("14-day free trial started today")}, no card needed.`, `Sign in, connect your WhatsApp and create your first campaign or automation.`], cta: { label: "Sign in to Zetrix", url: loginUrl }, notification: true },
+    es: { subject: "Tu cuenta de Zetrix fue aprobada", preheader: "Tu cuenta está activa y tu prueba de 14 días ya empezó.", heading: "Tu cuenta fue aprobada", paragraphs: [hello, `Buenas noticias: tu cuenta de Zetrix está ${b("activa")}. Tu ${b("prueba gratuita de 14 días empezó hoy")}, sin tarjeta.`, `Entra, conecta tu WhatsApp y crea tu primera campaña o automatización.`], cta: { label: "Entrar en Zetrix", url: loginUrl }, notification: true },
+  }));
+}
+
+// ------------------------------------------------------------------------------------- conta não aprovada
+export function accountRejectedEmail(input: { name?: string | null; reason: string; supportEmail?: string | null; lang: EmailLang }): EmailContent {
+  const { lang } = input;
+  const hello = esc(PHRASES[lang].hello(input.name));
+  const reason = esc(input.reason).replace(/\n/g, "<br>");
+  const support = input.supportEmail?.trim();
+  return render(lang, pick(lang, {
+    pt: { subject: "Sobre o seu registo na Zetrix", preheader: "Não foi possível aprovar o seu registo.", heading: "Não foi possível aprovar o seu registo", paragraphs: [hello, "Obrigado pelo interesse na Zetrix. Depois de analisar o seu registo, não o conseguimos aprovar neste momento.", `${b("Motivo indicado pela nossa equipa:")}<br>${reason}`, support ? `Se acha que se trata de um engano, ou se pode esclarecer a situação, responda a este e-mail ou escreva-nos para ${b(support)}. Teremos todo o gosto em rever a sua conta.` : "Se acha que se trata de um engano, responda a este e-mail e teremos todo o gosto em rever a sua conta."], notification: true },
+    en: { subject: "About your Zetrix sign-up", preheader: "We couldn't approve your sign-up.", heading: "We couldn't approve your sign-up", paragraphs: [hello, "Thank you for your interest in Zetrix. After reviewing your sign-up, we are unable to approve it at this time.", `${b("Reason given by our team:")}<br>${reason}`, support ? `If you think this is a mistake, or you can clarify the situation, reply to this email or write to ${b(support)}. We will gladly review your account.` : "If you think this is a mistake, reply to this email and we will gladly review your account."], notification: true },
+    es: { subject: "Sobre tu registro en Zetrix", preheader: "No pudimos aprobar tu registro.", heading: "No pudimos aprobar tu registro", paragraphs: [hello, "Gracias por tu interés en Zetrix. Tras revisar tu registro, no hemos podido aprobarlo en este momento.", `${b("Motivo indicado por nuestro equipo:")}<br>${reason}`, support ? `Si crees que se trata de un error, o puedes aclarar la situación, responde a este correo o escríbenos a ${b(support)}. Con gusto revisaremos tu cuenta.` : "Si crees que se trata de un error, responde a este correo y con gusto revisaremos tu cuenta."], notification: true },
+  }));
+}
+
+// -------------------------------------------------------------------- aviso: o teste / a subscrição termina em breve
+export type EndingKind = "trial" | "subscription";
+export function endingSoonEmail(input: { name?: string | null; orgName: string; kind: EndingKind; daysLeft: number; endsAt: Date; billingUrl: string; lang: EmailLang }): EmailContent {
+  const { lang, kind, daysLeft } = input;
+  const hello = esc(PHRASES[lang].hello(input.name));
+  const date = formatDate(input.endsAt, lang);
+  const org = input.orgName;
+  const days = Math.max(1, daysLeft);
+  const copy = {
+    pt: { d: days === 1 ? "1 dia" : `${days} dias` },
+    en: { d: days === 1 ? "1 day" : `${days} days` },
+    es: { d: days === 1 ? "1 día" : `${days} días` },
+  }[lang];
+  if (kind === "trial") {
+    return render(lang, pick(lang, {
+      pt: { subject: `O teste grátis de ${org} termina em ${copy.d}`, preheader: `O seu teste termina a ${date}.`, heading: `O seu teste termina em ${copy.d}`, paragraphs: [hello, `O teste gratuito de ${b(org)} na Zetrix termina a ${b(date)}.`, "Para continuar a usar a Inbox, as campanhas, as automações e a IA sem interrupções, ative o seu plano antes dessa data. Depois do fim do teste, o acesso fica bloqueado até subscrever (os seus dados ficam guardados)."], cta: { label: "Ativar o plano", url: input.billingUrl }, notification: true },
+      en: { subject: `The free trial of ${org} ends in ${copy.d}`, preheader: `Your trial ends on ${date}.`, heading: `Your trial ends in ${copy.d}`, paragraphs: [hello, `The free trial of ${b(org)} on Zetrix ends on ${b(date)}.`, "To keep using the Inbox, campaigns, automations and the AI without interruption, activate your plan before then. After the trial ends, access is blocked until you subscribe (your data is kept)."], cta: { label: "Activate the plan", url: input.billingUrl }, notification: true },
+      es: { subject: `La prueba gratuita de ${org} termina en ${copy.d}`, preheader: `Tu prueba termina el ${date}.`, heading: `Tu prueba termina en ${copy.d}`, paragraphs: [hello, `La prueba gratuita de ${b(org)} en Zetrix termina el ${b(date)}.`, "Para seguir usando la Inbox, las campañas, las automatizaciones y la IA sin interrupciones, activa tu plan antes de esa fecha. Cuando termine la prueba, el acceso se bloquea hasta que te suscribas (tus datos se conservan)."], cta: { label: "Activar el plan", url: input.billingUrl }, notification: true },
+    }));
   }
-  return {
-    subject: "Your Zetrix account was approved",
-    text: `${hello}\n\nYour account was approved and is now active, with a 14-day free trial starting today. Open the dashboard: ${dashboardUrl}`,
-    html: layout({ lang, preheader: "Your account is active.", heading: "Your account was approved", paragraphs: [esc(hello), "Your account is now active, with a <strong>14-day free trial</strong> starting today."], cta: { label: "Open the dashboard", url: dashboardUrl } }),
-  };
+  return render(lang, pick(lang, {
+    pt: { subject: `A subscrição de ${org} termina em ${copy.d}`, preheader: `O acesso termina a ${date}.`, heading: `A sua subscrição termina em ${copy.d}`, paragraphs: [hello, `A subscrição de ${b(org)} na Zetrix está cancelada e o acesso termina a ${b(date)}.`, "Se quiser continuar, pode reativá-la antes dessa data na página de faturação, sem perder nada."], cta: { label: "Gerir a subscrição", url: input.billingUrl }, notification: true },
+    en: { subject: `The subscription of ${org} ends in ${copy.d}`, preheader: `Access ends on ${date}.`, heading: `Your subscription ends in ${copy.d}`, paragraphs: [hello, `The subscription of ${b(org)} on Zetrix is cancelled and access ends on ${b(date)}.`, "If you want to continue, you can reactivate it before then on the billing page, without losing anything."], cta: { label: "Manage the subscription", url: input.billingUrl }, notification: true },
+    es: { subject: `La suscripción de ${org} termina en ${copy.d}`, preheader: `El acceso termina el ${date}.`, heading: `Tu suscripción termina en ${copy.d}`, paragraphs: [hello, `La suscripción de ${b(org)} en Zetrix está cancelada y el acceso termina el ${b(date)}.`, "Si quieres continuar, puedes reactivarla antes de esa fecha en la página de facturación, sin perder nada."], cta: { label: "Gestionar la suscripción", url: input.billingUrl }, notification: true },
+  }));
+}
+
+// ------------------------------------------------------------------------------------ subscrição renovada
+export function subscriptionRenewedEmail(input: { name?: string | null; orgName: string; plan: string | null; renewedUntil: Date; priceLabel?: string | null; billingUrl: string; lang: EmailLang }): EmailContent {
+  const { lang } = input;
+  const hello = esc(PHRASES[lang].hello(input.name));
+  const until = formatDate(input.renewedUntil, lang);
+  const plan = input.plan?.trim() || "Zetrix";
+  const price = input.priceLabel?.trim();
+  const details = {
+    pt: [["Organização", input.orgName], ["Plano", plan], ...(price ? [["Valor", price]] : []), ["Próxima renovação", until]],
+    en: [["Organisation", input.orgName], ["Plan", plan], ...(price ? [["Amount", price]] : []), ["Next renewal", until]],
+    es: [["Organización", input.orgName], ["Plan", plan], ...(price ? [["Importe", price]] : []), ["Próxima renovación", until]],
+  }[lang].map(([label, value]) => `${esc(label)}: ${b(value)}`).join("<br>");
+  return render(lang, pick(lang, {
+    pt: { subject: "Subscrição Zetrix renovada com sucesso", preheader: `Renovada até ${until}.`, heading: "A sua subscrição foi renovada", paragraphs: [hello, "Recebemos o pagamento e a sua subscrição foi renovada. Obrigado pela confiança!", details], cta: { label: "Ver faturação", url: input.billingUrl }, footnote: "As faturas ficam disponíveis no portal de faturação.", notification: true },
+    en: { subject: "Zetrix subscription renewed successfully", preheader: `Renewed until ${until}.`, heading: "Your subscription was renewed", paragraphs: [hello, "We received the payment and your subscription has been renewed. Thank you for your trust!", details], cta: { label: "View billing", url: input.billingUrl }, footnote: "Invoices are available in the billing portal.", notification: true },
+    es: { subject: "Suscripción de Zetrix renovada con éxito", preheader: `Renovada hasta el ${until}.`, heading: "Tu suscripción fue renovada", paragraphs: [hello, "Recibimos el pago y tu suscripción fue renovada. ¡Gracias por tu confianza!", details], cta: { label: "Ver facturación", url: input.billingUrl }, footnote: "Las facturas están disponibles en el portal de facturación.", notification: true },
+  }));
+}
+
+// ------------------------------------------------------------------- manutenção programada e avisos do sistema
+export type NoticeKind = "maintenance" | "notice";
+export interface NoticeText {
+  subject: string;
+  body: string;
+}
+// O administrador escreve o texto (uma versão por língua); aqui só se escapa e se dá a moldura. A janela de uma
+// manutenção, se existir, aparece formatada na língua de quem lê.
+export function systemNoticeEmail(input: { name?: string | null; kind: NoticeKind; text: NoticeText; startsAt?: Date | null; endsAt?: Date | null; lang: EmailLang }): EmailContent {
+  const { lang, kind, text } = input;
+  const hello = esc(PHRASES[lang].hello(input.name));
+  const body = text.body
+    .split(/\n{2,}/)
+    .map((paragraph) => esc(paragraph.trim()).replace(/\n/g, "<br>"))
+    .filter(Boolean);
+  const labels = {
+    pt: { maintenance: "Manutenção programada", notice: "Aviso importante", when: "Quando", from: "de", to: "até", reason: "Durante a intervenção, alguns serviços podem estar indisponíveis por breves momentos." },
+    en: { maintenance: "Scheduled maintenance", notice: "Important notice", when: "When", from: "from", to: "to", reason: "During the work, some services may be briefly unavailable." },
+    es: { maintenance: "Mantenimiento programado", notice: "Aviso importante", when: "Cuándo", from: "de", to: "hasta", reason: "Durante la intervención, algunos servicios pueden no estar disponibles por breves momentos." },
+  }[lang];
+  const window = input.startsAt ? `${esc(labels.when)}: ${b(`${labels.from} ${formatDate(input.startsAt, lang, true)}${input.endsAt ? ` ${labels.to} ${formatDate(input.endsAt, lang, true)}` : ""}`)}` : null;
+  return render(lang, {
+    subject: text.subject,
+    preheader: text.body.replace(/\s+/g, " ").slice(0, 110),
+    heading: kind === "maintenance" ? labels.maintenance : labels.notice,
+    paragraphs: [hello, `${b(text.subject)}`, ...body, ...(window ? [window] : []), ...(kind === "maintenance" ? [esc(labels.reason)] : [])],
+    notification: true,
+  });
 }

@@ -2,7 +2,7 @@ name: outbox
 
 # De 5 em 5 minutos: reenvia a fila de saída da Meta (tentativas por fazer, mensagens que ficaram para trás) e
 # corre os seguimentos automáticos (reengajamento), as campanhas (arranque das agendadas e envio em lotes) e as
-# automações (varrimento de eventos e execução das ações).
+# automações (varrimento de eventos e execução das ações) e os e-mails (avisos de fim de teste e reenvios).
 # Substitui o cron por minuto da Vercel, que só existe no plano Pro. O endpoint exige o CRON_SECRET.
 #
 # Configurar em GitHub → Settings → Secrets and variables → Actions:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Chamar /api/cron/process-outbox, /follow-ups, /campaigns e /automations
+      - name: Chamar /api/cron/process-outbox, /follow-ups, /campaigns, /automations e /emails
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
@@ -28,7 +28,7 @@ jobs:
             exit 0
           fi
           fail=0
-          for path in process-outbox follow-ups campaigns automations; do
+          for path in process-outbox follow-ups campaigns automations emails; do
             status=$(curl -sS -o response.json -w "%{http_code}" --max-time 90 \
               -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/$path")
             echo "$path: HTTP $status"; cat response.json; echo

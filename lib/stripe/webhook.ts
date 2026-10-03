@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { isRenewal } from "@/lib/email/notifications";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
@@ -80,7 +81,7 @@ export function mapStripeStatus(status: string): SubStatus | null {
 
 // ---------------------------------------------------------------- eventos
 export type ApplyResult =
-  | { result: "applied"; workspaceId: string; status: SubStatus }
+  | { result: "applied"; workspaceId: string; status: SubStatus; renewal?: { periodEnd: Date; plan: string | null } }
   | { result: "linked"; workspaceId: string }
   | { result: "ignored"; reason: string }
   | { result: "stale" }
@@ -90,6 +91,8 @@ const ORG_SELECT = {
   id: true,
   stripeCustomerId: true,
   stripeSubscriptionId: true,
+  periodEnd: true,
+  plan: true,
 } as const;
 
 // A organização de um evento: pelo cliente do Stripe já ligado, ou, na primeira vez, pelo metadata que NÓS
@@ -180,9 +183,10 @@ async function applySubscription(event: StripeEvent): Promise<ApplyResult> {
           : {}),
       },
     });
-    return updated.count === 1
-      ? { result: "applied", workspaceId: org.id, status: nextStatus }
-      : { result: "stale" };
+    if (updated.count !== 1) return { result: "stale" };
+    // Renovação: a subscrição está ativa e o período pago avançou (não é a primeira ativação nem uma repetição).
+    const renewal = nextStatus === "active" && periodEnd && isRenewal(org.periodEnd, periodEnd) ? { periodEnd, plan: plan ?? org.plan } : undefined;
+    return { result: "applied", workspaceId: org.id, status: nextStatus, ...(renewal ? { renewal } : {}) };
   } catch (err) {
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&
