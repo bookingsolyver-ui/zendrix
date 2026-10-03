@@ -6,27 +6,43 @@ datasource db {
   provider = "postgresql"
 }
 
+// Canal de onde vem (ou para onde vai) uma conversa. Os eventos da Meta chegam todos ao mesmo webhook.
+enum Platform {
+  WHATSAPP
+  INSTAGRAM
+  MESSENGER
+}
+
+// Estado de uma mensagem na fila de saída (OutboxMessage).
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
 // Uma organização (tenant) do SaaS. Todos os dados de um cliente pendem de um Workspace.
 model Workspace {
-  id                 String              @id @default(cuid())
-  name               String
-  createdAt          DateTime            @default(now())
-  ownerEmail         String?             @map("owner_email")
-  stripeCustomerId   String?             @unique @map("stripe_customer_id")
-  subStatus          String              @default("trialing") @map("sub_status") // trialing | active | past_due | canceled
-  plan               String?
-  trialEndsAt        DateTime?           @map("trial_ends_at")
-  agentEnabled       Boolean             @default(false) @map("agent_enabled") // interruptor do agente desta organização
-  agentKnowledge     String?             @map("agent_knowledge") // ficha do negócio: sem ela o agente não responde
-  agentProfile       Json?               @map("agent_profile") // os campos da ficha que o cliente edita (compilados para agentKnowledge)
-  stripeSubscriptionId String?           @unique @map("stripe_subscription_id") // a subscrição atual (só ela governa o estado)
-  stripeEventAt      DateTime?           @map("stripe_event_at") // último evento do Stripe aplicado (ordem não garantida)
-  users              User[]
-  socialIntegrations SocialIntegration[]
-  contacts           Contact[]
-  conversations      Conversation[]
-  messages           Message[]
-  apiKeys            ApiKey[]
+  id                   String              @id @default(cuid())
+  name                 String
+  createdAt            DateTime            @default(now())
+  ownerEmail           String?             @map("owner_email")
+  stripeCustomerId     String?             @unique @map("stripe_customer_id")
+  subStatus            String              @default("trialing") @map("sub_status") // trialing | active | past_due | canceled
+  plan                 String?
+  trialEndsAt          DateTime?           @map("trial_ends_at")
+  agentEnabled         Boolean             @default(false) @map("agent_enabled") // interruptor do agente desta organização
+  agentKnowledge       String?             @map("agent_knowledge") // ficha do negócio: sem ela o agente não responde
+  agentProfile         Json?               @map("agent_profile") // os campos da ficha que o cliente edita (compilados para agentKnowledge)
+  stripeSubscriptionId String?             @unique @map("stripe_subscription_id") // a subscrição atual (só ela governa o estado)
+  stripeEventAt        DateTime?           @map("stripe_event_at") // último evento do Stripe aplicado (ordem não garantida)
+  users                User[]
+  socialIntegrations   SocialIntegration[]
+  contacts             Contact[]
+  conversations        Conversation[]
+  messages             Message[]
+  apiKeys              ApiKey[]
+  outbox               OutboxMessage[]
 }
 
 // Papéis dentro de uma organização (RBAC), do mais para o menos poderoso. lib/roles.ts tem a hierarquia.
@@ -73,10 +89,18 @@ model ApiKey {
 model SocialIntegration {
   id                String    @id @default(cuid())
   workspaceId       String
-  platform          String // ex: "WHATSAPP", "INSTAGRAM"
-  accessToken       String // cifrado (AES-256-GCM), nunca em texto simples
-  providerAccountId String? // phone_number_id do WhatsApp
+  // Um valor do enum Platform ("WHATSAPP" | "INSTAGRAM" | "MESSENGER"), guardado como texto para não
+  // migrar as linhas que já existem.
+  platform          String
+  // WhatsApp: token do utilizador de sistema. Messenger: token da PÁGINA do Facebook. Instagram: token da
+  // página ligada à conta (ou do Instagram Login). Sempre cifrado (AES-256-GCM), nunca em texto simples.
+  accessToken       String
+  // O id que a Meta envia nos webhooks (entry.id) e que identifica de quem é o evento:
+  // WhatsApp = phone_number_id · Messenger = id da página · Instagram = id da conta profissional.
+  providerAccountId String?
   wabaId            String?   @map("waba_id") // WhatsApp Business Account do cliente
+  pageId            String?   @map("page_id") // Instagram: página do Facebook ligada à conta, usada para enviar
+  tokenExpiresAt    DateTime? @map("token_expires_at") // tokens de utilizador do Instagram expiram (~60 dias)
   status            String    @default("ACTIVE")
   workspace         Workspace @relation(fields: [workspaceId], references: [id])
   createdAt         DateTime  @default(now())
@@ -89,19 +113,22 @@ model SocialIntegration {
 model Contact {
   id            String         @id @default(cuid())
   workspaceId   String
+  platform      Platform       @default(WHATSAPP)
+  // Identificador do cliente na plataforma: WhatsApp = número (só dígitos) · Instagram = IGSID · Messenger = PSID.
   waId          String
   name          String?
   createdAt     DateTime       @default(now())
   workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   conversations Conversation[]
 
-  @@unique([workspaceId, waId])
+  @@unique([workspaceId, platform, waId])
 }
 
 // One thread per contact per workspace.
 model Conversation {
   id                 String    @id @default(cuid())
   workspaceId        String
+  platform           Platform  @default(WHATSAPP)
   contactId          String
   lastMessageAt      DateTime  @default(now())
   lastMessagePreview String?
@@ -120,10 +147,11 @@ model Message {
   id             String       @id @default(cuid())
   workspaceId    String
   conversationId String
+  platform       Platform     @default(WHATSAPP)
   direction      String // "IN" (from the customer) | "OUT" (sent by us)
   type           String       @default("text")
   body           String
-  status         String       @default("RECEIVED") // IN: RECEIVED · OUT: SENT, DELIVERED, READ, FAILED
+  status         String       @default("RECEIVED") // IN: RECEIVED · OUT: QUEUED (na fila de saída), SENT, DELIVERED, READ, FAILED
   waMessageId    String?      @unique // Meta's message id: dedupes webhook retries, matches status updates
   mediaPath      String?      @map("media_path") // object path in the private Storage bucket (customer voice notes)
   errorMessage   String?
@@ -156,4 +184,26 @@ model OfferedSlot {
 
   @@unique([workspaceId, contact, slot])
   @@index([expiresAt])
+}
+
+// Fila de saída (outbox): a IA e a Inbox NÃO falam com a Graph API da Meta. Gravam aqui a mensagem e o
+// worker (lib/outbox/process.ts, chamado pelo cron e logo após enfileirar) envia com ritmo controlado,
+// para centenas de respostas simultâneas não rebentarem os limites da Meta (e não dar má reputação ao número).
+model OutboxMessage {
+  id            String       @id @default(cuid())
+  workspaceId   String
+  platform      Platform
+  // Validado por lib/validations/outbox.ts: { kind: "text", to, text, conversationId, messageId }.
+  // Nunca leva segredos: o token lê-se da integração no momento do envio.
+  payload       Json
+  status        OutboxStatus @default(PENDING)
+  retryCount    Int          @default(0)
+  errorMessage  String?
+  nextAttemptAt DateTime     @default(now()) // não tentar antes (backoff e adiamentos por ritmo)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@index([workspaceId, createdAt])
 }

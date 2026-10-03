@@ -4,6 +4,8 @@ export interface ConversationSummary {
   id: string;
   contactName: string | null;
   waId: string;
+  // Canal da conversa: WHATSAPP | INSTAGRAM | MESSENGER.
+  platform: "WHATSAPP" | "INSTAGRAM" | "MESSENGER";
   lastMessagePreview: string | null;
   lastMessageAt: string;
   unreadCount: number;

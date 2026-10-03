@@ -8,6 +8,7 @@ import { REPLY_WINDOW_MS, type ChatMessage, type ConversationSummary } from "@/l
 const POLL_MS = 3000;
 
 const STATUS_LABEL: Record<string, string> = {
+  QUEUED: "Na fila",
   SENT: "Enviada",
   DELIVERED: "Entregue",
   READ: "Lida",

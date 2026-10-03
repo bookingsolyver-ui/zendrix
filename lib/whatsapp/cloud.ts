@@ -2,91 +2,27 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
+import { enqueueText } from "@/lib/outbox/enqueue";
 
 export type SendResult = { ok: true } | { ok: false; error: string };
 
-// Sends a free-text WhatsApp message inside an existing conversation and stores it as an OUT
-// message. Same rules as POST /api/whatsapp/send (workspace-scoped, 24h window, encrypted token),
-// for callers that are not an HTTP request from a signed-in user (e.g. the AI agent).
+// Responde a uma conversa com texto, em QUALQUER plataforma (WhatsApp, Instagram, Messenger). NÃO fala com a
+// Meta: grava a mensagem na fila de saída (lib/outbox) e devolve ok assim que ficou gravada. O worker envia
+// depois, com ritmo controlado e tentativas; quem chama (a IA) deve chamar drainOutbox() a seguir para o
+// envio não esperar pelo cron. Mesmas regras de antes: da organização, janela de 24 h, canal ligado.
 export async function sendTextInConversation(input: {
   workspaceId: string;
   conversationId: string;
   text: string;
 }): Promise<SendResult> {
-  const { workspaceId, conversationId, text } = input;
-
-  const conversation = await prisma.conversation.findFirst({
-    where: { id: conversationId, workspaceId },
-    select: { contact: { select: { waId: true } } },
-  });
-  if (!conversation) return { ok: false, error: "not_found" };
-
-  const lastInbound = await prisma.message.findFirst({
-    where: { conversationId, direction: "IN" },
-    orderBy: { createdAt: "desc" },
-    select: { createdAt: true },
-  });
-  if (!lastInbound || Date.now() - lastInbound.createdAt.getTime() > REPLY_WINDOW_MS) {
-    return { ok: false, error: "window_closed" };
-  }
-
-  const integration = await prisma.socialIntegration.findFirst({
-    where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE" },
-    orderBy: { createdAt: "desc" },
-    select: { accessToken: true, providerAccountId: true },
-  });
-  if (!integration?.providerAccountId) return { ok: false, error: "no_integration" };
-
-  let accessToken: string;
-  try {
-    accessToken = decryptSecret(integration.accessToken);
-  } catch {
-    return { ok: false, error: "integration_unreadable" };
-  }
-
-  const res = await fetch(`https://graph.facebook.com/v17.0/${integration.providerAccountId}/messages`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: conversation.contact.waId,
-      type: "text",
-      text: { body: text },
-    }),
-    signal: AbortSignal.timeout(15_000),
-  });
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    if (res.status === 401 || data?.error?.code === 190) return { ok: false, error: "token_expired" };
-    if (data?.error?.code === 131047) return { ok: false, error: "window_closed" };
-    return { ok: false, error: "meta_error" };
-  }
-
-  const now = new Date();
-  await prisma.$transaction(async (tx) => {
-    await tx.message.create({
-      data: {
-        workspaceId,
-        conversationId,
-        direction: "OUT",
-        type: "text",
-        body: text,
-        status: "SENT",
-        waMessageId: data?.messages?.[0]?.id ?? null,
-        createdAt: now,
-      },
-    });
-    await tx.conversation.update({
-      where: { id: conversationId },
-      data: { lastMessageAt: now, lastMessagePreview: text.slice(0, 120) },
-    });
-  });
-  return { ok: true };
+  const queued = await enqueueText(input);
+  return queued.ok ? { ok: true } : { ok: false, error: queued.error };
 }
 
 // ---------------------------------------------------------------- áudio (nota de voz)
+// EXCEÇÃO À FILA: o áudio é enviado directamente (o ficheiro não cabe num payload de fila e o chamador precisa
+// de saber já se falhou, para responder por texto, que SIM passa pela fila). Está desligado por defeito
+// (AGENT_VOICE) e é só WhatsApp.
 // Upload do ficheiro à Media API da Meta (multipart, direto da memória) e envio da mensagem
 // `type: "audio"`. O texto falado fica guardado como corpo da mensagem para a equipa o ler na Inbox.
 //
@@ -103,9 +39,11 @@ export async function sendAudioInConversation(input: {
 
   const conversation = await prisma.conversation.findFirst({
     where: { id: conversationId, workspaceId },
-    select: { contact: { select: { waId: true } } },
+    select: { platform: true, contact: { select: { waId: true } } },
   });
   if (!conversation) return { ok: false, error: "not_found" };
+  // A nota de voz é só do WhatsApp (upload à Media API do WhatsApp). Nas outras o chamador responde por texto.
+  if (conversation.platform !== "WHATSAPP") return { ok: false, error: "unsupported_platform" };
 
   const lastInbound = await prisma.message.findFirst({
     where: { conversationId, direction: "IN" },

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseMetaPayload } from "./meta-whatsapp.ts";
+import { metaWebhookSchema, parseMessagingEntries, parseMetaPayload } from "./meta-whatsapp.ts";
 import { stripeCheckoutSessionSchema, stripeEventSchema, stripeSubscriptionSchema, workspaceIdFromMetadata } from "./stripe.ts";
 import { createApiKeySchema } from "./api-keys.ts";
 import { sendTextSchema } from "./whatsapp-send.ts";
@@ -84,4 +84,42 @@ test("envio: texto aparado, obrigatório e limitado", () => {
   assert.ok(!sendTextSchema.safeParse({ conversationId: "c1", text: "   " }).success);
   assert.ok(!sendTextSchema.safeParse({ conversationId: "c1", text: "x".repeat(4097) }).success);
   assert.ok(!sendTextSchema.safeParse({ conversationId: 1, text: "x" }).success);
+});
+
+test("Meta unificado: o campo `object` escolhe a plataforma", () => {
+  for (const object of ["whatsapp_business_account", "instagram", "page"]) {
+    assert.equal(metaWebhookSchema.safeParse({ object, entry: [] }).success, true, object);
+  }
+  assert.equal(metaWebhookSchema.safeParse({ object: "user", entry: [] }).success, false);
+  assert.equal(metaWebhookSchema.safeParse({ entry: [] }).success, false);
+  assert.equal(metaWebhookSchema.safeParse({ object: "page", entry: "x" }).success, false);
+});
+
+test("Instagram/Messenger: mensagens, anexos, estados; ecos e lixo ignorados", () => {
+  const [change] = parseMessagingEntries([
+    {
+      id: "PAGE1",
+      messaging: [
+        { sender: { id: "u1" }, recipient: { id: "PAGE1" }, timestamp: 1700000000000, message: { mid: "m1", text: "olá" } },
+        { sender: { id: "u1" }, timestamp: 1700000001000, message: { mid: "m2", attachments: [{ type: "audio" }] } },
+        { sender: { id: "PAGE1" }, timestamp: 1, message: { mid: "echo", text: "enviada por nós", is_echo: true } },
+        { sender: { id: "u1" }, delivery: { mids: ["out1", "out2"] } },
+        { sender: { id: "u1" }, read: { mid: "out1" } },
+        { sender: { id: "u1" }, read: { watermark: 5 } },
+        { sender: {}, message: { mid: "x" } },
+        "lixo",
+        null,
+      ],
+    },
+    { messaging: [] },
+    42,
+  ]);
+  assert.equal(change.accountId, "PAGE1");
+  assert.deepEqual(change.messages.map((m) => [m.mid, m.text, m.attachmentType]), [["m1", "olá", null], ["m2", null, "audio"]]);
+  assert.deepEqual(change.statuses, [
+    { mid: "out1", status: "DELIVERED" },
+    { mid: "out2", status: "DELIVERED" },
+    { mid: "out1", status: "READ" },
+  ]);
+  assert.deepEqual(parseMessagingEntries([null, 1, {}]), []);
 });

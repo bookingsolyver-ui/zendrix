@@ -8,6 +8,7 @@ import {
 import { chaveOk, gerarResposta } from "./cerebro";
 import { synthesizeSpeech, voiceWanted } from "./voice";
 import { loadTenant } from "@/lib/tenant";
+import { drainOutbox } from "@/lib/outbox/process";
 
 // Ponto de entrada do agente. É chamado pelo webhook DEPOIS de a mensagem estar gravada
 // e de a Meta já ter recebido o 200, por isso nunca pode lançar erros: falhas só são registadas.
@@ -224,6 +225,10 @@ async function handle(event: AgentEvent) {
     conversationId: event.conversationId,
     text: reply,
   });
-  if (!sent.ok)
+  if (!sent.ok) {
     console.error("[agent] envio falhou:", sent.error, event.conversationId);
+    return;
+  }
+  // Enfileirada. Tenta enviar já (o cron é a rede de segurança); o ritmo por conta limita os picos.
+  await drainOutbox();
 }

@@ -3,31 +3,33 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import type { InboundMessage, StatusUpdate } from "@/lib/whatsapp/webhook";
+import type { PlatformName } from "@/lib/outbox/split-text";
 
-// Which organization owns a WhatsApp phone number id (the `providerAccountId` of its integration).
-// This is the multi-tenant router: every Meta event carries the phone number it is about, and that alone
-// decides whose data it is. The database enforces one owner per number (unique platform + providerAccountId).
-export async function findWorkspaceId(phoneNumberId: string) {
+// Which organization owns a Meta account: a WhatsApp phone number id, an Instagram account id or a Facebook
+// page id (the `providerAccountId` of its integration for that platform).
+// This is the multi-tenant router: every Meta event carries the account it is about, and that alone
+// decides whose data it is. The database enforces one owner per account (unique platform + providerAccountId).
+export async function findWorkspaceId(platform: PlatformName, accountId: string) {
   const integration = await prisma.socialIntegration.findFirst({
     where: {
-      platform: "WHATSAPP",
-      providerAccountId: phoneNumberId,
+      platform,
+      providerAccountId: accountId,
       status: "ACTIVE",
     },
     select: { workspaceId: true },
   });
   if (!integration) {
-    // A number nobody owns (disconnected client, typo in the Meta panel...): dropped, but not silently.
+    // An account nobody owns (disconnected client, typo in the Meta panel...): dropped, but not silently.
     if (
       (
-        await rateLimit(`unknown-number:${phoneNumberId}`, {
+        await rateLimit(`unknown-account:${platform}:${accountId}`, {
           limit: 1,
           windowMs: 10 * 60 * 1000,
         })
       ).ok
     ) {
       console.warn(
-        `[webhook] evento para o número ${phoneNumberId}, que não pertence a nenhuma organização ativa; ignorado`,
+        `[webhook] evento ${platform} para a conta ${accountId}, que não pertence a nenhuma organização ativa; ignorado`,
       );
     }
     return null;
@@ -41,27 +43,30 @@ export async function findWorkspaceId(phoneNumberId: string) {
 export async function saveInboundMessage(
   msg: InboundMessage,
 ): Promise<{ workspaceId: string; conversationId: string } | null> {
-  const workspaceId = await findWorkspaceId(msg.phoneNumberId);
-  if (!workspaceId) return null; // a number that is not connected to any workspace
+  const workspaceId = await findWorkspaceId(msg.platform, msg.accountId);
+  if (!workspaceId) return null; // an account that is not connected to any workspace
 
   try {
     const conversationId = await prisma.$transaction(async (tx) => {
       const contact = await tx.contact.upsert({
-        where: { workspaceId_waId: { workspaceId, waId: msg.waId } },
-        create: { workspaceId, waId: msg.waId, name: msg.contactName },
+        where: {
+          workspaceId_platform_waId: { workspaceId, platform: msg.platform, waId: msg.waId },
+        },
+        create: { workspaceId, platform: msg.platform, waId: msg.waId, name: msg.contactName },
         update: msg.contactName ? { name: msg.contactName } : {},
       });
       const conversation = await tx.conversation.upsert({
         where: {
           workspaceId_contactId: { workspaceId, contactId: contact.id },
         },
-        create: { workspaceId, contactId: contact.id },
+        create: { workspaceId, platform: msg.platform, contactId: contact.id },
         update: {},
       });
       await tx.message.create({
         data: {
           workspaceId,
           conversationId: conversation.id,
+          platform: msg.platform,
           direction: "IN",
           type: msg.type,
           body: msg.body,
@@ -102,8 +107,8 @@ const RANK: Record<string, number> = {
 };
 
 export async function applyStatusUpdate(update: StatusUpdate) {
-  // Um recibo de entrega só mexe em mensagens da organização dona desse número.
-  const workspaceId = await findWorkspaceId(update.phoneNumberId);
+  // Um recibo de entrega só mexe em mensagens da organização dona dessa conta.
+  const workspaceId = await findWorkspaceId(update.platform, update.accountId);
   if (!workspaceId) return false;
 
   const message = await prisma.message.findUnique({

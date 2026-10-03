@@ -1,6 +1,7 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { parseMetaPayload } from "@/lib/validations/meta-whatsapp";
+import { parseMessagingEntries, parseMetaPayload } from "@/lib/validations/meta-whatsapp";
+import type { PlatformName } from "@/lib/outbox/split-text";
 
 // Meta signs every webhook POST: header `X-Hub-Signature-256: sha256=<hmac of the raw body>`,
 // keyed with the app secret. Anything unsigned or mis-signed must be rejected, otherwise anyone
@@ -12,8 +13,13 @@ export function isValidSignature(rawBody: string, header: string | null, appSecr
   return received.length === expected.length && timingSafeEqual(received, expected);
 }
 
+// Eventos normalizados de QUALQUER plataforma da Meta (WhatsApp, Instagram, Messenger).
+// `accountId` é o id de quem recebe, tal como a Meta o envia em entry.id / metadata: WhatsApp = phone_number_id,
+// Messenger = id da página, Instagram = id da conta. `waId` guarda o id do cliente na plataforma
+// (número, IGSID ou PSID).
 export interface InboundMessage {
-  phoneNumberId: string;
+  platform: PlatformName;
+  accountId: string;
   waId: string;
   contactName: string | null;
   waMessageId: string;
@@ -26,7 +32,8 @@ export interface InboundMessage {
 }
 
 export interface StatusUpdate {
-  phoneNumberId: string;
+  platform: PlatformName;
+  accountId: string;
   waMessageId: string;
   status: "SENT" | "DELIVERED" | "READ" | "FAILED";
   errorMessage: string | null;
@@ -38,6 +45,36 @@ const STATUS_MAP: Record<string, StatusUpdate["status"]> = {
   read: "READ",
   failed: "FAILED",
 };
+
+// Instagram e Messenger (entry[].messaging[]) para os mesmos eventos normalizados.
+export function extractMessagingEvents(platform: "INSTAGRAM" | "MESSENGER", entries: unknown[]) {
+  const messages: InboundMessage[] = [];
+  const statuses: StatusUpdate[] = [];
+
+  for (const change of parseMessagingEntries(entries)) {
+    for (const msg of change.messages) {
+      const text = msg.text?.trim();
+      messages.push({
+        platform,
+        accountId: change.accountId,
+        waId: msg.senderId,
+        contactName: null, // estes webhooks não trazem o nome do cliente
+        waMessageId: msg.mid,
+        // Só o texto vai ao agente. Anexos (imagem, vídeo, áudio...) ficam com um marcador legível: o tipo
+        // "audio" é reservado às notas de voz do WhatsApp, que têm descarga e transcrição próprias.
+        type: text ? "text" : `${msg.attachmentType ?? "unknown"}_attachment`,
+        body: text || `[${msg.attachmentType ?? "anexo"}]`,
+        timestamp: msg.timestampMs > 0 ? new Date(msg.timestampMs) : new Date(),
+        mediaId: null,
+        mimeType: null,
+      });
+    }
+    for (const st of change.statuses) {
+      statuses.push({ platform, accountId: change.accountId, waMessageId: st.mid, status: st.status, errorMessage: null });
+    }
+  }
+  return { messages, statuses };
+}
 
 // Flattens Meta's nested payload (entry[].changes[].value) into plain events. The payload comes from
 // outside: lib/validations/meta-whatsapp.ts validates every element, and invalid ones are dropped.
@@ -56,7 +93,8 @@ export function extractEvents(payload: unknown) {
             ? "Mensagem de voz"
             : `[${msg.type}]`;
       messages.push({
-        phoneNumberId: change.phoneNumberId,
+        platform: "WHATSAPP",
+        accountId: change.phoneNumberId,
         waId: msg.from,
         contactName: change.contactNames.get(msg.from) ?? null,
         waMessageId: msg.id,
@@ -73,7 +111,8 @@ export function extractEvents(payload: unknown) {
       if (!status) continue;
       const err = st.errors[0];
       statuses.push({
-        phoneNumberId: change.phoneNumberId,
+        platform: "WHATSAPP",
+        accountId: change.phoneNumberId,
         waMessageId: st.id,
         status,
         errorMessage: err ? (err.title ?? err.message ?? "failed").slice(0, 300) : null,
