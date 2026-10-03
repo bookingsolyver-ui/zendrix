@@ -66,6 +66,7 @@ model Workspace {
   messageTemplates       MessageTemplate[]
   campaigns              Campaign[]
   automations            Automation[]
+  popups                 Popup[]
   paymentLinks           PaymentLink[]
   followUps              FollowUp[]
   appointments           Appointment[]
@@ -500,6 +501,7 @@ enum AutomationTrigger {
   MESSAGE_RECEIVED
   LEAD_QUALIFIED
   PAYMENT_PAID
+  POPUP_SUBMITTED
 }
 
 enum AutomationStepStatus {
@@ -566,4 +568,38 @@ model AutomationRunStep {
 
   @@unique([runId, index])
   @@index([status, dueAt])
+}
+
+// ─── Popups de captura de leads ───
+
+// Um popup que o cliente cola no seu site com um script. A `publicKey` (não adivinhável) é o que vai no script;
+// `config` (validado em lib/popups/schema.ts) manda no aspeto, nos campos e nas regras de exibição.
+model Popup {
+  id          String            @id @default(cuid())
+  workspaceId String
+  publicKey   String            @unique
+  name        String
+  active      Boolean           @default(false)
+  config      Json
+  views       Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  submissions PopupSubmission[]
+
+  @@index([workspaceId, createdAt])
+}
+
+// Cada registo feito num popup. Guarda o texto de consentimento que a pessoa aceitou, como prova.
+model PopupSubmission {
+  id          String   @id @default(cuid())
+  popupId     String
+  workspaceId String
+  contactId   String
+  consentText String
+  createdAt   DateTime @default(now())
+  popup       Popup    @relation(fields: [popupId], references: [id], onDelete: Cascade)
+
+  @@index([popupId, createdAt])
+  @@index([workspaceId, createdAt])
 }

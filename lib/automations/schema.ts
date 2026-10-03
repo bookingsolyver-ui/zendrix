@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { renderMessage } from "../campaigns/schema.ts";
 
-export const TRIGGERS = ["NEW_CONTACT", "MESSAGE_RECEIVED", "LEAD_QUALIFIED", "PAYMENT_PAID"] as const;
+export const TRIGGERS = ["NEW_CONTACT", "MESSAGE_RECEIVED", "LEAD_QUALIFIED", "PAYMENT_PAID", "POPUP_SUBMITTED"] as const;
 export type TriggerValue = (typeof TRIGGERS)[number];
 
 export const TRIGGER_LABEL: Record<TriggerValue, string> = {
@@ -11,6 +11,7 @@ export const TRIGGER_LABEL: Record<TriggerValue, string> = {
   MESSAGE_RECEIVED: "Mensagem recebida",
   LEAD_QUALIFIED: "Lead qualificado",
   PAYMENT_PAID: "Pagamento confirmado",
+  POPUP_SUBMITTED: "Popup preenchido",
 };
 
 export const TRIGGER_HINT: Record<TriggerValue, string> = {
@@ -18,6 +19,7 @@ export const TRIGGER_HINT: Record<TriggerValue, string> = {
   MESSAGE_RECEIVED: "Quando um cliente escreve. Pode exigir uma palavra-chave.",
   LEAD_QUALIFIED: "Quando um contacto passa a Qualificado (pela IA ou por outra automação).",
   PAYMENT_PAID: "Quando um link de pagamento é pago.",
+  POPUP_SUBMITTED: "Quando um visitante preenche um popup do seu site.",
 };
 
 export const ACTION_TYPES = ["SEND_MESSAGE", "SET_STAGE", "CREATE_TASK"] as const;
@@ -139,6 +141,12 @@ export const AUTOMATION_PRESETS: AutomationPreset[] = [
     title: "Lead qualificado: avisar a equipa",
     description: "Cria uma tarefa no CRM para a equipa fechar o negócio.",
     input: { name: "Lead qualificado", trigger: "LEAD_QUALIFIED", config: { keyword: "" }, actions: [{ type: "CREATE_TASK", title: "Contactar {{nome}} (lead qualificado)", delayMinutes: 0 }] },
+  },
+  {
+    id: "popup-lead",
+    title: "Lead de popup: avisar a equipa",
+    description: "Cria uma tarefa no CRM sempre que alguém se regista num popup do site.",
+    input: { name: "Lead de popup", trigger: "POPUP_SUBMITTED", config: { keyword: "" }, actions: [{ type: "CREATE_TASK", title: "Contactar {{nome}} (lead do site)", delayMinutes: 0 }] },
   },
   {
     id: "thanks",

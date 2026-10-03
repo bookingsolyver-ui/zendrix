@@ -16,8 +16,8 @@ export const FEATURES = {
   templates: true,
   campaigns: true,
   marketingAutomations: true,
+  popups: true,
   // Em construção (sem motor de envio ou de execução): escondidos
-  popups: false,
   ecommerce: false,
   analytics: false,
   segments: true,

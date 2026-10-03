@@ -64,6 +64,10 @@ async function fetchEvents(automation: Automation, from: Date, to: Date): Promis
       const rows = await prisma.contact.findMany({ where: { ...where, leadStage: "QUALIFIED", qualifiedAt: range }, orderBy: { qualifiedAt: "asc" }, take: SCAN_LIMIT, select: { id: true, qualifiedAt: true } });
       return rows.flatMap((row) => (row.qualifiedAt ? [{ contactId: row.id, key: `qualified:${row.id}:${row.qualifiedAt.getTime()}`, at: row.qualifiedAt }] : []));
     }
+    case "POPUP_SUBMITTED": {
+      const rows = await prisma.popupSubmission.findMany({ where: { ...where, createdAt: range }, orderBy: { createdAt: "asc" }, take: SCAN_LIMIT, select: { id: true, contactId: true, createdAt: true } });
+      return rows.map((row) => ({ contactId: row.contactId, key: `popup:${row.id}`, at: row.createdAt }));
+    }
     case "PAYMENT_PAID": {
       const rows = await prisma.paymentLink.findMany({ where: { ...where, status: "PAID", contactId: { not: null }, paidAt: range }, orderBy: { paidAt: "asc" }, take: SCAN_LIMIT, select: { id: true, contactId: true, paidAt: true } });
       return rows.flatMap((row) => (row.contactId && row.paidAt ? [{ contactId: row.contactId, key: `paid:${row.id}`, at: row.paidAt }] : []));
