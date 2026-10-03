@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
 import { markIntegrationExpired } from "@/lib/meta/integration-health";
+import { getAccess } from "@/lib/billing/access";
 import { enqueueText } from "@/lib/outbox/enqueue";
 
 export type SendResult = { ok: true } | { ok: false; error: string };
@@ -37,6 +38,9 @@ export async function sendAudioInConversation(input: {
   transcript: string;
 }): Promise<SendResult> {
   const { workspaceId, conversationId, audio, transcript } = input;
+
+  // PAYWALL (ver enqueueText): a nota de voz é um envio como os outros.
+  if (!(await getAccess(workspaceId)).active) return { ok: false, error: "subscription_required" };
 
   const conversation = await prisma.conversation.findFirst({
     where: { id: conversationId, workspaceId },

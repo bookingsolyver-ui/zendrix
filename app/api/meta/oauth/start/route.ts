@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { AuthError } from "@/lib/api-auth";
+import { getAccess } from "@/lib/billing/access";
 import { appOrigin } from "@/lib/http/origin";
 import {
   buildAuthorizeUrl,
@@ -27,7 +28,9 @@ export async function GET(request: Request) {
   if (!config) return backToChannels(request, locale, { error: "not_configured" });
 
   try {
-    await requireRole(["OWNER", "MANAGER"]);
+    const who = await requireRole(["OWNER", "MANAGER"]);
+    // PAYWALL: sem plano ativo não se ligam canais novos.
+    if (!(await getAccess(who.workspaceId)).active) return backToChannels(request, locale, { error: "subscription_required" });
   } catch (err) {
     if (err instanceof AuthError) {
       if (err.status === 401) return NextResponse.redirect(new URL(`/${locale}/login`, appOrigin(request)));

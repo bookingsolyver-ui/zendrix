@@ -8,20 +8,26 @@ import { UsageBars } from "@/components/dashboard/settings/billing/usage-bars";
 import { PaymentMethodCard } from "@/components/dashboard/settings/billing/payment-method-card";
 import { InvoiceHistory } from "@/components/dashboard/settings/billing/invoice-history";
 import { CheckoutBanner } from "@/components/dashboard/settings/billing/checkout-banner";
+import { PaywallNotice } from "@/components/dashboard/settings/billing/paywall-notice";
+import { evaluateAccess } from "@/lib/billing/policy";
 
 export default async function BillingPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; paywall?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { checkout } = await searchParams;
+  const { checkout, paywall } = await searchParams;
   const checkoutResult = checkout === "success" || checkout === "canceled" ? checkout : null;
 
   const user = await getCurrentUser();
+  // Sem plano ativo: o aviso aparece SEMPRE aqui (venha do redirecionamento do paywall ou de abrir a página).
+  const access = user?.workspace
+    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null)
+    : ({ active: true } as const);
   const workspaceId = user?.workspace?.id;
   const monthStart = new Date();
   monthStart.setUTCDate(1);
@@ -56,6 +62,7 @@ export default async function BillingPage({
       />
 
       <div className="space-y-6">
+        {!access.active && <PaywallNotice reason={access.reason} redirected={Boolean(paywall)} />}
         {checkoutResult && (
           <CheckoutBanner result={checkoutResult} subscriptionLinked={Boolean(billing?.stripeSubscriptionId)} />
         )}

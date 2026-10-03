@@ -6,6 +6,7 @@ const ERRORS: Record<string, string> = {
   invalid_request: "Pedido inválido. Volte a tentar.",
   session_expired: "A sessão expirou. Inicie sessão e tente de novo.",
   forbidden: "Apenas o proprietário ou um gestor pode ligar canais.",
+  subscription_required: "Ative o seu plano para ligar novos canais.",
   rate_limited: "Demasiadas tentativas. Aguarde alguns minutos.",
   not_configured: "A ligação com a Meta ainda não está configurada nesta instalação. Contacte o suporte.",
   no_pages: "Não encontrámos nenhuma página do Facebook a que tenha dado acesso. Escolha as páginas na janela da Meta.",

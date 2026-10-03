@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authErrorResponse } from "@/lib/api-auth";
+import { getAccess, subscriptionRequiredResponse } from "@/lib/billing/access";
 import { generateApiKey } from "@/lib/api-keys";
 import { isSameOrigin } from "@/lib/http/origin";
 import { prisma } from "@/lib/prisma";
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
 
   try {
     const who = await requireRole(["OWNER", "MANAGER"]);
+    if (!(await getAccess(who.workspaceId)).active) return subscriptionRequiredResponse(); // PAYWALL: sem plano não se criam chaves
 
     const limited = await rateLimit(`api-keys-create:${who.workspaceId}`, { limit: 10, windowMs: 60 * 60 * 1000 });
     if (!limited.ok) {

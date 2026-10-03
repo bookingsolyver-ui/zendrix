@@ -1,10 +1,11 @@
 import "server-only";
+import { getAccess } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
 import { splitText, TEXT_LIMITS } from "@/lib/outbox/split-text";
 import type { OutboxPayload } from "@/lib/validations/outbox";
 
-export type EnqueueError = "not_found" | "window_closed" | "no_integration";
+export type EnqueueError = "not_found" | "window_closed" | "no_integration" | "subscription_required";
 
 export type EnqueueResult =
   | { ok: true; messages: { id: string; type: string; body: string; status: string; createdAt: Date }[] }
@@ -20,6 +21,10 @@ export async function enqueueText(input: {
   text: string;
 }): Promise<EnqueueResult> {
   const { workspaceId, conversationId, text } = input;
+
+  // PAYWALL: sem plano ativo (trial acabado, cancelada, em atraso) nada novo sai. É o ponto único por onde
+  // passam as respostas da IA, as da Inbox e as das chaves de API.
+  if (!(await getAccess(workspaceId)).active) return { ok: false, error: "subscription_required" };
 
   const conversation = await prisma.conversation.findFirst({
     where: { id: conversationId, workspaceId },

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { getAccess, subscriptionRequiredResponse } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import type { ChatMessage } from "@/lib/inbox/types";
 import { signedMediaUrls } from "@/lib/storage/media";
@@ -8,6 +9,8 @@ async function authorize(id: string) {
   const me = await getCurrentUser();
   if (!me) return { error: NextResponse.json({ error: "unauthenticated" }, { status: 401 }) };
   if (!me.workspace) return { error: NextResponse.json({ error: "no_workspace" }, { status: 403 }) };
+  // PAYWALL: ler e gerir conversas exige plano ativo (a página já redireciona; isto fecha a API).
+  if (!(await getAccess(me.workspace.id)).active) return { error: subscriptionRequiredResponse() };
 
   // The workspace filter is what stops one workspace reading another's conversations.
   const conversation = await prisma.conversation.findFirst({

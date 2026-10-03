@@ -5,6 +5,7 @@ import { WhatsappGate } from "@/components/dashboard/overview/whatsapp-gate";
 import { FaqVideoSection } from "@/components/dashboard/overview/faq-video-section";
 import { msUntil } from "@/lib/trial";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { requireActivePlanForPage } from "@/lib/billing/access";
 import { getWhatsAppStatus } from "@/lib/whatsapp/status";
 
 export default async function DashboardPage({
@@ -14,6 +15,7 @@ export default async function DashboardPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await requireActivePlanForPage(locale);
 
   const user = await getCurrentUser();
   const whatsapp = await getWhatsAppStatus(user?.workspace?.id);

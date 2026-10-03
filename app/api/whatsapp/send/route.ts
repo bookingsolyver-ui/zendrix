@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     // worker envia. A mensagem aparece já na Inbox como "Na fila" e passa a "Enviada" (ou "Falhou") sozinha.
     const queued = await enqueueText({ workspaceId, conversationId, text });
     if (!queued.ok) {
-      const status = queued.error === "window_closed" ? 409 : 404;
+      const status = queued.error === "subscription_required" ? 402 : queued.error === "window_closed" ? 409 : 404;
       return NextResponse.json({ success: false, error: queued.error }, { status });
     }
     after(() => drainOutbox());

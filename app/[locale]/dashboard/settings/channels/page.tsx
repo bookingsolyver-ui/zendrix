@@ -7,6 +7,7 @@ import { ResultBanner } from "@/components/dashboard/settings/channels/result-ba
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getChannelsStatus } from "@/lib/meta/channels-status";
 import { metaOAuthConfig } from "@/lib/meta/oauth";
+import { evaluateAccess } from "@/lib/billing/policy";
 
 export default async function ChannelsPage({
   params,
@@ -24,12 +25,19 @@ export default async function ChannelsPage({
   const canManage = user?.role === "OWNER" || user?.role === "MANAGER";
   const status = await getChannelsStatus(user?.workspace?.id);
   const metaReady = metaOAuthConfig() !== null;
+  // PAYWALL: sem plano ativo não se ligam canais novos (a rota OAuth também recusa).
+  const planActive = user?.workspace
+    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null).active
+    : true;
 
   // Instagram e Messenger: Facebook Login. O botão é um link para a nossa rota, que gera o `state` e
   // redireciona para o Facebook com o App ID e as permissões.
   const oauthAction = (platform: "instagram" | "messenger", connected: boolean): ChannelAction => {
     if (!canManage) {
       return { kind: "disabled", label: "Ligar conta", reason: "Apenas o proprietário ou um gestor pode ligar canais." };
+    }
+    if (!planActive) {
+      return { kind: "disabled", label: "Ligar conta", reason: "Ative o seu plano em Faturação para ligar novos canais." };
     }
     if (!metaReady) {
       return { kind: "disabled", label: "Ligar conta", reason: "Indisponível: a app da Meta ainda não está configurada." };
@@ -46,7 +54,9 @@ export default async function ChannelsPage({
   };
 
   // O WhatsApp tem o seu próprio ecrã (número, token e Phone ID da API oficial).
-  const whatsappAction: ChannelAction = canManage
+  const whatsappAction: ChannelAction = !planActive
+    ? { kind: "disabled", label: "Ligar conta", reason: "Ative o seu plano em Faturação para ligar novos canais." }
+    : canManage
     ? {
         kind: "link",
         node: (className) => (

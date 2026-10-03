@@ -1,6 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { getAccess } from "@/lib/billing/access";
 import { API_KEY_HEADER, hashApiKey, looksLikeApiKey } from "@/lib/api-keys";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -24,7 +25,8 @@ export type AuthCode =
   | "invalid_api_key"
   | "no_workspace"
   | "forbidden"
-  | "rate_limited";
+  | "rate_limited"
+  | "subscription_required";
 
 export class AuthError extends Error {
   constructor(
@@ -51,6 +53,9 @@ async function authenticateApiKey(rawKey: string): Promise<Principal> {
   });
   const now = Date.now();
   if (!key || key.revokedAt || (key.expiresAt && key.expiresAt.getTime() <= now)) throw invalid;
+
+  // PAYWALL: uma chave de uma organização sem plano ativo não faz nada (402), mesmo sendo válida.
+  if (!(await getAccess(key.workspaceId)).active) throw new AuthError("subscription_required", 402);
 
   const limited = await rateLimit(`api-key:${key.id}`, { limit: API_KEY_LIMIT_PER_MINUTE, windowMs: 60_000 });
   if (!limited.ok) throw new AuthError("rate_limited", 429, limited.retryAfterSeconds);

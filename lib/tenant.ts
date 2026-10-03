@@ -1,11 +1,10 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { isSubscriptionActive } from "@/lib/billing/policy";
 
 // A organização (tenant) a que uma mensagem pertence e o que ela permite fazer.
 // Tudo o que é específico de um cliente (ficha do negócio, agente ligado/desligado, subscrição) vem daqui,
 // lido da base de dados a cada mensagem: nada de um cliente vive em variáveis de ambiente.
-
-export const ACTIVE_SUBSCRIPTION = ["trialing", "active"] as const;
 
 // Toda a organização nova começa com um teste grátis deste tamanho.
 export const TRIAL_DAYS = 14;
@@ -25,19 +24,8 @@ export interface TenantContext {
   knowledge: string | null;
 }
 
-export function isSubscriptionActive(
-  subStatus: string,
-  trialEndsAt: Date | null,
-  now = new Date(),
-) {
-  if (!(ACTIVE_SUBSCRIPTION as readonly string[]).includes(subStatus))
-    return false;
-  return !(
-    subStatus === "trialing" &&
-    trialEndsAt !== null &&
-    trialEndsAt.getTime() < now.getTime()
-  );
-}
+// A regra do paywall vive em lib/billing/policy.ts (pura e testada); reexporta-se para quem já a importa daqui.
+export { isSubscriptionActive };
 
 export async function loadTenant(
   workspaceId: string,

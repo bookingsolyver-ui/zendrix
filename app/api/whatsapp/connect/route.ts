@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAccess, subscriptionRequiredResponse } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { GRAPH_BASE } from "@/lib/meta/send";
@@ -25,6 +26,8 @@ export async function POST() {
     if (!dbUser) {
       return NextResponse.json({ success: false, error: "no_workspace" }, { status: 403 });
     }
+
+    if (!(await getAccess(dbUser.workspaceId)).active) return subscriptionRequiredResponse(); // PAYWALL
 
     // 3. Read the WhatsApp credentials that belong to that workspace only.
     const integration = await prisma.socialIntegration.findFirst({

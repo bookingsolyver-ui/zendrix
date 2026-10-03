@@ -1,4 +1,5 @@
 import "server-only";
+import { getAccess } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { backoffSeconds, MAX_ATTEMPTS } from "@/lib/meta/errors";
@@ -179,6 +180,9 @@ async function prepare(
   );
   if (!parsed.success) return markFailed(row, null, "invalid_payload");
   const payload = parsed.data;
+
+  // PAYWALL: o plano pode ter caducado DEPOIS de a mensagem ser enfileirada. Sem plano ativo não sai.
+  if (!(await getAccess(row.workspaceId)).active) return markFailed(row, payload, "subscription_required");
 
   const credentials = await credentialsFor(cache, row);
   if (!credentials) return markFailed(row, payload, "no_integration");

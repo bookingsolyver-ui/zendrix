@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { AuthError } from "@/lib/api-auth";
+import { getAccess } from "@/lib/billing/access";
 import { appOrigin } from "@/lib/http/origin";
 import { saveChannels } from "@/lib/meta/connect";
 import {
@@ -55,6 +56,9 @@ export async function GET(request: Request) {
     console.error("[meta/oauth] falhou a autenticar", err);
     return done({ error: "server_error" });
   }
+
+  // PAYWALL também no regresso: o plano pode ter caducado entre o início do fluxo e agora.
+  if (!(await getAccess(workspaceId)).active) return done({ error: "subscription_required" });
 
   const limited = await rateLimit(`meta-oauth:${workspaceId}`, { limit: 10, windowMs: 10 * 60 * 1000 });
   if (!limited.ok) return done({ error: "rate_limited" });

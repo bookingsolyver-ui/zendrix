@@ -31,6 +31,7 @@ const SEND_ERRORS: Record<string, string> = {
   token_expired: "O token da Meta expirou. Atualize-o em Definições → WhatsApp.",
   rate_limited: "Está a enviar depressa demais. Aguarde um instante.",
   no_integration: "Não há nenhum canal ligado a esta conversa.",
+  subscription_required: "O seu plano não está ativo. Ative-o em Configurações → Faturação para voltar a enviar.",
   invalid_input: "A mensagem está vazia ou é demasiado longa.",
 };
 

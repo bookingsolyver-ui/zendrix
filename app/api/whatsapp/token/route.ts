@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAccess, subscriptionRequiredResponse } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import { encryptSecret } from "@/lib/crypto";
 import { rateLimit } from "@/lib/rate-limit";
@@ -41,6 +42,7 @@ export async function PATCH(request: Request) {
     if (!dbUser) {
       return NextResponse.json({ success: false, error: "no_workspace" }, { status: 403 });
     }
+    if (!(await getAccess(dbUser.workspaceId)).active) return subscriptionRequiredResponse(); // PAYWALL
 
     const integration = await prisma.socialIntegration.findFirst({
       where: { workspaceId: dbUser.workspaceId, platform: "WHATSAPP" },
