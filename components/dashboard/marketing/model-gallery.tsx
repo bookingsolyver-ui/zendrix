@@ -1,12 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { LucideIcon } from "lucide-react";
+import { Cake, CalendarClock, CreditCard, Gift, Heart, MessageSquareText, PartyPopper, ShoppingBag, Sparkles, UserPlus, Wallet } from "lucide-react";
 import { SoonButton } from "@/components/ui/soon-button";
+
+// Os ícones viajam como nomes (texto): um componente é uma função e não pode ser passado de um Server Component
+// para este Client Component.
+const ICONS = { Cake, CalendarClock, CreditCard, Gift, Heart, MessageSquareText, PartyPopper, ShoppingBag, Sparkles, UserPlus, Wallet };
+
+export type GalleryIcon = keyof typeof ICONS;
 
 export type GalleryModel = {
   id: string;
-  icon: LucideIcon;
+  icon: GalleryIcon;
   title: string;
   description: string;
   category: string;
@@ -61,7 +67,7 @@ export function ModelGallery({
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((model) => {
-          const Icon = model.icon;
+          const Icon = ICONS[model.icon];
 
           return (
             <article key={model.id} className="glow-border flex flex-col rounded-2xl p-5">

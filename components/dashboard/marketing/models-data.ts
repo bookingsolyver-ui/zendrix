@@ -1,4 +1,3 @@
-import { Cake, CalendarClock, CreditCard, Gift, Heart, MessageSquareText, PartyPopper, ShoppingBag, Sparkles, UserPlus, Wallet } from "lucide-react";
 import type { GalleryModel } from "@/components/dashboard/marketing/model-gallery";
 
 // Modelos prontos: texto e estrutura de partida. Nada disto é enviado sem o cliente rever e ativar.
@@ -6,7 +5,7 @@ import type { GalleryModel } from "@/components/dashboard/marketing/model-galler
 export const AUTOMATION_MODELS: GalleryModel[] = [
   {
     id: "welcome",
-    icon: UserPlus,
+    icon: "UserPlus",
     title: "Boas-vindas a novo contacto",
     category: "Relacionamento",
     meta: "2 mensagens · ~1 dia",
@@ -15,7 +14,7 @@ export const AUTOMATION_MODELS: GalleryModel[] = [
   },
   {
     id: "abandoned-cart",
-    icon: ShoppingBag,
+    icon: "ShoppingBag",
     title: "Carrinho abandonado",
     category: "Recuperação",
     meta: "3 mensagens · ~2 dias",
@@ -24,7 +23,7 @@ export const AUTOMATION_MODELS: GalleryModel[] = [
   },
   {
     id: "payment-failed",
-    icon: CreditCard,
+    icon: "CreditCard",
     title: "Pagamento não concluído",
     category: "Recuperação",
     meta: "2 mensagens · ~1 dia",
@@ -33,7 +32,7 @@ export const AUTOMATION_MODELS: GalleryModel[] = [
   },
   {
     id: "payment-confirmed",
-    icon: Wallet,
+    icon: "Wallet",
     title: "Pagamento confirmado",
     category: "Transacional",
     meta: "1 mensagem · imediata",
@@ -42,7 +41,7 @@ export const AUTOMATION_MODELS: GalleryModel[] = [
   },
   {
     id: "appointment-reminder",
-    icon: CalendarClock,
+    icon: "CalendarClock",
     title: "Lembrete de marcação",
     category: "Transacional",
     meta: "1 mensagem · 24 h antes",
@@ -51,7 +50,7 @@ export const AUTOMATION_MODELS: GalleryModel[] = [
   },
   {
     id: "birthday",
-    icon: Cake,
+    icon: "Cake",
     title: "Aniversário do cliente",
     category: "Relacionamento",
     meta: "1 mensagem · no dia",
@@ -63,35 +62,35 @@ export const AUTOMATION_MODELS: GalleryModel[] = [
 export const POPUP_MODELS: GalleryModel[] = [
   {
     id: "editorial",
-    icon: Sparkles,
+    icon: "Sparkles",
     title: "Editorial",
     category: "Formulário",
     description: "Tipografia elegante, botão arredondado e apenas um formulário de registo.",
   },
   {
     id: "spin",
-    icon: Gift,
+    icon: "Gift",
     title: "Gire e ganhe",
     category: "Gamificado",
     description: "Registo seguido de roleta com prémios. O giro é a recompensa.",
   },
   {
     id: "scratch",
-    icon: PartyPopper,
+    icon: "PartyPopper",
     title: "Raspadinha",
     category: "Gamificado",
     description: "A pessoa raspa, vê o prémio e deixa os dados para o resgatar.",
   },
   {
     id: "vip",
-    icon: Heart,
+    icon: "Heart",
     title: "Lista VIP",
     category: "Formulário",
     description: "Faixa discreta com um único campo: o WhatsApp. Ideal para lançamentos.",
   },
   {
     id: "birthday",
-    icon: Cake,
+    icon: "Cake",
     title: "Aniversário",
     category: "Formulário",
     description: "Duas etapas: nome e WhatsApp, depois e-mail e data de nascimento.",
@@ -101,7 +100,7 @@ export const POPUP_MODELS: GalleryModel[] = [
 export const MESSAGE_MODELS: GalleryModel[] = [
   {
     id: "m-welcome",
-    icon: MessageSquareText,
+    icon: "MessageSquareText",
     title: "Boas-vindas",
     category: "Utilidade",
     meta: "Português (pt)",
@@ -110,7 +109,7 @@ export const MESSAGE_MODELS: GalleryModel[] = [
   },
   {
     id: "m-order",
-    icon: ShoppingBag,
+    icon: "ShoppingBag",
     title: "Confirmação de pedido",
     category: "Utilidade",
     meta: "Português (pt)",
@@ -119,7 +118,7 @@ export const MESSAGE_MODELS: GalleryModel[] = [
   },
   {
     id: "m-reminder",
-    icon: CalendarClock,
+    icon: "CalendarClock",
     title: "Lembrete de marcação",
     category: "Utilidade",
     meta: "Português (pt)",
@@ -128,7 +127,7 @@ export const MESSAGE_MODELS: GalleryModel[] = [
   },
   {
     id: "m-offer",
-    icon: Gift,
+    icon: "Gift",
     title: "Oferta com código",
     category: "Marketing",
     meta: "Português (pt)",
@@ -137,7 +136,7 @@ export const MESSAGE_MODELS: GalleryModel[] = [
   },
   {
     id: "m-reactivation",
-    icon: Heart,
+    icon: "Heart",
     title: "Reativação de cliente",
     category: "Marketing",
     meta: "Português (pt)",
