@@ -1,5 +1,6 @@
 import { Download } from "lucide-react";
 import { SoonButton } from "@/components/ui/soon-button";
+import { ManageBillingButton } from "./manage-billing-button";
 
 type Invoice = {
   id: string;
@@ -11,7 +12,13 @@ type Invoice = {
 // No billing system yet, so there are no invoices.
 const INVOICES: Invoice[] = [];
 
-export function InvoiceHistory() {
+export function InvoiceHistory({
+  canManage = false,
+  hasBillingAccount = false,
+}: {
+  canManage?: boolean;
+  hasBillingAccount?: boolean;
+}) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-7">
       <h2 className="text-sm font-semibold text-white">Histórico de Faturas</h2>
@@ -19,6 +26,13 @@ export function InvoiceHistory() {
       {INVOICES.length === 0 ? (
         <div className="mt-4 rounded-xl border border-white/10 bg-black/20 py-10 text-center">
           <p className="text-sm text-white/50">Ainda não existem faturas emitidas.</p>
+          {hasBillingAccount && canManage && (
+            <div className="mt-4 flex justify-center">
+              <ManageBillingButton className="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.03]">
+                Ver faturas no portal
+              </ManageBillingButton>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-4 overflow-x-auto">

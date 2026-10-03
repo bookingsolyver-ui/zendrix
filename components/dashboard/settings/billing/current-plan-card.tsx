@@ -1,5 +1,5 @@
-import { ArrowUpRight, ShieldCheck } from "lucide-react";
-import { SoonButton } from "@/components/ui/soon-button";
+import { ShieldCheck } from "lucide-react";
+import { PlanActions } from "./plan-actions";
 
 const COPY: Record<string, { title: string; text: string }> = {
   active: {
@@ -25,11 +25,15 @@ export function CurrentPlanCard({
   plan,
   trialEndsAt,
   msLeft,
+  canManage,
+  hasBillingAccount,
 }: {
   subStatus: string;
   plan: string | null;
   trialEndsAt: string | null;
   msLeft: number | null;
+  canManage: boolean;
+  hasBillingAccount: boolean;
 }) {
   const copy = COPY[subStatus] ?? COPY.canceled;
   const end = trialEndsAt ? new Date(trialEndsAt) : null;
@@ -58,14 +62,7 @@ export function CurrentPlanCard({
           </div>
         </div>
 
-        <SoonButton
-          feature="Escolher plano"
-          type="button"
-          className="neon-btn flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold text-background"
-        >
-          Escolher plano
-          <ArrowUpRight className="h-4 w-4" />
-        </SoonButton>
+        <PlanActions canManage={canManage} subStatus={subStatus} hasBillingAccount={hasBillingAccount} />
       </div>
     </div>
   );
