@@ -65,6 +65,7 @@ model Workspace {
   segments               Segment[]
   messageTemplates       MessageTemplate[]
   campaigns              Campaign[]
+  automations            Automation[]
   paymentLinks           PaymentLink[]
   followUps              FollowUp[]
   appointments           Appointment[]
@@ -490,4 +491,79 @@ model CampaignRecipient {
 
   @@unique([campaignId, contactId])
   @@index([campaignId, status])
+}
+
+// ─── Automações ───
+
+enum AutomationTrigger {
+  NEW_CONTACT
+  MESSAGE_RECEIVED
+  LEAD_QUALIFIED
+  PAYMENT_PAID
+}
+
+enum AutomationStepStatus {
+  PENDING
+  PROCESSING
+  DONE
+  SKIPPED
+  FAILED
+}
+
+// Um fluxo: um gatilho (evento real) e até 3 ações em sequência (cada uma com espera opcional). O motor lê os
+// eventos reais (contactos, mensagens, qualificações, pagamentos) a partir de `cursorAt`: uma automação só
+// reage ao que acontece DEPOIS de ser ativada.
+model Automation {
+  id          String            @id @default(cuid())
+  workspaceId String
+  name        String
+  trigger     AutomationTrigger
+  config      Json // por gatilho (ex.: palavra-chave)
+  actions     Json // lista validada em lib/automations/schema.ts
+  active      Boolean           @default(false)
+  activatedAt DateTime          @default(now()) // quando foi ativada pela última vez: só reage ao que vem depois
+  cursorAt    DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  runs        AutomationRun[]
+
+  @@index([workspaceId])
+  @@index([active, trigger])
+}
+
+// Uma execução: um evento + um contacto. A chave única (automação + evento) é o que impede reexecutar o mesmo
+// evento (varrimentos repetidos, dois workers).
+model AutomationRun {
+  id           String              @id @default(cuid())
+  automationId String
+  workspaceId  String
+  contactId    String
+  eventKey     String
+  createdAt    DateTime            @default(now())
+  completedAt  DateTime?
+  automation   Automation          @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  steps        AutomationRunStep[]
+
+  @@unique([automationId, eventKey])
+  @@index([automationId, contactId, createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+model AutomationRunStep {
+  id          String               @id @default(cuid())
+  runId       String
+  workspaceId String
+  index       Int
+  type        String // SEND_MESSAGE | SET_STAGE | CREATE_TASK
+  config      Json // cópia da ação no momento (editar a automação não muda execuções em curso)
+  dueAt       DateTime
+  status      AutomationStepStatus @default(PENDING)
+  reason      String?
+  doneAt      DateTime?
+  updatedAt   DateTime             @updatedAt
+  run         AutomationRun        @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, index])
+  @@index([status, dueAt])
 }

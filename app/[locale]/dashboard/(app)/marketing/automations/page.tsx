@@ -1,78 +1,79 @@
 import { setRequestLocale } from "next-intl/server";
-import { CalendarHeart, CreditCard, Plus, ShoppingBag, UserPlus, Workflow } from "lucide-react";
+import { Clock, History, ShieldCheck, Workflow } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { FilterBar } from "@/components/dashboard/marketing/filter-bar";
-import { HowItWorks } from "@/components/dashboard/marketing/how-it-works";
-import { MarketingEmptyState } from "@/components/dashboard/marketing/empty-state";
-import { ModelGallery } from "@/components/dashboard/marketing/model-gallery";
-import { StarterGrid } from "@/components/dashboard/marketing/starter-grid";
-import { AutomationList } from "@/components/dashboard/marketing/automation-list";
-import { AUTOMATION_MODELS } from "@/components/dashboard/marketing/models-data";
-import { INITIAL_AUTOMATIONS } from "@/components/dashboard/marketing/automations-data";
-import { SoonButton } from "@/components/ui/soon-button";
+import { MarketingHero } from "@/components/dashboard/marketing/hero-banner";
+import { FeatureGrid } from "@/components/dashboard/crm/feature-grid";
+import { AutomationsManager, type AutomationView, type RunView } from "@/components/dashboard/marketing/automations-manager";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { automationStats } from "@/lib/automations/engine";
+import { ACTION_TYPES, parseActions, parseTriggerConfig, type ActionType } from "@/lib/automations/schema";
+import { prisma } from "@/lib/prisma";
 
-const TRIGGERS = [
-  { icon: ShoppingBag, title: "Carrinho abandonado", description: "Requer uma loja ligada que envie este evento." },
-  { icon: CreditCard, title: "Pagamento confirmado", description: "Dispara quando um link de pagamento é pago." },
-  { icon: UserPlus, title: "Novo contacto", description: "Dispara quando alguém escreve pela primeira vez." },
-  { icon: CalendarHeart, title: "Data do contacto", description: "Chegou uma data do contacto: aniversário, renovação, vencimento." },
+const FEATURES = [
+  { icon: Clock, title: "Executam por si", description: "O sistema verifica os eventos de 5 em 5 minutos e executa as ações, sem ninguém ter de intervir." },
+  { icon: ShieldCheck, title: "Sem repetições", description: "Cada evento só corre uma vez, e a mesma automação só corre uma vez por contacto em 24 horas." },
+  { icon: Workflow, title: "Só o que acontece depois", description: "Ao ativar, a automação não age sobre contactos antigos: só sobre o que acontecer a partir desse momento." },
+  { icon: History, title: "Tudo registado", description: "Cada execução fica guardada com o resultado de cada ação, incluindo as que foram ignoradas e porquê." },
 ];
+
+const dateFormat = new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Lisbon" });
 
 export default async function MarketingAutomationsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const user = await getCurrentUser();
+  const workspaceId = user?.workspace?.id;
+  const canManage = user?.role === "OWNER" || user?.role === "MANAGER";
+
+  const rows = workspaceId ? await prisma.automation.findMany({ where: { workspaceId }, orderBy: { createdAt: "asc" } }) : [];
+  const stats = workspaceId ? await automationStats(workspaceId, rows.map((row) => row.id)) : {};
+  const automations: AutomationView[] = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    trigger: row.trigger,
+    keyword: parseTriggerConfig(row.config).keyword,
+    actions: parseActions(row.actions),
+    active: row.active,
+    runs: stats[row.id]?.runs ?? 0,
+    messages: stats[row.id]?.messages ?? 0,
+    failed: stats[row.id]?.failed ?? 0,
+  }));
+
+  const recent = workspaceId
+    ? await prisma.automationRun.findMany({
+        where: { workspaceId },
+        orderBy: { createdAt: "desc" },
+        take: 15,
+        select: { id: true, createdAt: true, completedAt: true, contactId: true, automation: { select: { name: true } }, steps: { orderBy: { index: "asc" }, select: { type: true, status: true, reason: true } } },
+      })
+    : [];
+  const contacts = recent.length ? await prisma.contact.findMany({ where: { workspaceId, id: { in: recent.map((run) => run.contactId) } }, select: { id: true, name: true, waId: true } }) : [];
+  const runs: RunView[] = recent.map((run) => {
+    const contact = contacts.find((c) => c.id === run.contactId);
+    const statuses = run.steps.map((step) => step.status);
+    return {
+      id: run.id,
+      automationName: run.automation.name,
+      contact: contact?.name?.trim() || (contact ? `+${contact.waId}` : "Contacto removido"),
+      whenLabel: dateFormat.format(run.createdAt),
+      status: !run.completedAt ? "Em curso" : statuses.includes("FAILED") ? "Falhou" : statuses.every((status) => status === "SKIPPED") ? "Ignorada" : "Concluída",
+      steps: run.steps.filter((step): step is typeof step & { type: ActionType } => (ACTION_TYPES as readonly string[]).includes(step.type)).map((step) => ({ type: step.type, status: step.status, reason: step.reason })),
+    };
+  });
+
   return (
     <>
-      <DashboardPageHeader
-        title="Automações"
-        subtitle="Automatize jornadas de mensagens disparadas por eventos do cliente."
-        action={
-          <SoonButton
-            feature="Nova automação"
-            className="neon-btn flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-background"
-          >
-            <Plus className="h-4 w-4" />
-            Nova automação
-          </SoonButton>
-        }
-      />
-
+      <DashboardPageHeader title="Automações" subtitle="Automatize respostas e tarefas a partir de eventos reais do seu negócio." />
       <div className="space-y-8">
-        <section className="space-y-4">
-          <FilterBar filters={["Últimos 30 dias", "Qualquer tipo", "Qualquer estado"]} />
-          {INITIAL_AUTOMATIONS.length === 0 ? (
-            <MarketingEmptyState
-              icon={Workflow}
-              title="Ainda não tem automações"
-              description="Os fluxos reagem a um evento do cliente e enviam o seguimento por si, a qualquer hora."
-            />
-          ) : (
-            <AutomationList />
-          )}
-        </section>
-
-        <HowItWorks
-          steps={[
-            "Comece por um evento: carrinho abandonado, pedido, novo contacto",
-            "Envie automaticamente um template aprovado",
-            "Ramifique com condições, filtros e esperas",
-            "Acompanhe envios e cliques por fluxo",
-          ]}
+        <MarketingHero
+          icon={Workflow}
+          title="Fluxos automáticos"
+          description="Escolha um evento (novo contacto, mensagem recebida, lead qualificado, pagamento) e o que deve acontecer a seguir: enviar uma mensagem, mudar a fase ou criar uma tarefa."
+          bullets={["Gatilhos reais da sua base de contactos", "Mensagens pela fila de envio, com as regras do WhatsApp", "Histórico de cada execução"]}
         />
-
-        <StarterGrid
-          title="Comece por um gatilho"
-          subtitle="A automação nasce com o gatilho já escolhido e o editor abre com ele no lugar."
-          options={TRIGGERS}
-        />
-
-        <ModelGallery
-          title="Modelos prontos"
-          subtitle="Jornadas completas, com as mensagens já escritas. Reveja tudo antes de ativar."
-          models={AUTOMATION_MODELS}
-          action="Usar este modelo"
-        />
+        <AutomationsManager automations={automations} runs={runs} canManage={canManage} />
+        <FeatureGrid title="Como funciona" features={FEATURES} />
       </div>
     </>
   );
