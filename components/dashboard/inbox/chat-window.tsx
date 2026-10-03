@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Bot, Loader2, Pause, Send } from "lucide-react";
+import { Bot, Clock, Loader2, Pause, Send } from "lucide-react";
 import { contactLabel } from "@/lib/inbox/display";
+import { channelOf, CHANNEL_LABEL } from "@/lib/inbox/channels";
+import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
 import { REPLY_WINDOW_MS, type ChatMessage, type ConversationSummary } from "@/lib/inbox/types";
 
 const POLL_MS = 3000;
@@ -15,12 +17,20 @@ const STATUS_LABEL: Record<string, string> = {
   FAILED: "Falhou",
 };
 
+// Mensagens que ainda não saíram para a Meta: estão na fila de saída (QUEUED na Inbox; PENDING/PROCESSING são
+// os estados da própria fila). Passam sozinhas a "Enviada" (ou "Falhou") quando o worker as envia.
+const QUEUE_LABEL: Record<string, string> = {
+  QUEUED: "Na fila…",
+  PENDING: "Na fila…",
+  PROCESSING: "A enviar…",
+};
+
 const SEND_ERRORS: Record<string, string> = {
   window_closed:
     "Passaram mais de 24 h desde a última mensagem do cliente. A Meta só permite responder com um template.",
   token_expired: "O token da Meta expirou. Atualize-o em Definições → WhatsApp.",
   rate_limited: "Está a enviar depressa demais. Aguarde um instante.",
-  no_integration: "Não há nenhum número de WhatsApp ligado.",
+  no_integration: "Não há nenhum canal ligado a esta conversa.",
   invalid_input: "A mensagem está vazia ou é demasiado longa.",
 };
 
@@ -155,14 +165,20 @@ export function ChatWindow({
     }
   }
 
-  const title = contactLabel(conversation.contactName, conversation.waId);
+  const platform = channelOf(conversation.platform);
+  const title = contactLabel(conversation.contactName, conversation.waId, platform);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background/40">
       <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
-        <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold text-foreground">{title}</h2>
-          <p className="text-xs text-muted">+{conversation.waId}</p>
+        <div className="flex min-w-0 items-center gap-3">
+          <ChannelBadge platform={platform} />
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-foreground">{title}</h2>
+            <p className="text-xs text-muted">
+              {platform === "WHATSAPP" ? `+${conversation.waId}` : CHANNEL_LABEL[platform]}
+            </p>
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -241,7 +257,16 @@ export function ChatWindow({
               </p>
               <p className={`mt-1 text-right text-[10px] ${isOut ? "text-white/70" : "text-muted"}`}>
                 {time(message.createdAt)}
-                {isOut && ` · ${STATUS_LABEL[message.status] ?? message.status}`}
+                {isOut && QUEUE_LABEL[message.status] && (
+                  <span
+                    className="ml-1 inline-flex animate-pulse items-center gap-1 align-middle"
+                    title="A aguardar envio para a Meta"
+                  >
+                    · <Clock className="h-2.5 w-2.5" aria-hidden />
+                    {QUEUE_LABEL[message.status]}
+                  </span>
+                )}
+                {isOut && !QUEUE_LABEL[message.status] && ` · ${STATUS_LABEL[message.status] ?? message.status}`}
                 {isOut && message.status === "FAILED" && message.errorMessage
                   ? ` (${message.errorMessage})`
                   : ""}

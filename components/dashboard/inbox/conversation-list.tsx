@@ -2,9 +2,11 @@
 
 import type { ConversationSummary } from "@/lib/inbox/types";
 import { contactLabel, visibleName } from "@/lib/inbox/display";
+import { channelOf } from "@/lib/inbox/channels";
+import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
 
 function displayName(conversation: ConversationSummary) {
-  return contactLabel(conversation.contactName, conversation.waId);
+  return contactLabel(conversation.contactName, conversation.waId, channelOf(conversation.platform));
 }
 
 function initials(conversation: ConversationSummary) {
@@ -56,8 +58,16 @@ export function ConversationList({
                 isSelected ? "bg-surface-2" : "hover:bg-surface-2/60"
               }`}
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-semibold text-foreground ring-1 ring-border">
-                {initials(conversation)}
+              <span className="relative shrink-0">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-xs font-semibold text-foreground ring-1 ring-border">
+                  {initials(conversation)}
+                </span>
+                {/* O canal da conversa, no canto do avatar. */}
+                <ChannelBadge
+                  platform={channelOf(conversation.platform)}
+                  size="sm"
+                  className="absolute -bottom-0.5 -right-0.5 ring-2 ring-background"
+                />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-baseline justify-between gap-2">
