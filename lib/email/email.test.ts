@@ -74,6 +74,16 @@ test("renovação: organização, plano, valor (se existir) e próxima data", ()
   assert.ok(noPrice.text.includes("Zetrix") && !noPrice.text.includes("Amount"));
 });
 
+test("renovação com recibo: valor cobrado e ligação ao recibo, nas três línguas", () => {
+  for (const lang of LANGS) {
+    const mail = subscriptionRenewedEmail({ orgName: "Loja", plan: "Pro", renewedUntil: new Date("2026-11-03T12:00:00Z"), amountLabel: "29,90 €", priceLabel: "99 € / mês", receiptUrl: "https://pay.stripe.test/i/abc?x=1&y=2", billingUrl: URL_, lang });
+    assert.ok(mail.text.includes("29,90 €") && !mail.text.includes("99 € / mês"), `${lang}: o valor cobrado manda sobre o preço de tabela`);
+    assert.ok(mail.text.includes("https://pay.stripe.test/i/abc?x=1&y=2"), `${lang}: o link do recibo vai no texto`);
+    assert.ok(mail.html.includes('href="https://pay.stripe.test/i/abc?x=1&amp;y=2"'), `${lang}: e no HTML, escapado`);
+  }
+  assert.ok(!subscriptionRenewedEmail({ orgName: "Loja", plan: "Pro", renewedUntil: new Date(), billingUrl: URL_, lang: "pt" }).text.includes("Recibo"), "sem recibo, sem a linha do recibo");
+});
+
 test("avisos do sistema: manutenção mostra a janela; o texto do administrador é escapado e respeita parágrafos", () => {
   const mail = systemNoticeEmail({ kind: "maintenance", text: { subject: "Manutenção <b>sábado</b>", body: "Linha 1\nLinha 2\n\nSegundo parágrafo <script>x</script>" }, startsAt: new Date("2026-10-10T01:00:00Z"), endsAt: new Date("2026-10-10T03:00:00Z"), lang: "pt" });
   assert.ok(!mail.html.includes("<script>") && !mail.html.includes("<b>sábado"));

@@ -71,3 +71,16 @@ export const stripeCheckoutSessionPaidSchema = z.object({
   mode: z.string().optional(),
   payment_status: z.string().optional(),
 });
+
+// A fatura paga (invoice.payment_succeeded / invoice.paid). Só se leem os campos usados no e-mail de renovação.
+export const stripeInvoiceSchema = z.object({
+  id: z.string().min(1),
+  customer: idOrObject.nullish(),
+  billing_reason: z.string().nullish(), // "subscription_cycle" = renovação; "subscription_create" = primeira cobrança
+  amount_paid: z.number().int().nonnegative().nullish(), // na unidade mínima (cêntimos)
+  currency: z.string().length(3).nullish(),
+  hosted_invoice_url: z.string().url().nullish(),
+  period_end: z.number().nullish(),
+  lines: z.object({ data: z.array(z.object({ period: z.object({ end: z.number() }).nullish() })) }).nullish(),
+});
+export type StripeInvoice = z.infer<typeof stripeInvoiceSchema>;

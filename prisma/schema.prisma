@@ -663,6 +663,8 @@ model EmailNotification {
   noticeId    String? // se pertence a um aviso do administrador
   createdAt   DateTime  @default(now())
   sentAt      DateTime?
+  // Não enviar antes desta hora (por exemplo, o e-mail de renovação espera uns minutos pelo recibo do Stripe).
+  notBefore   DateTime?
 
   @@unique([kind, dedupeKey, toEmail])
   @@index([status, createdAt])

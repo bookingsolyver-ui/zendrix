@@ -193,21 +193,24 @@ export function endingSoonEmail(input: { name?: string | null; orgName: string; 
 }
 
 // ------------------------------------------------------------------------------------ subscrição renovada
-export function subscriptionRenewedEmail(input: { name?: string | null; orgName: string; plan: string | null; renewedUntil: Date; priceLabel?: string | null; billingUrl: string; lang: EmailLang }): EmailContent {
+// `amountLabel`: o valor cobrado (do recibo do Stripe); `priceLabel`: o preço do plano, se não houver recibo ainda.
+export function subscriptionRenewedEmail(input: { name?: string | null; orgName: string; plan: string | null; renewedUntil: Date; priceLabel?: string | null; amountLabel?: string | null; receiptUrl?: string | null; billingUrl: string; lang: EmailLang }): EmailContent {
   const { lang } = input;
   const hello = esc(PHRASES[lang].hello(input.name));
   const until = formatDate(input.renewedUntil, lang);
   const plan = input.plan?.trim() || "Zetrix";
-  const price = input.priceLabel?.trim();
+  const price = input.amountLabel?.trim() || input.priceLabel?.trim();
+  const receiptLabel = { pt: "Recibo", en: "Receipt", es: "Recibo" }[lang];
+  const receipt = input.receiptUrl ? [`${esc(receiptLabel)}: <a href="${esc(input.receiptUrl)}" style="color:#059669">${esc(input.receiptUrl)}</a>`] : [];
   const details = {
     pt: [["Organização", input.orgName], ["Plano", plan], ...(price ? [["Valor", price]] : []), ["Próxima renovação", until]],
     en: [["Organisation", input.orgName], ["Plan", plan], ...(price ? [["Amount", price]] : []), ["Next renewal", until]],
     es: [["Organización", input.orgName], ["Plan", plan], ...(price ? [["Importe", price]] : []), ["Próxima renovación", until]],
   }[lang].map(([label, value]) => `${esc(label)}: ${b(value)}`).join("<br>");
   return render(lang, pick(lang, {
-    pt: { subject: "Subscrição Zetrix renovada com sucesso", preheader: `Renovada até ${until}.`, heading: "A sua subscrição foi renovada", paragraphs: [hello, "Recebemos o pagamento e a sua subscrição foi renovada. Obrigado pela confiança!", details], cta: { label: "Ver faturação", url: input.billingUrl }, footnote: "As faturas ficam disponíveis no portal de faturação.", notification: true },
-    en: { subject: "Zetrix subscription renewed successfully", preheader: `Renewed until ${until}.`, heading: "Your subscription was renewed", paragraphs: [hello, "We received the payment and your subscription has been renewed. Thank you for your trust!", details], cta: { label: "View billing", url: input.billingUrl }, footnote: "Invoices are available in the billing portal.", notification: true },
-    es: { subject: "Suscripción de Zetrix renovada con éxito", preheader: `Renovada hasta el ${until}.`, heading: "Tu suscripción fue renovada", paragraphs: [hello, "Recibimos el pago y tu suscripción fue renovada. ¡Gracias por tu confianza!", details], cta: { label: "Ver facturación", url: input.billingUrl }, footnote: "Las facturas están disponibles en el portal de facturación.", notification: true },
+    pt: { subject: "Subscrição Zetrix renovada com sucesso", preheader: `Renovada até ${until}.`, heading: "A sua subscrição foi renovada", paragraphs: [hello, "Recebemos o pagamento e a sua subscrição foi renovada. Obrigado pela confiança!", details, ...receipt], cta: { label: "Ver faturação", url: input.billingUrl }, footnote: "As faturas ficam disponíveis no portal de faturação.", notification: true },
+    en: { subject: "Zetrix subscription renewed successfully", preheader: `Renewed until ${until}.`, heading: "Your subscription was renewed", paragraphs: [hello, "We received the payment and your subscription has been renewed. Thank you for your trust!", details, ...receipt], cta: { label: "View billing", url: input.billingUrl }, footnote: "Invoices are available in the billing portal.", notification: true },
+    es: { subject: "Suscripción de Zetrix renovada con éxito", preheader: `Renovada hasta el ${until}.`, heading: "Tu suscripción fue renovada", paragraphs: [hello, "Recibimos el pago y tu suscripción fue renovada. ¡Gracias por tu confianza!", details, ...receipt], cta: { label: "Ver facturación", url: input.billingUrl }, footnote: "Las facturas están disponibles en el portal de facturación.", notification: true },
   }));
 }
 

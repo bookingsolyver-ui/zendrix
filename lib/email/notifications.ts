@@ -26,7 +26,7 @@ export const payloadSchemas = {
   account_approved: z.object({ name, loginUrl: httpUrl }),
   account_rejected: z.object({ name, reason: z.string().min(1).max(300), supportEmail: z.string().max(254).nullish() }),
   ending_soon: z.object({ name, orgName: z.string().min(1).max(120), kind: z.enum(["trial", "subscription"]), endsAt: isoDate, billingUrl: httpUrl }),
-  subscription_renewed: z.object({ name, orgName: z.string().min(1).max(120), plan: z.string().max(80).nullish(), renewedUntil: isoDate, priceLabel: z.string().max(60).nullish(), billingUrl: httpUrl }),
+  subscription_renewed: z.object({ name, orgName: z.string().min(1).max(120), plan: z.string().max(80).nullish(), renewedUntil: isoDate, priceLabel: z.string().max(60).nullish(), amountLabel: z.string().max(60).nullish(), receiptUrl: httpUrl.nullish(), billingUrl: httpUrl }),
   system_notice: z.object({
     name,
     kind: z.enum(["maintenance", "notice"]),
@@ -82,7 +82,7 @@ export function renderNotification(kind: string, payload: unknown, lang: EmailLa
     }
     case "subscription_renewed": {
       const d = data as z.infer<typeof payloadSchemas.subscription_renewed>;
-      return { ok: true, email: subscriptionRenewedEmail({ name: d.name, orgName: d.orgName, plan: d.plan ?? null, renewedUntil: new Date(d.renewedUntil), priceLabel: d.priceLabel, billingUrl: d.billingUrl, lang }) };
+      return { ok: true, email: subscriptionRenewedEmail({ name: d.name, orgName: d.orgName, plan: d.plan ?? null, renewedUntil: new Date(d.renewedUntil), priceLabel: d.priceLabel, amountLabel: d.amountLabel, receiptUrl: d.receiptUrl, billingUrl: d.billingUrl, lang }) };
     }
     case "system_notice": {
       const d = data as z.infer<typeof payloadSchemas.system_notice>;

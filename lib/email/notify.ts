@@ -20,13 +20,15 @@ export interface QueueInput {
   workspaceId?: string | null;
   payload: Prisma.InputJsonValue;
   noticeId?: string | null;
+  // Não enviar antes desta hora (só se regista; o cron envia quando chegar).
+  notBefore?: Date | null;
 }
 
 // Regista o e-mail. Devolve o id, ou null se este aviso já existia para este destinatário.
 export async function queueNotification(input: QueueInput): Promise<string | null> {
   try {
     const row = await prisma.emailNotification.create({
-      data: { kind: input.kind, dedupeKey: input.dedupeKey, toEmail: input.to.trim().toLowerCase(), locale: emailLang(input.locale), workspaceId: input.workspaceId ?? null, payload: input.payload, noticeId: input.noticeId ?? null },
+      data: { kind: input.kind, dedupeKey: input.dedupeKey, toEmail: input.to.trim().toLowerCase(), locale: emailLang(input.locale), workspaceId: input.workspaceId ?? null, payload: input.payload, noticeId: input.noticeId ?? null, notBefore: input.notBefore ?? null },
       select: { id: true },
     });
     return row.id;
@@ -90,7 +92,7 @@ export interface PendingSummary {
 export async function processPendingEmails(limit = 40, deadlineAt?: number): Promise<PendingSummary> {
   const summary: PendingSummary = { tried: 0, sent: 0, failed: 0 };
   if (!emailConfigured()) return summary;
-  const rows = await prisma.emailNotification.findMany({ where: { status: "PENDING", attempts: { lt: MAX_ATTEMPTS } }, orderBy: { createdAt: "asc" }, take: limit, select: { id: true } });
+  const rows = await prisma.emailNotification.findMany({ where: { status: "PENDING", attempts: { lt: MAX_ATTEMPTS }, OR: [{ notBefore: null }, { notBefore: { lte: new Date() } }] }, orderBy: { createdAt: "asc" }, take: limit, select: { id: true } });
   for (const row of rows) {
     if (deadlineAt !== undefined && Date.now() >= deadlineAt) break;
     const result = await deliverNotification(row.id);
@@ -114,4 +116,20 @@ export async function ownerRecipients(workspaceId: string): Promise<Recipient[]>
   if (owners.length > 0) return owners;
   const workspace = await prisma.workspace.findUnique({ where: { id: workspaceId }, select: { ownerEmail: true } });
   return workspace?.ownerEmail ? [{ email: workspace.ownerEmail, name: null, locale: null }] : [];
+}
+
+// Regista e envia; se o mesmo e-mail já estava registado e ainda PENDENTE (à espera da sua hora), atualiza-o com
+// os dados novos (mais completos) e envia já. Se já saiu ou falhou de vez, não faz nada. Nunca lança.
+export async function notifyOrUpgrade(input: QueueInput): Promise<DeliveryResult | "duplicate"> {
+  try {
+    const id = await queueNotification({ ...input, notBefore: null });
+    if (id) return await deliverNotification(id);
+    const existing = await prisma.emailNotification.findUnique({ where: { kind_dedupeKey_toEmail: { kind: input.kind, dedupeKey: input.dedupeKey, toEmail: input.to.trim().toLowerCase() } }, select: { id: true, status: true } });
+    if (!existing || existing.status !== "PENDING") return "duplicate";
+    await prisma.emailNotification.update({ where: { id: existing.id }, data: { payload: input.payload, notBefore: null } });
+    return await deliverNotification(existing.id);
+  } catch (err) {
+    console.error("[email] falha ao atualizar/enviar", input.kind, err);
+    return "retry";
+  }
 }

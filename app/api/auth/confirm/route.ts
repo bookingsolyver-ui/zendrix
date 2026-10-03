@@ -3,7 +3,6 @@ import { z } from "zod";
 import { provisionUser } from "@/lib/auth/provision";
 import { emailConfigured, sendEmail } from "@/lib/email/send";
 import { emailLang, welcomeEmail } from "@/lib/email/templates";
-import { notify } from "@/lib/email/notify";
 import { prisma } from "@/lib/prisma";
 import { appOrigin } from "@/lib/http/origin";
 import { safeNextPath } from "@/lib/http/safe-next";
@@ -51,8 +50,7 @@ export async function POST(request: Request) {
       // A sessão é válida; /api/auth/provision repete isto no próximo início de sessão.
       console.error("[auth/confirm] provisioning failed", err);
     }
-    // E-mail depois da resposta, para nunca atrasar nem falhar o acesso. Conta por aprovar: aviso de que o registo foi
-    // recebido (e será revisto); conta ativa: boas-vindas. Ambos ficam registados e repetem-se se o envio falhar.
+    // Boas-vindas depois da resposta, para nunca atrasar nem falhar o acesso.
     {
       const to = data.user.email;
       const userId = data.user.id;
@@ -62,10 +60,10 @@ export async function POST(request: Request) {
         .catch(() => null);
       const pending = row?.workspace.approvalStatus === "PENDING_APPROVAL";
       const lang = emailLang(row?.locale ?? locale);
+      // Conta por aprovar: o aviso «conta em análise» já saiu quando o registo foi gravado (lib/auth/provision.ts).
+      // Aqui só as boas-vindas, e só a contas já ativas.
       after(async () => {
-        if (pending) {
-          await notify({ kind: "pending_review", dedupeKey: `pending:${userId}`, to, locale: lang, workspaceId: row?.workspaceId, payload: { name } });
-        } else if (emailConfigured()) {
+        if (!pending && emailConfigured()) {
           await sendEmail({ to, ...welcomeEmail({ name, dashboardUrl, lang }), idempotencyKey: `welcome-${userId}` });
         }
       });

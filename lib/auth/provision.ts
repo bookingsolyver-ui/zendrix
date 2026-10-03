@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { trialEndDate } from "@/lib/tenant";
 import { approvalRequired, initialApprovalStatus } from "@/lib/auth/approval";
+import { sendPendingReviewEmail } from "@/lib/email/account-events";
 import { hashInviteToken, looksLikeInviteToken } from "@/lib/team/invite-token";
 
 interface ProvisionInput {
@@ -107,7 +108,7 @@ export async function provisionUser({
   }
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx) => {
       const workspace = await tx.workspace.create({
         data: {
           name:
@@ -134,6 +135,10 @@ export async function provisionUser({
         },
       });
     });
+    // «Conta em análise»: assim que o registo fica gravado (a conta nasce por aprovar), sem esperar por mais nada.
+    // Só aqui se cria uma organização nova, por isso todos os caminhos de registo passam por este e-mail.
+    if (approvalRequired(process.env.REQUIRE_ACCOUNT_APPROVAL)) sendPendingReviewEmail({ authId, email: normalizedEmail, name: cleanName, locale: cleanLocale, workspaceId: created.workspaceId });
+    return created;
   } catch (err) {
     // Two concurrent requests for the same account: the loser reuses the winner's row.
     if (
