@@ -51,7 +51,7 @@ async function ensureCustomer(workspace: BillingWorkspace, email: string): Promi
       name: workspace.name,
       metadata: { workspace_id: workspace.id },
     },
-    `zentrix-customer-${workspace.id}`,
+    `zetrix-customer-${workspace.id}`,
   );
 
   const linked = await prisma.workspace.updateMany({

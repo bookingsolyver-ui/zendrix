@@ -167,7 +167,7 @@ export function InboxShell({ whatsapp }: { whatsapp: WhatsAppStatus }) {
           </h2>
           <p className="mt-2 text-sm text-muted">
             Ligue o seu número de WhatsApp Business e comece a responder aos seus clientes
-            diretamente a partir do Inbox da Zentrix.
+            diretamente a partir do Inbox da Zetrix.
           </p>
         </div>
 

@@ -10,7 +10,7 @@ export const maxDuration = 30;
 const THANKS = "Pagamento recebido: obrigado! ✅ A equipa dá seguimento ao seu pedido.";
 
 // Webhook do Stripe CONNECT (eventos das contas ligadas: os pagamentos dos clientes das empresas). Distinto do
-// webhook das subscrições da Zentrix. No Stripe: Developers → Webhooks → "Eventos em contas ligadas", com
+// webhook das subscrições da Zetrix. No Stripe: Developers → Webhooks → "Eventos em contas ligadas", com
 // checkout.session.completed, checkout.session.async_payment_succeeded e checkout.session.expired.
 // O segredo (whsec_...) vai em STRIPE_CONNECT_WEBHOOK_SECRET (vários, separados por vírgula, para o rodar).
 export async function POST(request: Request) {

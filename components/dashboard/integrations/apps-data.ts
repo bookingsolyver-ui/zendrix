@@ -53,7 +53,7 @@ export const INTEGRATION_APPS: IntegrationApp[] = [
   {
     id: "woocommerce",
     name: "WooCommerce",
-    description: "Ligue a sua loja WordPress/WooCommerce à Zentrix em minutos.",
+    description: "Ligue a sua loja WordPress/WooCommerce à Zetrix em minutos.",
     niche: "E-commerce",
     category: "ecommerce",
     icon: Store,

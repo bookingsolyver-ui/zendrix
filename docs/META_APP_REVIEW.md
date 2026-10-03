@@ -1,6 +1,6 @@
 # Meta: App Review, webhook e Embedded Signup
 
-Guia para pôr a Zentrix a funcionar com clientes reais. O que é código já está feito; isto é o que se faz nos
+Guia para pôr a Zetrix a funcionar com clientes reais. O que é código já está feito; isto é o que se faz nos
 painéis da Meta. Corra `npm run check:meta -- --url https://<dominio>` para verificar o lado do servidor.
 
 ## 1. Pré-requisitos (fora do código)

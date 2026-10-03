@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Zentrix — Marketing, automatización y CRM para WhatsApp",
+    "title": "Zetrix — Marketing, automatización y CRM para WhatsApp",
     "description": "Capta contactos con popups, envía campañas segmentadas, automatiza respuestas y gestiona clientes en un CRM con Kanban. Con IA de ventas e Inbox para el equipo. 14 días gratis, sin tarjeta."
   },
   "Landing": {
@@ -14,7 +14,7 @@
       "note": "14 días gratis · Sin tarjeta · Cancela cuando quieras"
     },
     "mock": {
-      "window": "Panel Zentrix",
+      "window": "Panel Zetrix",
       "sample": "Ejemplo ilustrativo",
       "navInbox": "Inbox",
       "navCrm": "CRM",
@@ -144,7 +144,7 @@
       "titleHighlight": "sin sorpresas.",
       "subtitle": "Empieza con 14 días de prueba gratis, sin tarjeta. Después, un único plan con todo incluido.",
       "trialBadge": "14 días de prueba gratis",
-      "planName": "Zentrix",
+      "planName": "Zetrix",
       "planDescription": "Marketing, automatización, CRM e IA para vender en WhatsApp.",
       "priceAtCheckout": "El precio se muestra antes de suscribirte",
       "features": [
@@ -164,7 +164,7 @@
     "faq": {
       "title": "Tus dudas,",
       "titleHighlight": "resueltas.",
-      "subtitle": "Respuestas directas sobre cómo funciona Zentrix.",
+      "subtitle": "Respuestas directas sobre cómo funciona Zetrix.",
       "q1": {
         "question": "¿Qué canales puedo conectar?",
         "answer": "WhatsApp (por la API oficial de Meta), Instagram (cuenta profesional) y Messenger (página de Facebook). Todos llegan a la misma Inbox."
@@ -244,7 +244,7 @@
   },
   "Auth": {
     "login": {
-      "title": "Iniciar sesión en Zentrix",
+      "title": "Iniciar sesión en Zetrix",
       "subtitle": "Acceda al panel de su empresa.",
       "email": "Correo electrónico",
       "password": "Contraseña",

@@ -34,7 +34,7 @@ export async function deleteAccount(workspaceId: string): Promise<DeleteAccountR
     }
   }
 
-  // A conta Stripe da empresa deixa de estar ligada à Zentrix (revoga o acesso). Best-effort: o dinheiro e os
+  // A conta Stripe da empresa deixa de estar ligada à Zetrix (revoga o acesso). Best-effort: o dinheiro e os
   // pagamentos já feitos continuam na conta dela, que nunca foi nossa.
   if (workspace.stripeConnectAccountId) await deauthorizeConnectAccount(workspace.stripeConnectAccountId);
 

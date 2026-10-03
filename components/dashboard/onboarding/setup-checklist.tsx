@@ -18,7 +18,7 @@ export function SetupChecklist({ progress, showWhenComplete = false }: { progres
           <p className="mt-0.5 text-sm text-white/50">
             {progress.complete
               ? "O canal está ligado, a ficha preenchida e a IA ativa. Já pode atender os clientes."
-              : "Três passos e a Zentrix começa a atender os seus clientes."}
+              : "Três passos e a Zetrix começa a atender os seus clientes."}
           </p>
         </div>
         <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70">

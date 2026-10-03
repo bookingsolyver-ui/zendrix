@@ -26,9 +26,9 @@ const res = await fetch("https://api.resend.com/emails", {
   body: JSON.stringify({
     from,
     to: [to],
-    subject: "Teste de e-mail da Zentrix",
-    text: "Se está a ler isto, o envio de e-mails da Zentrix pelo Resend está a funcionar.",
-    html: "<p>Se está a ler isto, o envio de e-mails da <strong>Zentrix</strong> pelo Resend está a funcionar.</p>",
+    subject: "Teste de e-mail da Zetrix",
+    text: "Se está a ler isto, o envio de e-mails da Zetrix pelo Resend está a funcionar.",
+    html: "<p>Se está a ler isto, o envio de e-mails da <strong>Zetrix</strong> pelo Resend está a funcionar.</p>",
     ...(process.env.EMAIL_REPLY_TO?.trim() ? { reply_to: process.env.EMAIL_REPLY_TO.trim() } : {}),
   }),
 });

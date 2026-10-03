@@ -30,7 +30,7 @@ export type LegalLang = "pt" | "en";
 export const LEGAL_UPDATED = "2026-10-03";
 
 export const legalEntityFromEnv = (): LegalEntity => ({
-  name: process.env.NEXT_PUBLIC_COMPANY_NAME?.trim() || "Zentrix",
+  name: process.env.NEXT_PUBLIC_COMPANY_NAME?.trim() || "Zetrix",
   address: process.env.NEXT_PUBLIC_COMPANY_ADDRESS?.trim() || null,
   email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || null,
 });
@@ -56,7 +56,7 @@ type Builder = (entity: LegalEntity, contactText: string) => Omit<LegalDoc, "upd
 // ------------------------------------------------------------------------------------------------ PRIVACIDADE (PT)
 const privacyPt: Builder = (e, c) => ({
   title: "Política de Privacidade",
-  intro: `Esta política explica que dados pessoais a plataforma ${e.name} ("Zentrix") trata, para quê, com quem os partilha e como exercer os seus direitos.`,
+  intro: `Esta política explica que dados pessoais a plataforma ${e.name} ("Zetrix") trata, para quê, com quem os partilha e como exercer os seus direitos.`,
   sections: [
     {
       heading: "1. Quem é o responsável",
@@ -106,7 +106,7 @@ const privacyPt: Builder = (e, c) => ({
         [
           "Supabase: base de dados, autenticação e armazenamento de ficheiros (região da União Europeia).",
           "Vercel: alojamento da aplicação (região da Irlanda).",
-          "Stripe: pagamentos e faturação das subscrições da Zentrix e, se a empresa ligar a sua conta (Stripe Connect), os links de pagamento dos seus clientes.",
+          "Stripe: pagamentos e faturação das subscrições da Zetrix e, se a empresa ligar a sua conta (Stripe Connect), os links de pagamento dos seus clientes.",
           "Meta (WhatsApp, Instagram, Messenger): canais de mensagens.",
           "OpenRouter e os fornecedores de modelos de IA que ele encaminha: processam o texto das conversas para gerar respostas, extrair dados de qualificação e escrever mensagens de seguimento, quando o assistente de IA está ligado.",
           "OpenAI, Groq e ElevenLabs: transcrição e síntese de voz, apenas se a funcionalidade de voz estiver ativada.",
@@ -158,7 +158,7 @@ const privacyPt: Builder = (e, c) => ({
 // ------------------------------------------------------------------------------------------------ PRIVACY (EN)
 const privacyEn: Builder = (e, c) => ({
   title: "Privacy Policy",
-  intro: `This policy explains which personal data the ${e.name} platform ("Zentrix") processes, why, who it is shared with, and how to exercise your rights.`,
+  intro: `This policy explains which personal data the ${e.name} platform ("Zetrix") processes, why, who it is shared with, and how to exercise your rights.`,
   sections: [
     {
       heading: "1. Who is responsible",
@@ -208,7 +208,7 @@ const privacyEn: Builder = (e, c) => ({
         [
           "Supabase: database, authentication and file storage (European Union region).",
           "Vercel: application hosting (Ireland region).",
-          "Stripe: payments and billing of Zentrix subscriptions and, if the business connects its account (Stripe Connect), payment links for its customers.",
+          "Stripe: payments and billing of Zetrix subscriptions and, if the business connects its account (Stripe Connect), payment links for its customers.",
           "Meta (WhatsApp, Instagram, Messenger): messaging channels.",
           "OpenRouter and the AI model providers it routes to: process conversation text to generate replies, extract qualification data and write follow-up messages, when the AI assistant is on.",
           "OpenAI, Groq and ElevenLabs: voice transcription and synthesis, only if the voice feature is enabled.",
@@ -260,11 +260,11 @@ const privacyEn: Builder = (e, c) => ({
 // ------------------------------------------------------------------------------------------------ TERMOS (PT)
 const termsPt: Builder = (e, c) => ({
   title: "Termos de Serviço",
-  intro: `Estes termos regem o uso da plataforma ${e.name} ("Zentrix"). Ao criar uma conta ou usar o serviço, aceita-os.`,
+  intro: `Estes termos regem o uso da plataforma ${e.name} ("Zetrix"). Ao criar uma conta ou usar o serviço, aceita-os.`,
   sections: [
     {
       heading: "1. O serviço",
-      body: ["A Zentrix é uma plataforma de atendimento omnicanal: reúne numa Inbox as conversas de WhatsApp, Instagram e Messenger de uma empresa e permite responder por equipa ou através de um assistente de IA configurado pela empresa."],
+      body: ["A Zetrix é uma plataforma de atendimento omnicanal: reúne numa Inbox as conversas de WhatsApp, Instagram e Messenger de uma empresa e permite responder por equipa ou através de um assistente de IA configurado pela empresa."],
     },
     {
       heading: "2. Conta e equipa",
@@ -299,24 +299,24 @@ const termsPt: Builder = (e, c) => ({
     },
     {
       heading: "5. Canais de terceiros",
-      body: ["A Zentrix depende de plataformas da Meta. Não somos afiliados à Meta. A Meta pode alterar, limitar ou suspender o acesso aos canais ou às contas; não controlamos nem garantimos essa disponibilidade."],
+      body: ["A Zetrix depende de plataformas da Meta. Não somos afiliados à Meta. A Meta pode alterar, limitar ou suspender o acesso aos canais ou às contas; não controlamos nem garantimos essa disponibilidade."],
     },
     {
       heading: "6. Assistente de IA",
       body: [
         "O assistente gera respostas automáticas com base na ficha do negócio que a empresa escreve. As respostas de IA podem conter erros ou omissões. A empresa é responsável por rever a ficha, por supervisionar as conversas (pode pausar a IA em cada conversa) e pelo que o assistente diz em seu nome.",
-        "Se a empresa o ativar, o assistente também pode guardar dados de qualificação dos clientes, enviar mensagens de seguimento a quem deixou de responder, marcar reuniões nos horários definidos pela empresa e enviar links de pagamento de itens do catálogo da empresa, cobrados na conta Stripe da própria empresa. A empresa define o catálogo, os preços e os horários, e é responsável pelas vendas, cobranças, reembolsos e obrigações fiscais perante os seus clientes; a Zentrix não é parte nessas transações nem recebe esses valores.",
+        "Se a empresa o ativar, o assistente também pode guardar dados de qualificação dos clientes, enviar mensagens de seguimento a quem deixou de responder, marcar reuniões nos horários definidos pela empresa e enviar links de pagamento de itens do catálogo da empresa, cobrados na conta Stripe da própria empresa. A empresa define o catálogo, os preços e os horários, e é responsável pelas vendas, cobranças, reembolsos e obrigações fiscais perante os seus clientes; a Zetrix não é parte nessas transações nem recebe esses valores.",
       ],
     },
     {
       heading: "7. Dados e privacidade",
       body: [
-        "O tratamento de dados pessoais descreve-se na Política de Privacidade. Quanto às mensagens e aos contactos dos seus clientes, a empresa é a responsável pelo tratamento e a Zentrix é subcontratante. É a empresa que tem de ter o fundamento legal e informar os seus clientes. Pode pedir-nos um acordo de tratamento de dados.",
+        "O tratamento de dados pessoais descreve-se na Política de Privacidade. Quanto às mensagens e aos contactos dos seus clientes, a empresa é a responsável pelo tratamento e a Zetrix é subcontratante. É a empresa que tem de ter o fundamento legal e informar os seus clientes. Pode pedir-nos um acordo de tratamento de dados.",
       ],
     },
     {
       heading: "8. Propriedade intelectual",
-      body: ["O software e a marca Zentrix pertencem-nos. Os dados e conteúdos que a empresa carrega continuam a ser seus; concede-nos apenas a licença necessária para prestar o serviço."],
+      body: ["O software e a marca Zetrix pertencem-nos. Os dados e conteúdos que a empresa carrega continuam a ser seus; concede-nos apenas a licença necessária para prestar o serviço."],
     },
     {
       heading: "9. Disponibilidade e suporte",
@@ -344,11 +344,11 @@ const termsPt: Builder = (e, c) => ({
 // ------------------------------------------------------------------------------------------------ TERMS (EN)
 const termsEn: Builder = (e, c) => ({
   title: "Terms of Service",
-  intro: `These terms govern the use of the ${e.name} platform ("Zentrix"). By creating an account or using the service, you accept them.`,
+  intro: `These terms govern the use of the ${e.name} platform ("Zetrix"). By creating an account or using the service, you accept them.`,
   sections: [
     {
       heading: "1. The service",
-      body: ["Zentrix is an omnichannel customer service platform: it gathers a business's WhatsApp, Instagram and Messenger conversations in one Inbox and lets the team, or an AI assistant configured by the business, reply."],
+      body: ["Zetrix is an omnichannel customer service platform: it gathers a business's WhatsApp, Instagram and Messenger conversations in one Inbox and lets the team, or an AI assistant configured by the business, reply."],
     },
     {
       heading: "2. Account and team",
@@ -383,24 +383,24 @@ const termsEn: Builder = (e, c) => ({
     },
     {
       heading: "5. Third-party channels",
-      body: ["Zentrix depends on Meta platforms. We are not affiliated with Meta. Meta may change, limit or suspend access to channels or accounts; we do not control or guarantee that availability."],
+      body: ["Zetrix depends on Meta platforms. We are not affiliated with Meta. Meta may change, limit or suspend access to channels or accounts; we do not control or guarantee that availability."],
     },
     {
       heading: "6. AI assistant",
       body: [
         "The assistant generates automatic replies based on the business profile the business writes. AI replies may contain errors or omissions. The business is responsible for reviewing the profile, supervising conversations (AI can be paused per conversation) and what the assistant says on its behalf.",
-        "If the business turns them on, the assistant can also store customer qualification data, send follow-up messages to people who stopped replying, book meetings in the hours the business defines and send payment links for items in the business's catalog, charged in the business's own Stripe account. The business defines the catalog, prices and hours, and is responsible for sales, charges, refunds and tax obligations toward its customers; Zentrix is not a party to those transactions and does not receive those amounts.",
+        "If the business turns them on, the assistant can also store customer qualification data, send follow-up messages to people who stopped replying, book meetings in the hours the business defines and send payment links for items in the business's catalog, charged in the business's own Stripe account. The business defines the catalog, prices and hours, and is responsible for sales, charges, refunds and tax obligations toward its customers; Zetrix is not a party to those transactions and does not receive those amounts.",
       ],
     },
     {
       heading: "7. Data and privacy",
       body: [
-        "Personal data processing is described in the Privacy Policy. For your customers' messages and contacts, the business is the data controller and Zentrix is the processor. The business must have a legal basis and inform its customers. You can ask us for a data processing agreement.",
+        "Personal data processing is described in the Privacy Policy. For your customers' messages and contacts, the business is the data controller and Zetrix is the processor. The business must have a legal basis and inform its customers. You can ask us for a data processing agreement.",
       ],
     },
     {
       heading: "8. Intellectual property",
-      body: ["The Zentrix software and brand belong to us. The data and content the business uploads remain its own; it grants us only the license needed to provide the service."],
+      body: ["The Zetrix software and brand belong to us. The data and content the business uploads remain its own; it grants us only the license needed to provide the service."],
     },
     {
       heading: "9. Availability and support",

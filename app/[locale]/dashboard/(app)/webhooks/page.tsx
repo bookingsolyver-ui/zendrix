@@ -16,7 +16,7 @@ export default async function WebhooksPage({
     <>
       <DashboardPageHeader
         title="Webhooks e API"
-        subtitle="Configure endpoints para receber eventos da Zentrix em tempo real."
+        subtitle="Configure endpoints para receber eventos da Zetrix em tempo real."
         action={
           <SoonButton feature="Adicionar Endpoint"
             type="button"

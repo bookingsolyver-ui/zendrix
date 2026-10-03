@@ -49,7 +49,7 @@ test("envio: sem configuração não envia (e não chama a rede)", async () => {
 
 test("envio: repete em 429/5xx até conseguir, com a chave de idempotência e o remetente certos", async () => {
   process.env.RESEND_API_KEY = "re_test";
-  process.env.EMAIL_FROM = "Zentrix <no-reply@exemplo.test>";
+  process.env.EMAIL_FROM = "Zetrix <no-reply@exemplo.test>";
   process.env.EMAIL_REPLY_TO = "ajuda@exemplo.test";
   const seen: { headers: Record<string, string>; body: Record<string, unknown> }[] = [];
   const statuses = [429, 503, 200];
@@ -64,7 +64,7 @@ test("envio: repete em 429/5xx até conseguir, com a chave de idempotência e o 
   for (const call of seen) {
     assert.equal(call.headers["Idempotency-Key"], "k-1");
     assert.equal(call.headers.Authorization, "Bearer re_test");
-    assert.equal(call.body.from, "Zentrix <no-reply@exemplo.test>");
+    assert.equal(call.body.from, "Zetrix <no-reply@exemplo.test>");
     assert.equal(call.body.reply_to, "ajuda@exemplo.test");
     assert.deepEqual(call.body.to, ["a@b.test"]);
   }

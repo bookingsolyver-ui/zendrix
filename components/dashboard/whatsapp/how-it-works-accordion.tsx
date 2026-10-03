@@ -7,7 +7,7 @@ const ITEMS = [
   {
     title: "Conectando um número",
     content:
-      "Siga o passo a passo guiado para ligar o seu número de WhatsApp Business à Zentrix através da janela oficial da Meta. Todo o processo acontece fora da Zentrix e demora apenas alguns minutos.",
+      "Siga o passo a passo guiado para ligar o seu número de WhatsApp Business à Zetrix através da janela oficial da Meta. Todo o processo acontece fora da Zetrix e demora apenas alguns minutos.",
   },
   {
     title: "Gerenciando um número conectado",

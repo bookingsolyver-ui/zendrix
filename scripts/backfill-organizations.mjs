@@ -1,20 +1,20 @@
 // Preenche as organizações que já existiam antes das colunas novas (owner_email, agente).
 //
 //   node scripts/backfill-organizations.mjs                      → owner_email de todas
-//   node scripts/backfill-organizations.mjs --seed-zentrix <id>  → + liga o agente da organização <id> com a
-//                                                                  ficha da Zentrix e marca a subscrição ativa
+//   node scripts/backfill-organizations.mjs --seed-zetrix <id>  → + liga o agente da organização <id> com a
+//                                                                  ficha da Zetrix e marca a subscrição ativa
 //
-// A ficha da Zentrix só deve ir para a organização que é a própria Zentrix: qualquer outra tem de
-// escrever a sua (senão o agente de um cliente falava dos produtos da Zentrix). Idempotente.
+// A ficha da Zetrix só deve ir para a organização que é a própria Zetrix: qualquer outra tem de
+// escrever a sua (senão o agente de um cliente falava dos produtos da Zetrix). Idempotente.
 import pg from "pg";
-import { ZENTRIX_KNOWLEDGE } from "../lib/agent/negocio.ts";
+import { ZETRIX_KNOWLEDGE } from "../lib/agent/negocio.ts";
 
 process.loadEnvFile(".env.local");
 const args = process.argv.slice(2);
-const seedIdx = args.indexOf("--seed-zentrix");
+const seedIdx = args.indexOf("--seed-zetrix");
 const seedId = seedIdx !== -1 ? args[seedIdx + 1] : null;
 if (seedIdx !== -1 && !seedId) {
-  console.error("--seed-zentrix precisa do id da organização.");
+  console.error("--seed-zetrix precisa do id da organização.");
   process.exit(1);
 }
 
@@ -35,7 +35,7 @@ try {
     const r = await db.query(
       `update "Workspace" set agent_enabled = true, sub_status = 'active', agent_knowledge = coalesce(agent_knowledge, $2)
        where id = $1 returning name, agent_enabled, sub_status, length(agent_knowledge) as ficha_caracteres`,
-      [seedId, ZENTRIX_KNOWLEDGE]
+      [seedId, ZETRIX_KNOWLEDGE]
     );
     if (r.rowCount !== 1) throw new Error(`organização ${seedId} não encontrada`);
     console.log("agente ligado:", JSON.stringify(r.rows[0]));

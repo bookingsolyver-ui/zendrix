@@ -1,11 +1,11 @@
 import "server-only";
 import { StripeApiError, StripeNotConfiguredError, requireEnv } from "@/lib/stripe/client";
 
-// Stripe Connect (contas Standard, por OAuth): cada empresa liga a SUA conta Stripe à Zentrix. Os links de
+// Stripe Connect (contas Standard, por OAuth): cada empresa liga a SUA conta Stripe à Zetrix. Os links de
 // pagamento que a IA envia são criados nessa conta, por isso o dinheiro dos clientes vai direto para a empresa e
-// nunca passa pela conta da Zentrix (que cobra só as subscrições da Zentrix).
+// nunca passa pela conta da Zetrix (que cobra só as subscrições da Zetrix).
 //
-// Requer: Connect ativado na conta Stripe da Zentrix (plataforma), STRIPE_CONNECT_CLIENT_ID (ca_...) e o URI de
+// Requer: Connect ativado na conta Stripe da Zetrix (plataforma), STRIPE_CONNECT_CLIENT_ID (ca_...) e o URI de
 // regresso https://<dominio>/api/stripe/connect/callback nas definições de OAuth do Connect.
 
 export const connectConfigured = () => Boolean(process.env.STRIPE_CONNECT_CLIENT_ID?.trim() && process.env.STRIPE_SECRET_KEY?.trim());
@@ -51,7 +51,7 @@ export async function exchangeConnectCode(code: string): Promise<string> {
   return id;
 }
 
-// Revoga o acesso da Zentrix a essa conta (ao desligar). Best-effort: não lança.
+// Revoga o acesso da Zetrix a essa conta (ao desligar). Best-effort: não lança.
 export async function deauthorizeConnectAccount(accountId: string): Promise<boolean> {
   try {
     await connectPost("/oauth/deauthorize", { client_id: clientId(), stripe_user_id: accountId });

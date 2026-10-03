@@ -78,7 +78,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-white/5 px-6 py-6 text-center text-xs text-white/30">
-        © {year} Zentrix. {t("rights")}
+        © {year} Zetrix. {t("rights")}
       </div>
     </footer>
   );

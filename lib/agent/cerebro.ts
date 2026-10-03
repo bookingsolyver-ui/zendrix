@@ -218,7 +218,7 @@ export async function chamarModelo(
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "X-Title": "Zentrix",
+          "X-Title": "Zetrix",
         },
         body: JSON.stringify({
           model: modelo,

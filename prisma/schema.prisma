@@ -55,7 +55,7 @@ model Workspace {
   apiKeys                ApiKey[]
   outbox                 OutboxMessage[]
   invites                TeamInvite[]
-  // Stripe Connect: a conta Stripe DA EMPRESA, onde caem os pagamentos dos clientes dela (nunca a da Zentrix).
+  // Stripe Connect: a conta Stripe DA EMPRESA, onde caem os pagamentos dos clientes dela (nunca a da Zetrix).
   stripeConnectAccountId String?             @unique @map("stripe_connect_account_id")
   followUpConfig         Json?               @map("follow_up_config") // lib/followups/config.ts
   scheduleConfig         Json?               @map("schedule_config") // lib/schedule/config.ts
@@ -116,7 +116,7 @@ model User {
   isPlatformAdmin Boolean   @default(false) @map("is_platform_admin")
 }
 
-// Chave de API de uma organização, para clientes externos chamarem o Zentrix (cabeçalho x-api-key).
+// Chave de API de uma organização, para clientes externos chamarem o Zetrix (cabeçalho x-api-key).
 // Só se guarda o hash SHA-256: a chave completa é mostrada UMA vez, ao ser criada, e não se recupera.
 model ApiKey {
   id          String    @id @default(cuid())

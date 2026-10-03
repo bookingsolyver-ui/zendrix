@@ -6,8 +6,8 @@ import "server-only";
 //   - KNOWLEDGE:  O QUE o assistente sabe (a empresa, preços, regras). É a única fonte de factos e vem da
 //                 organização (Workspace.agentKnowledge). Sem ela o agente não responde.
 //
-// ZENTRIX_KNOWLEDGE é a ficha da própria Zentrix (organização de arranque). Nunca é usada como valor por
-// omissão para outra organização: senão o agente de um cliente falava dos produtos da Zentrix.
+// ZETRIX_KNOWLEDGE é a ficha da própria Zetrix (organização de arranque). Nunca é usada como valor por
+// omissão para outra organização: senão o agente de um cliente falava dos produtos da Zetrix.
 
 export const BEHAVIOR = `És o assistente virtual de vendas e suporte da empresa descrita na BASE DE CONHECIMENTO abaixo. Conversas com clientes e potenciais clientes dessa empresa por WhatsApp.
 
@@ -39,10 +39,10 @@ LIMITES (importantes)
 - Nunca peças palavras-passe, dados de cartão nem documentos de identificação.
 - Se o cliente pedir para falar com uma pessoa, ou se o assunto for contrato ou reclamação, diz que vais pedir a um colega da equipa para dar seguimento à conversa. Quanto a pagamentos, segue a secção PAGAMENTOS mais abaixo.`;
 
-export const ZENTRIX_KNOWLEDGE = `BASE DE CONHECIMENTO
+export const ZETRIX_KNOWLEDGE = `BASE DE CONHECIMENTO
 
-Sobre a Zentrix
-A Zentrix é uma plataforma SaaS de atendimento ao cliente multicanal. Reúne as conversas dos clientes num Inbox unificado e integra o WhatsApp Business através da API oficial da Meta.
+Sobre a Zetrix
+A Zetrix é uma plataforma SaaS de atendimento ao cliente multicanal. Reúne as conversas dos clientes num Inbox unificado e integra o WhatsApp Business através da API oficial da Meta.
 
 Planos (preços mensais)
 
@@ -68,7 +68,7 @@ Notas
 - Tudo o que não estiver escrito acima (duração do teste grátis, descontos, condições de pagamento, integrações, prazos) é para confirmar com a equipa.`;
 
 // O prompt completo de uma organização: comportamento comum + a ficha dela.
-// (A ficha pode já trazer o cabeçalho "BASE DE CONHECIMENTO", como a da Zentrix; não se duplica.)
+// (A ficha pode já trazer o cabeçalho "BASE DE CONHECIMENTO", como a da Zetrix; não se duplica.)
 export function buildSystemPrompt(knowledge: string) {
   const ficha = knowledge.trim();
   const comCabecalho = ficha.startsWith("BASE DE CONHECIMENTO")
@@ -77,6 +77,6 @@ export function buildSystemPrompt(knowledge: string) {
   return `${BEHAVIOR}\n\n${comCabecalho}`;
 }
 
-// Só para a organização Zentrix (e para os testes).
-export const ZENTRIX_BEHAVIOR = BEHAVIOR;
-export const ZENTRIX_SYSTEM_PROMPT = buildSystemPrompt(ZENTRIX_KNOWLEDGE);
+// Só para a organização Zetrix (e para os testes).
+export const ZETRIX_BEHAVIOR = BEHAVIOR;
+export const ZETRIX_SYSTEM_PROMPT = buildSystemPrompt(ZETRIX_KNOWLEDGE);

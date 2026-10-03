@@ -22,7 +22,7 @@ export function ConnectButtons() {
         return;
       }
       if (!res.ok || !data?.success) throw new Error("meta-error");
-      localStorage.setItem("zentrix_wa_connected", "true");
+      localStorage.setItem("zetrix_wa_connected", "true");
       router.push("/dashboard");
     } catch {
       setIsConnecting(false);

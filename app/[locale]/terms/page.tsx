@@ -5,7 +5,7 @@ import { legalDocument, legalEntityFromEnv, legalLang } from "@/lib/legal/conten
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  return { title: `${legalDocument("terms", legalLang(locale), legalEntityFromEnv(), "").title} · Zentrix` };
+  return { title: `${legalDocument("terms", legalLang(locale), legalEntityFromEnv(), "").title} · Zetrix` };
 }
 
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {

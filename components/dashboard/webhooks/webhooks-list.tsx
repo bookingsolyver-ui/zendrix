@@ -9,7 +9,7 @@ export function WebhooksList() {
       <MarketingEmptyState
         icon={Webhook}
         title="Nenhum endpoint configurado"
-        description="Adicione um endpoint para começar a receber eventos da Zentrix em tempo real."
+        description="Adicione um endpoint para começar a receber eventos da Zetrix em tempo real."
       />
     );
   }

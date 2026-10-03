@@ -8,7 +8,7 @@ import type { PopupConfig } from "./schema.ts";
 export const safeJson = (value: unknown) =>
   JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
 
-export const NOOP_SCRIPT = "/* Zentrix: popup indisponível */\n";
+export const NOOP_SCRIPT = "/* Zetrix: popup indisponível */\n";
 
 export function buildEmbedScript(input: { key: string; apiBase: string; config: PopupConfig }): string {
   const { config } = input;
@@ -28,7 +28,7 @@ export function buildEmbedScript(input: { key: string; apiBase: string; config: 
     email: config.askEmail,
     days: config.frequencyDays,
   });
-  return `/* Zentrix popup */
+  return `/* Zetrix popup */
 (function(){
 "use strict";
 var C=${data};

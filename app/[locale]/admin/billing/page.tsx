@@ -29,7 +29,7 @@ export default async function AdminBillingPage({ params }: { params: Promise<{ l
           <Stat label="Por pagar (total)" value={n(b.links.byStatus.OPEN ?? 0)} />
           <Stat label="Expirados (total)" value={n(b.links.byStatus.EXPIRED ?? 0)} />
         </div>
-        <p className="mt-3 text-xs text-white/40">O dinheiro fica na conta Stripe de cada empresa. A Zentrix só regista o estado de cada link.</p>
+        <p className="mt-3 text-xs text-white/40">O dinheiro fica na conta Stripe de cada empresa. A Zetrix só regista o estado de cada link.</p>
       </Section>
 
       <Section title="Testes a terminar nos próximos 3 dias">

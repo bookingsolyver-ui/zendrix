@@ -15,7 +15,7 @@ export default async function SetupPage({ params }: { params: Promise<{ locale: 
 
   return (
     <>
-      <DashboardPageHeader title="Primeiros passos" subtitle="Ponha a Zentrix a atender os seus clientes em três passos." />
+      <DashboardPageHeader title="Primeiros passos" subtitle="Ponha a Zetrix a atender os seus clientes em três passos." />
       {progress && canSetup ? (
         <SetupChecklist progress={progress} showWhenComplete />
       ) : (

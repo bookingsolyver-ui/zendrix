@@ -90,7 +90,7 @@ export default async function SettingsPage({
     <>
       <DashboardPageHeader
         title="Configurações"
-        subtitle="Gira as definições gerais da sua conta Zentrix."
+        subtitle="Gira as definições gerais da sua conta Zetrix."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

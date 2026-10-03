@@ -20,7 +20,7 @@ export function Logo({
         <span className="neon-green-text">Z</span>
       </span>
       <span className={`${wordmark} font-semibold tracking-tight text-foreground`}>
-        Zen<span className="neon-green-text">trix</span>
+        Zet<span className="neon-green-text">rix</span>
       </span>
     </Link>
   );
