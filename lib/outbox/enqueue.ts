@@ -19,8 +19,10 @@ export async function enqueueText(input: {
   workspaceId: string;
   conversationId: string;
   text: string;
+  // Se é um seguimento automático, o passo (1, 2, 3): fica registado na mensagem e conta para a sequência.
+  followUpStep?: number;
 }): Promise<EnqueueResult> {
-  const { workspaceId, conversationId, text } = input;
+  const { workspaceId, conversationId, text, followUpStep } = input;
 
   // PAYWALL: sem plano ativo (trial acabado, cancelada, em atraso) nada novo sai. É o ponto único por onde
   // passam as respostas da IA, as da Inbox e as das chaves de API.
@@ -66,6 +68,7 @@ export async function enqueueText(input: {
           type: "text",
           body: part,
           status: "QUEUED",
+          ...(followUpStep ? { followUpStep } : {}),
           createdAt,
         },
         select: { id: true, type: true, body: true, status: true, createdAt: true },

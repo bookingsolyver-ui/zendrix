@@ -1,4 +1,7 @@
 {
   "regions": ["dub1"],
-  "crons": [{ "path": "/api/cron/process-outbox", "schedule": "0 0 * * *" }]
+  "crons": [
+    { "path": "/api/cron/process-outbox", "schedule": "0 0 * * *" },
+    { "path": "/api/cron/follow-ups", "schedule": "0 9 * * *" }
+  ]
 }

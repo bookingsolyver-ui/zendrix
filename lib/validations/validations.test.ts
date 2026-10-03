@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { metaWebhookSchema, parseMessagingEntries, parseMetaPayload } from "./meta-whatsapp.ts";
-import { stripeCheckoutSessionSchema, stripeEventSchema, stripeSubscriptionSchema, workspaceIdFromMetadata } from "./stripe.ts";
+import { stripeCheckoutSessionPaidSchema, stripeCheckoutSessionSchema, stripeConnectEventSchema, stripeEventSchema, stripeSubscriptionSchema, workspaceIdFromMetadata } from "./stripe.ts";
 import { createApiKeySchema } from "./api-keys.ts";
 import { callbackQuerySchema, parsePages, startQuerySchema } from "./meta-oauth.ts";
 import { decodeStateCookie, encodeStateCookie, newState, statesMatch } from "../meta/oauth-state.ts";
@@ -199,4 +199,15 @@ test("Embedded Signup: o pedido ao servidor é estrito", () => {
   assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, wabaId: "12 34" }).success);
   assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, phoneNumberId: "../etc" }).success);
   assert.ok(!embeddedSignupRequestSchema.safeParse({ ...ok, code: "" }).success);
+});
+
+test("Stripe Connect: só eventos de uma conta ligada, com a sessão de pagamento", () => {
+  const event = { id: "evt_1", type: "checkout.session.completed", created: 1700000000, account: "acct_1ABC", data: { object: { id: "cs_1", payment_status: "paid", mode: "payment" } } };
+  assert.ok(stripeConnectEventSchema.safeParse(event).success);
+  // sem `account` (evento da própria plataforma) ou com um id que não é de conta: recusado
+  const { account, ...platformEvent } = event;
+  assert.ok(account && !stripeConnectEventSchema.safeParse(platformEvent).success);
+  for (const bad of ["", "acct_", "cus_123", "acct_1 ABC", "ACCT_1"]) assert.ok(!stripeConnectEventSchema.safeParse({ ...event, account: bad }).success, bad);
+  assert.deepEqual(stripeCheckoutSessionPaidSchema.parse(event.data.object), { id: "cs_1", payment_status: "paid", mode: "payment" });
+  assert.ok(!stripeCheckoutSessionPaidSchema.safeParse({ payment_status: "paid" }).success, "sem id da sessão");
 });

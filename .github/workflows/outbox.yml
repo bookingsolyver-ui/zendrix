@@ -1,6 +1,7 @@
 name: outbox
 
-# Reenvia a fila de saída da Meta (tentativas por fazer, mensagens que ficaram para trás) de 5 em 5 minutos.
+# De 5 em 5 minutos: reenvia a fila de saída da Meta (tentativas por fazer, mensagens que ficaram para trás) e
+# corre os seguimentos automáticos (reengajamento).
 # Substitui o cron por minuto da Vercel, que só existe no plano Pro. O endpoint exige o CRON_SECRET.
 #
 # Configurar em GitHub → Settings → Secrets and variables → Actions:
@@ -14,9 +15,9 @@ on:
 jobs:
   drain:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
     steps:
-      - name: Chamar /api/cron/process-outbox
+      - name: Chamar /api/cron/process-outbox e /api/cron/follow-ups
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
@@ -25,7 +26,11 @@ jobs:
             echo "::warning::CRON_SECRET ou APP_URL não estão definidos nos secrets do repositório; nada a fazer."
             exit 0
           fi
-          status=$(curl -sS -o response.json -w "%{http_code}" --max-time 90 \
-            -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/process-outbox")
-          echo "HTTP $status"; cat response.json; echo
-          [ "$status" = "200" ]
+          fail=0
+          for path in process-outbox follow-ups; do
+            status=$(curl -sS -o response.json -w "%{http_code}" --max-time 90 \
+              -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/$path")
+            echo "$path: HTTP $status"; cat response.json; echo
+            [ "$status" = "200" ] || fail=1
+          done
+          exit $fail

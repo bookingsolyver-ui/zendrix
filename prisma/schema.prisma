@@ -13,6 +13,17 @@ enum Platform {
   MESSENGER
 }
 
+// Em que ponto está um potencial cliente (lead). Só avança com provas (a IA identificou intenção, um link de
+// pagamento foi enviado, o pagamento entrou) e nunca recua de WON. Ver lib/leads/lead.ts.
+enum LeadStage {
+  NEW
+  ENGAGED
+  QUALIFIED
+  PAYMENT_SENT
+  WON
+  LOST
+}
+
 // Estado de uma mensagem na fila de saída (OutboxMessage).
 enum OutboxStatus {
   PENDING
@@ -23,27 +34,35 @@ enum OutboxStatus {
 
 // Uma organização (tenant) do SaaS. Todos os dados de um cliente pendem de um Workspace.
 model Workspace {
-  id                   String              @id @default(cuid())
-  name                 String
-  createdAt            DateTime            @default(now())
-  ownerEmail           String?             @map("owner_email")
-  stripeCustomerId     String?             @unique @map("stripe_customer_id")
-  subStatus            String              @default("trialing") @map("sub_status") // trialing | active | past_due | canceled
-  plan                 String?
-  trialEndsAt          DateTime?           @map("trial_ends_at")
-  agentEnabled         Boolean             @default(false) @map("agent_enabled") // interruptor do agente desta organização
-  agentKnowledge       String?             @map("agent_knowledge") // ficha do negócio: sem ela o agente não responde
-  agentProfile         Json?               @map("agent_profile") // os campos da ficha que o cliente edita (compilados para agentKnowledge)
-  stripeSubscriptionId String?             @unique @map("stripe_subscription_id") // a subscrição atual (só ela governa o estado)
-  stripeEventAt        DateTime?           @map("stripe_event_at") // último evento do Stripe aplicado (ordem não garantida)
-  users                User[]
-  socialIntegrations   SocialIntegration[]
-  contacts             Contact[]
-  conversations        Conversation[]
-  messages             Message[]
-  apiKeys              ApiKey[]
-  outbox               OutboxMessage[]
-  invites              TeamInvite[]
+  id                     String              @id @default(cuid())
+  name                   String
+  createdAt              DateTime            @default(now())
+  ownerEmail             String?             @map("owner_email")
+  stripeCustomerId       String?             @unique @map("stripe_customer_id")
+  subStatus              String              @default("trialing") @map("sub_status") // trialing | active | past_due | canceled
+  plan                   String?
+  trialEndsAt            DateTime?           @map("trial_ends_at")
+  agentEnabled           Boolean             @default(false) @map("agent_enabled") // interruptor do agente desta organização
+  agentKnowledge         String?             @map("agent_knowledge") // ficha do negócio: sem ela o agente não responde
+  agentProfile           Json?               @map("agent_profile") // os campos da ficha que o cliente edita (compilados para agentKnowledge)
+  stripeSubscriptionId   String?             @unique @map("stripe_subscription_id") // a subscrição atual (só ela governa o estado)
+  stripeEventAt          DateTime?           @map("stripe_event_at") // último evento do Stripe aplicado (ordem não garantida)
+  users                  User[]
+  socialIntegrations     SocialIntegration[]
+  contacts               Contact[]
+  conversations          Conversation[]
+  messages               Message[]
+  apiKeys                ApiKey[]
+  outbox                 OutboxMessage[]
+  invites                TeamInvite[]
+  // Stripe Connect: a conta Stripe DA EMPRESA, onde caem os pagamentos dos clientes dela (nunca a da Zentrix).
+  stripeConnectAccountId String?             @unique @map("stripe_connect_account_id")
+  followUpConfig         Json?               @map("follow_up_config") // lib/followups/config.ts
+  scheduleConfig         Json?               @map("schedule_config") // lib/schedule/config.ts
+  paymentItems           PaymentItem[]
+  paymentLinks           PaymentLink[]
+  followUps              FollowUp[]
+  appointments           Appointment[]
 }
 
 // Papéis dentro de uma organização (RBAC), do mais para o menos poderoso. lib/roles.ts tem a hierarquia.
@@ -122,6 +141,15 @@ model Contact {
   // Identificador do cliente na plataforma: WhatsApp = número (só dígitos) · Instagram = IGSID · Messenger = PSID.
   waId          String
   name          String?
+  // Qualificação comercial (lead): preenchida pela IA durante a conversa e por regras do servidor.
+  email         String?
+  painPoint     String? // a necessidade/dor principal, nas palavras do cliente (curta)
+  leadStage     LeadStage      @default(NEW)
+  leadIntent    String? // última intenção identificada: interested | ready_to_buy | not_interested
+  qualifiedAt   DateTime?
+  // O cliente pediu para não receber mais mensagens automáticas (STOP, parar...). Nunca mais se lhe enviam
+  // follow-ups. Não se limpa sozinho: só uma pessoa o pode reverter (com o consentimento dele).
+  optedOutAt    DateTime?
   createdAt     DateTime       @default(now())
   workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   conversations Conversation[]
@@ -160,6 +188,8 @@ model Message {
   waMessageId    String?      @unique // Meta's message id: dedupes webhook retries, matches status updates
   mediaPath      String?      @map("media_path") // object path in the private Storage bucket (customer voice notes)
   errorMessage   String?
+  // Se é uma mensagem de seguimento automático (reengajamento), o passo (1, 2, 3...). null = mensagem normal.
+  followUpStep   Int?
   createdAt      DateTime     @default(now())
   workspace      Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -247,4 +277,80 @@ model DataDeletionRequest {
   completedAt DateTime?
 
   @@index([status, createdAt])
+}
+
+// O catálogo do que a IA pode vender com um link de pagamento. A IA escolhe um item; o PREÇO vem sempre daqui,
+// nunca do que o modelo "acha". Valores em unidades menores da moeda (cêntimos).
+model PaymentItem {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  amountMinor Int // 2990 = 29,90
+  currency    String // EUR | USD | GBP | BRL (as que o Stripe aceita)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, active])
+}
+
+// Um link de pagamento enviado a um cliente (sessão de Checkout na conta Stripe da empresa).
+model PaymentLink {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  conversationId  String?
+  contactId       String?
+  itemName        String // fotografia do item no momento (o catálogo pode mudar depois)
+  amountMinor     Int
+  currency        String
+  stripeSessionId String    @unique
+  url             String
+  status          String    @default("OPEN") // OPEN | PAID | EXPIRED
+  createdAt       DateTime  @default(now())
+  paidAt          DateTime?
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+}
+
+// Registo de cada seguimento automático decidido. A restrição única é o que impede dois workers de
+// enviarem o MESMO seguimento: quem consegue inserir a linha, envia; o outro vê o conflito e salta.
+model FollowUp {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  conversationId  String
+  anchorInboundId String // a última mensagem do cliente quando se decidiu (a "âncora" da sequência)
+  step            Int // 1, 2, 3...
+  status          String // QUEUED | SKIPPED | FAILED
+  reason          String?
+  messageId       String?
+  createdAt       DateTime  @default(now())
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, anchorInboundId, step])
+  @@index([workspaceId, createdAt])
+}
+
+// Uma marcação feita pela IA (ou à mão). Nativa: a disponibilidade vem da configuração da organização.
+// `slotKey` (= início em ISO) só existe enquanto a marcação está CONFIRMED, e é único por organização: dois
+// pedidos simultâneos para a mesma hora não podem ambos entrar. Ao cancelar fica null e a hora volta a estar livre.
+model Appointment {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  conversationId String?
+  contactId      String?
+  customerName   String
+  customerEmail  String?
+  service        String?
+  startsAt       DateTime
+  endsAt         DateTime
+  status         String    @default("CONFIRMED") // CONFIRMED | CANCELLED
+  slotKey        String?
+  createdAt      DateTime  @default(now())
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, slotKey])
+  @@index([workspaceId, startsAt])
 }

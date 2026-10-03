@@ -1,5 +1,5 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { cronAuthorized } from "@/lib/cron/auth";
 import { processOutbox, type ProcessSummary } from "@/lib/outbox/process";
 
 export const maxDuration = 60;
@@ -11,16 +11,8 @@ const ROUND_LIMIT = 50;
 const MAX_ROUNDS = 10; // até 500 mensagens por execução
 const TIME_BUDGET_MS = 45_000; // a função tem 60 s: deixa folga para acabar o que está a meio
 
-function authorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return null; // não configurado
-  const received = Buffer.from(request.headers.get("authorization") ?? "");
-  const expected = Buffer.from(`Bearer ${secret}`);
-  return received.length === expected.length && timingSafeEqual(received, expected);
-}
-
 export async function GET(request: Request) {
-  const ok = authorized(request);
+  const ok = cronAuthorized(request);
   if (ok === null) {
     console.error("[cron/process-outbox] CRON_SECRET não está definido; a recusar");
     return NextResponse.json({ error: "cron_not_configured" }, { status: 503 });

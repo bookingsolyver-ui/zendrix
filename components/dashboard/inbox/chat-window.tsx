@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type Keyboard
 import { Bot, Clock, Loader2, Pause, Send } from "lucide-react";
 import { contactLabel } from "@/lib/inbox/display";
 import { channelOf, CHANNEL_LABEL } from "@/lib/inbox/channels";
+import { LEAD_STAGE_LABEL } from "@/lib/leads/lead";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
 import { REPLY_WINDOW_MS, type ChatMessage, type ConversationSummary } from "@/lib/inbox/types";
 
@@ -178,6 +179,12 @@ export function ChatWindow({
             <h2 className="truncate text-sm font-semibold text-foreground">{title}</h2>
             <p className="text-xs text-muted">
               {platform === "WHATSAPP" ? `+${conversation.waId}` : CHANNEL_LABEL[platform]}
+              {conversation.email ? ` · ${conversation.email}` : ""}
+            </p>
+            {/* O que a IA apurou do cliente: estado do lead e a necessidade principal. */}
+            <p className="mt-0.5 flex min-w-0 items-center gap-2 text-[11px] text-muted">
+              <span className="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-white/70">{LEAD_STAGE_LABEL[conversation.leadStage]}</span>
+              {conversation.painPoint && <span className="truncate" title={conversation.painPoint}>{conversation.painPoint}</span>}
             </p>
           </div>
         </div>

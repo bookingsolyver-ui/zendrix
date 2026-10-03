@@ -3,12 +3,25 @@
 import { useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 import { visibleName } from "@/lib/inbox/display";
+import { LEAD_STAGE_LABEL, type LeadStageName } from "@/lib/leads/lead";
 
 export type ContactRow = {
   id: string;
   name: string | null;
   phone: string;
   registeredAt: string; // already formatted on the server, so server and client render the same text
+  email: string | null;
+  stage: LeadStageName;
+  optedOut: boolean;
+};
+
+const STAGE_STYLE: Record<LeadStageName, string> = {
+  NEW: "bg-white/10 text-white/60",
+  ENGAGED: "bg-sky-500/15 text-sky-300",
+  QUALIFIED: "bg-amber-400/15 text-amber-300",
+  PAYMENT_SENT: "bg-violet-500/15 text-violet-300",
+  WON: "bg-emerald-500/15 text-emerald-300",
+  LOST: "bg-red-500/10 text-red-300",
 };
 
 function displayName(contact: ContactRow) {
@@ -44,10 +57,12 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
   }, [contacts, query]);
 
   function exportCsv() {
-    const header = ["Nome", "Telemóvel", "Data de Registo"];
+    const header = ["Nome", "Telemóvel", "E-mail", "Estado", "Data de Registo"];
     const rows = filtered.map((contact) => [
       visibleName(contact.name) ?? "",
       contact.phone,
+      contact.email ?? "",
+      LEAD_STAGE_LABEL[contact.stage],
       contact.registeredAt,
     ]);
 
@@ -94,6 +109,8 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
             <tr className="border-b border-border text-left text-muted">
               <th className="px-5 py-3 font-medium">Nome</th>
               <th className="px-5 py-3 font-medium">Telemóvel</th>
+              <th className="px-5 py-3 font-medium">E-mail</th>
+              <th className="px-5 py-3 font-medium">Estado</th>
               <th className="px-5 py-3 font-medium">Data de Registo</th>
             </tr>
           </thead>
@@ -112,13 +129,18 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
                   </div>
                 </td>
                 <td className="px-5 py-4 text-muted">{contact.phone}</td>
+                <td className="px-5 py-4 text-muted">{contact.email ?? "—"}</td>
+                <td className="px-5 py-4">
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STAGE_STYLE[contact.stage]}`}>{LEAD_STAGE_LABEL[contact.stage]}</span>
+                  {contact.optedOut && <span className="ml-2 text-xs text-white/40" title="Pediu para não receber mensagens automáticas">sem automáticas</span>}
+                </td>
                 <td className="px-5 py-4 text-muted">{contact.registeredAt}</td>
               </tr>
             ))}
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-5 py-10 text-center text-sm text-muted">
+                <td colSpan={5} className="px-5 py-10 text-center text-sm text-muted">
                   {contacts.length === 0
                     ? "Ainda não há contactos. Os clientes que escreverem para o seu WhatsApp aparecem aqui automaticamente."
                     : "Nenhum contacto encontrado."}

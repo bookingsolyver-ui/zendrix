@@ -22,7 +22,7 @@ export async function GET() {
         platform: true,
         unreadCount: true,
         isPaused: true,
-        contact: { select: { name: true, waId: true } },
+        contact: { select: { name: true, waId: true, leadStage: true, email: true, painPoint: true } },
       },
     });
 
@@ -35,6 +35,9 @@ export async function GET() {
       lastMessageAt: row.lastMessageAt.toISOString(),
       unreadCount: row.unreadCount,
       isPaused: row.isPaused,
+      leadStage: row.contact.leadStage,
+      email: row.contact.email,
+      painPoint: row.contact.painPoint,
     }));
     return NextResponse.json({ conversations });
   } catch (err) {

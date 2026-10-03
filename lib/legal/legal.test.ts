@@ -20,7 +20,7 @@ test("legal: as duas línguas têm os mesmos documentos, secções e numeração
 
 test("legal: a privacidade cobre o que a Meta e o RGPD exigem", () => {
   const text = JSON.stringify(legalDocument("privacy", "en", entity, "x")).toLowerCase();
-  for (const needle of ["meta", "supabase", "stripe", "vercel", "openrouter", "how long we keep data", "delete", "/data-deletion", "access, rectification, erasure"]) {
+  for (const needle of ["meta", "supabase", "stripe", "vercel", "openrouter", "how long we keep data", "delete", "/data-deletion", "access, rectification, erasure", "qualification", "stripe connect", "follow-up"]) {
     assert.ok(text.includes(needle), `falta: ${needle}`);
   }
 });
@@ -36,4 +36,15 @@ test("legal: espanhol usa a versão inglesa", () => {
   assert.equal(legalLang("pt"), "pt");
   assert.equal(legalLang("en"), "en");
   assert.equal(legalLang("es"), "en");
+});
+
+test("legal: já não menciona o Cal.com (deixou de ser usado) e os termos cobrem vendas, agenda e seguimentos", () => {
+  for (const lang of ["pt", "en"] as const) {
+    const privacy = JSON.stringify(legalDocument("privacy", lang, entity, "x"));
+    assert.ok(!/cal\.com/i.test(privacy), `${lang}: Cal.com ainda na privacidade`);
+    const terms = JSON.stringify(legalDocument("terms", lang, entity, "x")).toLowerCase();
+    for (const needle of lang === "pt" ? ["stripe", "seguimento", "reuniões", "catálogo"] : ["stripe", "follow-up", "meetings", "catalog"]) {
+      assert.ok(terms.includes(needle), `${lang}: termos sem "${needle}"`);
+    }
+  }
 });

@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { LINKED_STATUSES } from "@/lib/meta/integration-health";
+import { extractEmail, isOptOut } from "@/lib/leads/lead";
 import type { InboundMessage, StatusUpdate } from "@/lib/whatsapp/webhook";
 import type { PlatformName } from "@/lib/outbox/split-text";
 
@@ -85,6 +86,19 @@ export async function saveInboundMessage(
           unreadCount: { increment: 1 },
         },
       });
+      // Regras deterministas sobre o texto do cliente (valem mesmo com a IA desligada):
+      //  * pediu para não receber mais mensagens -> nunca mais seguimentos automáticos;
+      //  * escreveu um e-mail e ainda não temos o dele -> fica guardado.
+      if (msg.type === "text") {
+        const optOut = isOptOut(msg.body);
+        const email = contact.email ? null : extractEmail(msg.body);
+        if (optOut || email) {
+          await tx.contact.update({
+            where: { id: contact.id },
+            data: { ...(optOut && !contact.optedOutAt ? { optedOutAt: new Date() } : {}), ...(email ? { email } : {}) },
+          });
+        }
+      }
       return conversation.id;
     });
     return { workspaceId, conversationId };

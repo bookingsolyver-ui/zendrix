@@ -6,7 +6,8 @@ import type { PlatformName } from "@/lib/outbox/split-text";
 // O ÚNICO sítio que fala com a Graph API da Meta para enviar texto. Só o worker da fila (lib/outbox) o usa.
 
 // A versão da Graph API. 17.0 é a que o resto do projeto já usa; META_GRAPH_VERSION permite subir sem código.
-export const GRAPH_BASE = `https://graph.facebook.com/${process.env.META_GRAPH_VERSION?.trim() || "v17.0"}`;
+// META_GRAPH_URL só serve para testes (um servidor falso); por omissão é a Graph API da Meta.
+export const GRAPH_BASE = process.env.META_GRAPH_URL?.trim() || `https://graph.facebook.com/${process.env.META_GRAPH_VERSION?.trim() || "v17.0"}`;
 const TIMEOUT_MS = 15_000;
 
 export type MetaSendResult =

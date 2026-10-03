@@ -2,6 +2,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { stripeDelete, StripeNotConfiguredError } from "@/lib/stripe/client";
+import { deauthorizeConnectAccount } from "@/lib/stripe/connect";
 import { deleteWorkspaceMedia } from "@/lib/storage/media";
 import { deleteAuthUsers } from "@/lib/supabase/admin";
 
@@ -20,7 +21,7 @@ export type DeleteAccountResult =
 export async function deleteAccount(workspaceId: string): Promise<DeleteAccountResult> {
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
-    select: { stripeSubscriptionId: true, users: { select: { authId: true } } },
+    select: { stripeSubscriptionId: true, stripeConnectAccountId: true, users: { select: { authId: true } } },
   });
   if (!workspace) return { ok: false, error: "not_found" };
 
@@ -32,6 +33,10 @@ export async function deleteAccount(workspaceId: string): Promise<DeleteAccountR
       return { ok: false, error: "stripe_cancel_failed" };
     }
   }
+
+  // A conta Stripe da empresa deixa de estar ligada à Zentrix (revoga o acesso). Best-effort: o dinheiro e os
+  // pagamentos já feitos continuam na conta dela, que nunca foi nossa.
+  if (workspace.stripeConnectAccountId) await deauthorizeConnectAccount(workspace.stripeConnectAccountId);
 
   const files = await deleteWorkspaceMedia(workspaceId);
 

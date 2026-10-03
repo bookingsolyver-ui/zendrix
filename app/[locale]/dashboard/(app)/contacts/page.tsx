@@ -25,7 +25,7 @@ export default async function ContactsPage({
         where: { workspaceId: user.workspace.id },
         orderBy: { createdAt: "desc" },
         take: 1000,
-        select: { id: true, name: true, waId: true, createdAt: true },
+        select: { id: true, name: true, waId: true, createdAt: true, email: true, leadStage: true, optedOutAt: true },
       })
     : [];
 
@@ -34,6 +34,9 @@ export default async function ContactsPage({
     name: row.name,
     phone: `+${row.waId}`,
     registeredAt: dateFormat.format(row.createdAt),
+    email: row.email,
+    stage: row.leadStage,
+    optedOut: Boolean(row.optedOutAt),
   }));
 
   return (

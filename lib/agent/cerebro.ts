@@ -1,10 +1,11 @@
 import "server-only";
-import { prisma } from "@/lib/prisma";
 import { buildSystemPrompt } from "./negocio";
-import { AGENDAMENTO_ATIVO, agenda } from "./agenda";
+import { buildTools, catalogForPrompt, executeTool, type AgentCapabilities, type ToolDefinition } from "./tools";
+import { addDaysISO, todayISO, zonedToUtcMs } from "@/lib/schedule/slots";
 
-// Cérebro do agente: ficha do negócio + histórico + modelo (OpenRouter) [+ ferramentas de agenda].
-// Não toca na base de dados nem no WhatsApp: recebe o histórico e devolve o texto da resposta.
+// Cérebro do agente: ficha do negócio + histórico + modelo (OpenRouter) + ferramentas (qualificar o lead,
+// agenda, link de pagamento: só as que a organização tem). Recebe o histórico e devolve o texto da resposta;
+// as ferramentas executam-se em ./tools (validadas pelo servidor, nunca pelo modelo).
 
 const FUSO = process.env.FUSO || "Europe/Lisbon";
 const MODELO = process.env.MODELO || "google/gemini-3.8-flash";
@@ -14,13 +15,19 @@ const TIMEOUT_MS = 30_000;
 const MAX_RESPOSTA = 1500;
 const MAX_PASSOS = 6; // voltas modelo <-> ferramentas
 
-// O que é específico da organização a quem o agente está a responder.
+// O que é específico da organização (e da conversa) a quem o agente está a responder.
 export interface ContextoDoAgente {
-  // A organização: isola os horários oferecidos de cada cliente (e de cada organização).
+  // A organização: isola tudo o que é de cada cliente (e de cada organização).
   workspaceId: string;
   // Ficha do negócio (Workspace.agentKnowledge). Obrigatória: não há ficha por omissão, para o agente de
   // uma organização nunca responder com dados de outra.
   conhecimento: string;
+  conversationId: string;
+  contactId: string;
+  // O que esta organização tem de facto (agenda, pagamentos): decide as ferramentas e as regras do prompt.
+  capabilities: AgentCapabilities;
+  // Para onde o Stripe devolve o cliente depois de pagar: https://<dominio>/<lingua>/payment-return
+  returnBase: string;
 }
 
 export interface HistoricoMensagem {
@@ -61,178 +68,71 @@ export function construirHistorico(historico: HistoricoMensagem[]): ChatMsg[] {
     }));
 }
 
-// ---------------------------------------------------------------- datas (só usadas com agenda ligada)
-const fmtData = (d: Date, o: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat("pt-PT", { timeZone: FUSO, ...o }).format(d);
-const isoDia = (d: Date) =>
-  new Intl.DateTimeFormat("en-CA", {
-    timeZone: FUSO,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
+// ---------------------------------------------------------------- datas (só com agenda configurada)
+const fmtData = (d: Date, timeZone: string, o: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat("pt-PT", { timeZone, ...o }).format(d);
 
-function calendario(dias = 21) {
+// "Amanhã", "quinta-feira"... convertidos em AAAA-MM-DD no fuso da agenda: o modelo não faz contas de datas.
+function calendario(timeZone: string, dias = 21) {
+  const hoje = todayISO(Date.now(), timeZone);
   const linhas: string[] = [];
   for (let i = 0; i < dias; i++) {
-    const d = new Date(Date.now() + i * 86400e3);
+    const data = addDaysISO(hoje, i);
+    const meioDia = new Date(zonedToUtcMs(data, "12:00", timeZone));
     const nota = i === 0 ? " (hoje)" : i === 1 ? " (amanhã)" : "";
-    linhas.push(
-      `${isoDia(d)} = ${fmtData(d, { weekday: "long", day: "2-digit", month: "2-digit" })}${nota}`,
-    );
+    linhas.push(`${data} = ${fmtData(meioDia, timeZone, { weekday: "long", day: "2-digit", month: "2-digit" })}${nota}`);
   }
   return linhas.join("\n");
 }
 
-function validarData(data: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(data || ""))
-    return "Data em formato inválido. Use AAAA-MM-DD da tabela de datas.";
-  const [a, m, d] = data.split("-").map(Number);
-  const dt = new Date(Date.UTC(a, m - 1, d));
-  if (
-    dt.getUTCFullYear() !== a ||
-    dt.getUTCMonth() !== m - 1 ||
-    dt.getUTCDate() !== d
-  ) {
-    return `A data ${data} não existe no calendário.`;
-  }
-  if (data < isoDia(new Date())) return `A data ${data} já passou.`;
-  if (data > isoDia(new Date(Date.now() + 60 * 86400e3)))
-    return "Só marcamos até 60 dias à frente.";
-  return null;
-}
-
 // ---------------------------------------------------------------- prompt de sistema
-// O texto fixo (comportamento + base de conhecimento) vive em negocio.ts. Aqui só se acrescenta
-// o que muda a cada pedido: o estado da agenda e a data/hora atuais.
+// O texto fixo (comportamento + base de conhecimento) vive em negocio.ts. Aqui acrescenta-se o que muda a cada
+// pedido: o que esta organização consegue fazer (qualificar, vender, marcar) e a data/hora atuais.
 export function promptDeSistema(
   contexto: ContextoDoAgente,
   agora = new Date(),
 ) {
-  const agenda = AGENDAMENTO_ATIVO
+  const { schedule, payments } = contexto.capabilities;
+
+  const qualificacao = `QUALIFICAÇÃO DO CLIENTE (ferramenta atualizar_lead)
+- Quando o cliente disser o nome, o e-mail ou o que precisa, guarda-o com atualizar_lead. Pergunta uma coisa de cada vez e só quando fizer sentido na conversa; nunca faças um interrogatório.
+- Indica a intencao: "interested" se mostra interesse, "ready_to_buy" se quer avançar (comprar ou marcar), "not_interested" se recusa, "none" se não sabes.
+- Só guardas o que o cliente disse. Nunca inventes dados.
+- Se o cliente pedir para não receber mais mensagens, respeita e não insistas.`;
+
+  const pagamentos =
+    payments.connected && payments.items.length > 0
+      ? `PAGAMENTOS (ferramenta criar_link_pagamento; esta secção prevalece sobre a regra geral de pagamentos acima)
+- Só vendes os itens desta lista, ao preço indicado. Não há descontos nem outros valores.
+${catalogForPrompt(payments)}
+- Quando o cliente confirmar que quer comprar, usa criar_link_pagamento com o id EXATO do item e envia-lhe o link na resposta, com uma frase curta.
+- Nunca digas que um pagamento foi recebido: só a plataforma o confirma. Se o cliente disser que já pagou, diz que a confirmação chega em instantes.
+- Se pedirem outra forma de pagar, um reembolso ou algo que não está aqui, diz que a equipa dá seguimento.`
+      : `PAGAMENTOS
+- Não consegues cobrar nem enviar links de pagamento. Se o cliente quiser pagar, diz que a equipa lhe envia o pagamento.`;
+
+  const agenda = schedule
     ? `AGENDA
 - Para ver horários livres usa a ferramenta ver_horarios. Nunca inventes um horário.
-- Para marcar usa criar_agendamento, e SÓ depois de o cliente confirmar por escrito o serviço, o dia e a hora.
+- Para marcar usa criar_agendamento, e SÓ depois de o cliente confirmar por escrito o dia e a hora.
+- Depois de marcar, confirma ao cliente o dia e a hora (ex.: "Fica marcado para quinta-feira às 15:00").
 - Datas: usa SEMPRE a tabela de datas abaixo para converter "amanhã", "quinta-feira" etc. em AAAA-MM-DD.
 
-TABELA DE DATAS (fuso ${FUSO})
-${calendario()}`
+TABELA DE DATAS (fuso ${schedule.timezone})
+${calendario(schedule.timezone)}`
     : `AGENDA
 - Não tens acesso a nenhuma agenda: não marques, não proponhas nem confirmes horários. Se pedirem uma marcação ou uma demonstração, diz que a equipa entra em contacto.`;
 
+  const fuso = schedule?.timezone ?? FUSO;
   return `${buildSystemPrompt(contexto.conhecimento)}
+
+${qualificacao}
+
+${pagamentos}
 
 ${agenda}
 
-DATA E HORA ATUAIS (fuso ${FUSO}): ${fmtData(agora, { dateStyle: "full", timeStyle: "short" })}`;
-}
-
-// ---------------------------------------------------------------- ferramentas (só com agenda ligada)
-const FERRAMENTAS = AGENDAMENTO_ATIVO
-  ? [
-      {
-        type: "function",
-        function: {
-          name: "ver_horarios",
-          description: "Lista os horários livres de um dia na agenda.",
-          parameters: {
-            type: "object",
-            properties: {
-              data: {
-                type: "string",
-                description: "Dia AAAA-MM-DD, tirado da tabela de datas.",
-              },
-            },
-            required: ["data"],
-          },
-        },
-      },
-      {
-        type: "function",
-        function: {
-          name: "criar_agendamento",
-          description:
-            "Marca um horário. Só depois de o cliente confirmar por escrito serviço, dia e hora.",
-          parameters: {
-            type: "object",
-            properties: {
-              data: { type: "string", description: "AAAA-MM-DD" },
-              hora: {
-                type: "string",
-                description: "HH:MM, exatamente como veio de ver_horarios",
-              },
-              nome: { type: "string", description: "Nome do cliente" },
-              servico: { type: "string", description: "Serviço da ficha" },
-            },
-            required: ["data", "hora", "nome", "servico"],
-          },
-        },
-      },
-    ]
-  : [];
-
-// Horários mostrados a cada cliente: só se marca o que a agenda ofereceu a ESSA pessoa.
-// Guardados na base de dados (OfferedSlot) e não em memória: entre a pergunta do cliente e a confirmação
-// a conversa pode passar por outra instância serverless. Uma oferta caduca ao fim de OFERTA_HORAS.
-const OFERTA_HORAS = 12;
-
-async function executar(
-  workspaceId: string,
-  contacto: string,
-  nome: string,
-  args: Record<string, string>,
-) {
-  if (nome === "ver_horarios") {
-    const erro = validarData(args.data);
-    if (erro) return { erro };
-    const horas = await agenda.horariosLivres(args.data, FUSO);
-    const agora = Date.now();
-    await prisma.offeredSlot.deleteMany({ where: { expiresAt: { lt: new Date(agora) } } });
-    if (horas.length) {
-      const expiresAt = new Date(agora + OFERTA_HORAS * 60 * 60 * 1000);
-      await prisma.offeredSlot.createMany({
-        data: horas.map((h) => ({ workspaceId, contact: contacto, slot: `${args.data} ${h}`, expiresAt })),
-        skipDuplicates: true,
-      });
-      // skipDuplicates não renova a validade de uma oferta repetida: renova-se aqui.
-      await prisma.offeredSlot.updateMany({
-        where: { workspaceId, contact: contacto, slot: { in: horas.map((h) => `${args.data} ${h}`) } },
-        data: { expiresAt },
-      });
-    }
-    return horas.length
-      ? { data: args.data, livres: horas }
-      : {
-          data: args.data,
-          livres: [],
-          aviso: "Nenhum horário livre neste dia.",
-        };
-  }
-  if (nome === "criar_agendamento") {
-    const erro = validarData(args.data);
-    if (erro) return { erro };
-    const chave = `${args.data} ${args.hora}`;
-    const oferta = await prisma.offeredSlot.findUnique({
-      where: { workspaceId_contact_slot: { workspaceId, contact: contacto, slot: chave } },
-      select: { expiresAt: true },
-    });
-    if (!oferta || oferta.expiresAt.getTime() < Date.now())
-      return {
-        erro: `O horário ${chave} não foi mostrado como livre. Chame ver_horarios antes.`,
-      };
-    const r = await agenda.marcar({
-      data: args.data,
-      hora: args.hora,
-      nome: args.nome,
-      servico: args.servico,
-      telefone: contacto,
-      fuso: FUSO,
-    });
-    // Marcado: este horário já não está livre, não pode ser marcado outra vez com a mesma oferta.
-    await prisma.offeredSlot.deleteMany({ where: { workspaceId, contact: contacto, slot: chave } });
-    return { ok: true, data: args.data, hora: args.hora, id: r.id };
-  }
-  return { erro: `Ferramenta desconhecida: ${nome}` };
+DATA E HORA ATUAIS (fuso ${fuso}): ${fmtData(agora, fuso, { dateStyle: "full", timeStyle: "short" })}`;
 }
 
 // ---------------------------------------------------------------- modelo (OpenRouter)
@@ -245,6 +145,9 @@ const PAUSA_REPETICAO_MS = 2000;
 // de modelos, com repetições, tem de caber num orçamento: passado este tempo desiste e o agente avisa
 // o cliente de que a equipa responde. Configurável em MODELO_ORCAMENTO_MS.
 const orcamentoMs = () => Number(process.env.MODELO_ORCAMENTO_MS) || 40_000;
+
+// OPENROUTER_API_URL só serve para testes (um servidor falso); por omissão é o OpenRouter.
+const urlDoModelo = () => process.env.OPENROUTER_API_URL?.trim() || "https://openrouter.ai/api/v1/chat/completions";
 
 // Modelos de recurso, por ordem, quando o principal (MODELO) está limitado ou em baixo. Os modelos
 // gratuitos entram em limite de pedidos com frequência, por isso um só modelo é um ponto de falha.
@@ -289,11 +192,14 @@ const ERRO_DE_CONTA = new Set([401, 402, 403]);
 // Uma chamada ao modelo. Se o principal falhar por algo passageiro (429, 5xx, corpo inválido) ou
 // específico dele (400/404), passa logo ao seguinte da cadeia. Esgotada a cadeia, espera um pouco
 // e percorre-a UMA vez mais. Só falha se todos falharem.
-async function chamarModelo(
+export async function chamarModelo(
   messages: ChatMsg[],
+  tools: ToolDefinition[] = [],
+  // Orçamento próprio (os seguimentos automáticos correm em lote e não podem gastar 40 s cada).
+  orcamento?: number,
 ): Promise<{ content: string | null; tool_calls?: ToolCall[] }> {
   const cadeia = cadeiaDeModelos();
-  const limite = Date.now() + orcamentoMs();
+  const limite = Date.now() + (orcamento ?? orcamentoMs());
   let ultimoErro = "";
 
   for (let volta = 0; volta < 2; volta++) {
@@ -307,7 +213,7 @@ async function chamarModelo(
           `${ultimoErro || "OpenRouter"} (orçamento de tempo esgotado)`,
         );
 
-      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const r = await fetch(urlDoModelo(), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
@@ -320,7 +226,7 @@ async function chamarModelo(
           temperature: 0.3,
           // Modelos que "pensam" gastam parte deste limite no raciocínio: com pouco, a resposta vem vazia.
           max_tokens: 1500,
-          ...(FERRAMENTAS.length ? { tools: FERRAMENTAS } : {}),
+          ...(tools.length ? { tools } : {}),
         }),
         // Nunca mais do que o tempo que resta do orçamento (mas o suficiente para uma resposta rápida).
         signal: AbortSignal.timeout(
@@ -370,7 +276,7 @@ async function chamarModelo(
 }
 
 // ---------------------------------------------------------------- a resposta
-// `contacto` = número do cliente (só usado pelas ferramentas de agenda).
+// `contacto` = identificador do cliente no canal (número, IGSID ou PSID; usado nas ofertas de horários).
 // Devolve "" se o modelo não produzir texto: quem chama decide não enviar nada.
 export async function gerarResposta(
   historico: HistoricoMensagem[],
@@ -381,13 +287,31 @@ export async function gerarResposta(
     { role: "system", content: promptDeSistema(contexto) },
     ...construirHistorico(historico),
   ];
+  const tools = buildTools(contexto.capabilities);
+  const toolContext = {
+    workspaceId: contexto.workspaceId,
+    conversationId: contexto.conversationId,
+    contactId: contexto.contactId,
+    contactWaId: contacto,
+    returnBase: contexto.returnBase,
+    capabilities: contexto.capabilities,
+  };
 
   let repetiu = false;
+  // O link de pagamento criado nesta resposta: tem de ir MESMO na mensagem (o modelo pode esquecer-se dele
+  // ou alterá-lo), por isso garante-se aqui, com o endereço devolvido pelo servidor.
+  let linkDePagamento: string | null = null;
+  const comLink = (texto: string) => {
+    if (!linkDePagamento || texto.includes(linkDePagamento)) return texto.slice(0, MAX_RESPOSTA);
+    if (!texto) return `Aqui está o seu link de pagamento seguro: ${linkDePagamento}`;
+    return `${texto.slice(0, Math.max(0, MAX_RESPOSTA - linkDePagamento.length - 2))}\n\n${linkDePagamento}`;
+  };
+
   for (let passo = 0; passo < MAX_PASSOS; passo++) {
-    const msg = await chamarModelo(messages);
+    const msg = await chamarModelo(messages, tools);
     if (!msg.tool_calls?.length) {
       const texto = (msg.content ?? "").trim();
-      if (texto) return texto.slice(0, MAX_RESPOSTA);
+      if (texto || linkDePagamento) return comLink(texto);
       // Resposta vazia (o modelo gastou tudo a raciocinar): tenta uma vez mais antes de desistir.
       if (!repetiu) {
         repetiu = true;
@@ -402,17 +326,25 @@ export async function gerarResposta(
       tool_calls: msg.tool_calls,
     });
     for (const tc of msg.tool_calls) {
-      let args: Record<string, string> = {};
+      let args: Record<string, unknown> = {};
       try {
-        args = JSON.parse(tc.function.arguments || "{}");
+        const parsed = JSON.parse(tc.function.arguments || "{}");
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) args = parsed;
       } catch {
         // argumentos partidos: a ferramenta devolve o erro ao modelo
       }
-      let saida: unknown;
+      let saida: Record<string, unknown>;
       try {
-        saida = await executar(contexto.workspaceId, contacto, tc.function.name, args);
+        // Só se executa o que foi oferecido ao modelo nesta conversa.
+        saida = tools.some((t) => t.function.name === tc.function.name)
+          ? await executeTool(toolContext, tc.function.name, args)
+          : { erro: `Ferramenta indisponível: ${tc.function.name}` };
       } catch (e) {
-        saida = { erro: e instanceof Error ? e.message : String(e) };
+        console.error("[agent] ferramenta falhou", tc.function.name, e instanceof Error ? e.message : e);
+        saida = { erro: "Não foi possível executar a ação agora." };
+      }
+      if (tc.function.name === "criar_link_pagamento" && saida.ok === true && typeof saida.url === "string") {
+        linkDePagamento = saida.url;
       }
       messages.push({
         role: "tool",
@@ -421,5 +353,39 @@ export async function gerarResposta(
       });
     }
   }
-  return ""; // demasiadas voltas sem resposta final
+  return linkDePagamento ? comLink("") : ""; // demasiadas voltas sem resposta final
+}
+
+// ---------------------------------------------------------------- seguimento automático (reengajamento)
+const INSTRUCOES_SEGUIMENTO = (passo: number, total: number) => `SEGUIMENTO AUTOMÁTICO
+O cliente deixou de responder à tua última mensagem. Escreve UMA mensagem curta (no máximo 2 frases) a retomar o que estavam a tratar, a partir do histórico.
+- Este é o seguimento ${passo} de ${total}.${passo >= total ? " É o último: despede-te com simpatia e diz que fica à disposição, sem insistir." : " Sê leve: uma pergunta simples que facilite a resposta."}
+- Retoma o ÚLTIMO assunto concreto. Não repitas a mensagem anterior nem te apresentes outra vez.
+- Sem pressão, sem urgência artificial, sem descontos nem ofertas, sem inventar nada que não esteja na base de conhecimento.
+- Não incluas ligações. Responde só com o texto da mensagem.`;
+
+// O texto de um seguimento, ou null se o modelo falhar ou produzir algo que não serve (o chamador usa o texto
+// de recurso). Sem ferramentas: um seguimento só escreve, nunca marca nem cobra.
+export async function gerarSeguimento(input: {
+  historico: HistoricoMensagem[];
+  passo: number;
+  totalPassos: number;
+  conhecimento: string;
+}): Promise<string | null> {
+  const messages: ChatMsg[] = [
+    { role: "system", content: `${buildSystemPrompt(input.conhecimento)}\n\n${INSTRUCOES_SEGUIMENTO(input.passo, input.totalPassos)}` },
+    ...construirHistorico(input.historico),
+  ];
+  try {
+    const msg = await chamarModelo(messages, [], 12_000);
+    const texto = (msg.content ?? "").trim();
+    const anterior = [...input.historico].reverse().find((m) => m.direction === "OUT")?.body.trim();
+    if (texto.length < 5 || texto.length > 400) return null;
+    if (respostaSuspeita(texto) || /https?:\/\/|www\./i.test(texto)) return null;
+    if (anterior && texto === anterior) return null;
+    return texto;
+  } catch (err) {
+    console.error("[followup] o modelo falhou:", err instanceof Error ? err.message : err);
+    return null;
+  }
 }

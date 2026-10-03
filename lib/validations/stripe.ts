@@ -51,3 +51,20 @@ export function workspaceIdFromMetadata(meta: Record<string, unknown> | null | u
   const value = meta?.workspace_id;
   return typeof value === "string" && value ? value : undefined;
 }
+
+// ---------------------------------------------------------------------------------------------- Connect
+// Eventos das contas LIGADAS (pagamentos dos clientes das empresas). Chegam a um endpoint próprio e trazem o
+// id da conta de onde vieram (`account`): só valem para a organização que ligou ESSA conta.
+export const stripeConnectEventSchema = z.object({
+  id: z.string().min(1),
+  type: z.string().min(1),
+  created: z.number().int().positive(),
+  account: z.string().regex(/^acct_[A-Za-z0-9]+$/),
+  data: z.object({ object: z.record(z.string(), z.unknown()) }),
+});
+
+export const stripeCheckoutSessionPaidSchema = z.object({
+  id: z.string().min(1),
+  mode: z.string().optional(),
+  payment_status: z.string().optional(),
+});

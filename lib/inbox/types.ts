@@ -10,6 +10,10 @@ export interface ConversationSummary {
   lastMessageAt: string;
   unreadCount: number;
   isPaused: boolean;
+  // Qualificação do cliente (preenchida pela IA): ver lib/leads/lead.ts.
+  leadStage: "NEW" | "ENGAGED" | "QUALIFIED" | "PAYMENT_SENT" | "WON" | "LOST";
+  email: string | null;
+  painPoint: string | null;
 }
 
 export interface ChatMessage {

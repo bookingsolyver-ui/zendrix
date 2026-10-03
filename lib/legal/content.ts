@@ -73,6 +73,8 @@ const privacyPt: Builder = (e, c) => ({
           "Organização: nome, ficha do negócio (texto que a empresa escreve para orientar o assistente de IA) e definições.",
           "Canais ligados: identificadores das contas e páginas (WhatsApp Business, Instagram, Messenger), incluindo o identificador da conta WhatsApp Business e do número de telefone, e os tokens de acesso, que guardamos cifrados (AES-256-GCM).",
           "Conversas: as mensagens enviadas e recebidas, o identificador do cliente final em cada canal (número de telefone, ou identificador do Instagram/Messenger) e o nome de perfil, quando o canal o fornece. Se a transcrição de voz estiver ativa, também as notas de voz recebidas e o respetivo texto.",
+          "Qualificação comercial: o nome, o e-mail e a necessidade que o cliente final indica nas conversas, extraídos pelo assistente de IA quando está ligado, e o estado comercial do contacto (novo, qualificado, cliente...). Também os pedidos de não receber mais mensagens.",
+          "Marcações e pagamentos: as marcações feitas na agenda e os links de pagamento enviados (item, valor e se foi pago). Os pagamentos dos clientes finais são processados na conta Stripe da própria empresa; não guardamos dados de cartão.",
           "Faturação: o identificador de cliente e de subscrição no Stripe e o estado do plano. Não guardamos dados de cartão: são tratados pelo Stripe.",
           "Chaves de API: guardamos apenas o hash; a chave completa só é mostrada uma vez.",
           "Dados técnicos: endereço IP e registos de pedidos, usados para segurança e limitação de abusos.",
@@ -93,6 +95,7 @@ const privacyPt: Builder = (e, c) => ({
           "Prestar o serviço contratado (conta, Inbox, canais, assistente de IA, faturação): execução do contrato.",
           "Segurança, prevenção de abusos e limitação de pedidos: interesse legítimo.",
           "Cumprir obrigações legais, incluindo fiscais e de faturação: obrigação legal.",
+          "Mensagens automáticas de seguimento: enviadas em nome da empresa a clientes que lhe escreveram, dentro da janela permitida pela Meta e nunca a quem pediu para não as receber (a empresa é a responsável por este tratamento).",
           "Comunicações sobre a conta e o serviço (por exemplo, convites de equipa): execução do contrato e interesse legítimo.",
         ],
       ],
@@ -103,11 +106,10 @@ const privacyPt: Builder = (e, c) => ({
         [
           "Supabase: base de dados, autenticação e armazenamento de ficheiros (região da União Europeia).",
           "Vercel: alojamento da aplicação (região da Irlanda).",
-          "Stripe: pagamentos e faturação.",
+          "Stripe: pagamentos e faturação das subscrições da Zentrix e, se a empresa ligar a sua conta (Stripe Connect), os links de pagamento dos seus clientes.",
           "Meta (WhatsApp, Instagram, Messenger): canais de mensagens.",
-          "OpenRouter e os fornecedores de modelos de IA que ele encaminha: processam o texto das conversas para gerar respostas, quando o assistente de IA está ligado.",
+          "OpenRouter e os fornecedores de modelos de IA que ele encaminha: processam o texto das conversas para gerar respostas, extrair dados de qualificação e escrever mensagens de seguimento, quando o assistente de IA está ligado.",
           "OpenAI, Groq e ElevenLabs: transcrição e síntese de voz, apenas se a funcionalidade de voz estiver ativada.",
-          "Cal.com: marcação de reuniões, apenas se a agenda estiver ligada.",
           "Resend: envio de e-mails da plataforma, quando configurado.",
         ],
         "Alguns destes fornecedores podem tratar dados fora do Espaço Económico Europeu. Nesses casos, as transferências assentam em cláusulas contratuais-tipo ou noutros mecanismos previstos no RGPD.",
@@ -173,6 +175,8 @@ const privacyEn: Builder = (e, c) => ({
           "Organization: name, business profile (text the business writes to guide the AI assistant) and settings.",
           "Connected channels: identifiers of accounts and pages (WhatsApp Business, Instagram, Messenger), including the WhatsApp Business account and phone number identifiers, and access tokens, which we store encrypted (AES-256-GCM).",
           "Conversations: messages sent and received, the end customer's identifier on each channel (phone number, or Instagram/Messenger identifier) and profile name when the channel provides it. If voice transcription is enabled, also received voice notes and their text.",
+          "Lead qualification: the name, email and need the end customer states in conversations, extracted by the AI assistant when it is on, and the contact's commercial stage (new, qualified, customer...). Also requests to stop receiving messages.",
+          "Appointments and payments: appointments booked in the calendar and payment links sent (item, amount and whether it was paid). End customers' payments are processed in the business's own Stripe account; we do not store card data.",
           "Billing: the Stripe customer and subscription identifiers and the plan status. We do not store card data: it is handled by Stripe.",
           "API keys: we only store the hash; the full key is shown once.",
           "Technical data: IP address and request logs, used for security and abuse prevention.",
@@ -193,6 +197,7 @@ const privacyEn: Builder = (e, c) => ({
           "Providing the contracted service (account, Inbox, channels, AI assistant, billing): performance of a contract.",
           "Security, abuse prevention and rate limiting: legitimate interest.",
           "Complying with legal obligations, including tax and invoicing: legal obligation.",
+          "Automated follow-up messages: sent on the business's behalf to customers who wrote to it, within the window allowed by Meta and never to anyone who asked not to receive them (the business is the controller of this processing).",
           "Account and service communications (for example team invitations): performance of a contract and legitimate interest.",
         ],
       ],
@@ -203,11 +208,10 @@ const privacyEn: Builder = (e, c) => ({
         [
           "Supabase: database, authentication and file storage (European Union region).",
           "Vercel: application hosting (Ireland region).",
-          "Stripe: payments and billing.",
+          "Stripe: payments and billing of Zentrix subscriptions and, if the business connects its account (Stripe Connect), payment links for its customers.",
           "Meta (WhatsApp, Instagram, Messenger): messaging channels.",
-          "OpenRouter and the AI model providers it routes to: process conversation text to generate replies, when the AI assistant is on.",
+          "OpenRouter and the AI model providers it routes to: process conversation text to generate replies, extract qualification data and write follow-up messages, when the AI assistant is on.",
           "OpenAI, Groq and ElevenLabs: voice transcription and synthesis, only if the voice feature is enabled.",
-          "Cal.com: meeting scheduling, only if the calendar is connected.",
           "Resend: platform emails, when configured.",
         ],
         "Some of these providers may process data outside the European Economic Area. In those cases, transfers rely on standard contractual clauses or other mechanisms provided by the GDPR.",
@@ -286,6 +290,7 @@ const termsPt: Builder = (e, c) => ({
         "Compromete-se a usar o serviço de acordo com a lei e com as políticas da Meta, do WhatsApp Business, do Instagram e do Messenger. Em particular:",
         [
           "só contactar pessoas que tenham dado consentimento ou que lhe tenham escrito primeiro, e respeitar a janela de 24 horas para respostas livres;",
+          "respeitar de imediato quem pedir para não receber mais mensagens (a plataforma já o faz nos seguimentos automáticos, mas a responsabilidade é sua);",
           "não enviar spam, conteúdo ilegal, enganoso, ofensivo ou que viole direitos de terceiros;",
           "não tentar contornar limites técnicos, aceder a dados de outras organizações nem comprometer a segurança do serviço;",
           "não usar o serviço para decisões automatizadas com efeitos legais sobre pessoas.",
@@ -300,6 +305,7 @@ const termsPt: Builder = (e, c) => ({
       heading: "6. Assistente de IA",
       body: [
         "O assistente gera respostas automáticas com base na ficha do negócio que a empresa escreve. As respostas de IA podem conter erros ou omissões. A empresa é responsável por rever a ficha, por supervisionar as conversas (pode pausar a IA em cada conversa) e pelo que o assistente diz em seu nome.",
+        "Se a empresa o ativar, o assistente também pode guardar dados de qualificação dos clientes, enviar mensagens de seguimento a quem deixou de responder, marcar reuniões nos horários definidos pela empresa e enviar links de pagamento de itens do catálogo da empresa, cobrados na conta Stripe da própria empresa. A empresa define o catálogo, os preços e os horários, e é responsável pelas vendas, cobranças, reembolsos e obrigações fiscais perante os seus clientes; a Zentrix não é parte nessas transações nem recebe esses valores.",
       ],
     },
     {
@@ -368,6 +374,7 @@ const termsEn: Builder = (e, c) => ({
         "You agree to use the service in compliance with the law and with the policies of Meta, WhatsApp Business, Instagram and Messenger. In particular:",
         [
           "only contact people who have given consent or who wrote to you first, and respect the 24-hour window for free-form replies;",
+          "immediately respect anyone who asks to stop receiving messages (the platform already does this for automated follow-ups, but the responsibility is yours);",
           "do not send spam or illegal, misleading or offensive content, or content that infringes third-party rights;",
           "do not try to bypass technical limits, access other organizations' data or compromise the security of the service;",
           "do not use the service for automated decisions with legal effects on people.",
@@ -382,6 +389,7 @@ const termsEn: Builder = (e, c) => ({
       heading: "6. AI assistant",
       body: [
         "The assistant generates automatic replies based on the business profile the business writes. AI replies may contain errors or omissions. The business is responsible for reviewing the profile, supervising conversations (AI can be paused per conversation) and what the assistant says on its behalf.",
+        "If the business turns them on, the assistant can also store customer qualification data, send follow-up messages to people who stopped replying, book meetings in the hours the business defines and send payment links for items in the business's catalog, charged in the business's own Stripe account. The business defines the catalog, prices and hours, and is responsible for sales, charges, refunds and tax obligations toward its customers; Zentrix is not a party to those transactions and does not receive those amounts.",
       ],
     },
     {

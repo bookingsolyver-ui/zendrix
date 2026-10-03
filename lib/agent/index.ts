@@ -9,6 +9,9 @@ import { chaveOk, gerarResposta } from "./cerebro";
 import { synthesizeSpeech, voiceWanted } from "./voice";
 import { loadTenant } from "@/lib/tenant";
 import { drainOutbox } from "@/lib/outbox/process";
+import { loadAgentCapabilities } from "./tools";
+import { publicOrigin } from "@/lib/http/public-url";
+import { isOptOut, OPT_OUT_REPLY } from "@/lib/leads/lead";
 
 // Ponto de entrada do agente. É chamado pelo webhook DEPOIS de a mensagem estar gravada
 // e de a Meta já ter recebido o 200, por isso nunca pode lançar erros: falhas só são registadas.
@@ -103,11 +106,6 @@ async function handle(event: AgentEvent) {
     }
     return;
   }
-  const contexto = {
-    workspaceId: tenant.workspaceId,
-    conhecimento: tenant.knowledge,
-  };
-
   // O humano assumiu esta conversa: a mensagem já ficou gravada, o agente nem chega ao modelo.
   if (await isPaused(event.conversationId)) return;
 
@@ -126,13 +124,42 @@ async function handle(event: AgentEvent) {
     select: {
       id: true,
       createdAt: true,
-      conversation: { select: { contact: { select: { waId: true } } } },
+      type: true,
+      body: true,
+      conversation: { select: { contact: { select: { id: true, waId: true } } } },
     },
   });
   if (!mine) return;
 
   // Chegou outra mensagem do cliente entretanto: a execução dessa é que responde, com o contexto todo.
   if (await hasNewerInbound(event.conversationId, mine)) return;
+
+  // O cliente pede para não receber mais mensagens ("parar", "stop"...): resposta fixa e nada mais. Não passa
+  // pelo modelo (tem de ser sempre igual, e nunca insistir). O registo do pedido (optedOutAt) é feito ao
+  // gravar a mensagem, para valer mesmo com a IA desligada.
+  if (mine.type === "text" && isOptOut(mine.body)) {
+    const sent = await sendTextInConversation({
+      workspaceId: event.workspaceId,
+      conversationId: event.conversationId,
+      text: OPT_OUT_REPLY,
+    });
+    if (sent.ok) await drainOutbox();
+    return;
+  }
+
+  // O que esta organização consegue fazer (agenda, pagamentos) decide as ferramentas e as regras do prompt.
+  // Sem endereço público configurado não se enviam links de pagamento (o Stripe não saberia para onde devolver).
+  const origin = publicOrigin();
+  const capabilities = await loadAgentCapabilities(event.workspaceId);
+  if (!origin) capabilities.payments = { connected: false, items: [] };
+  const contexto = {
+    workspaceId: tenant.workspaceId,
+    conhecimento: tenant.knowledge,
+    conversationId: event.conversationId,
+    contactId: mine.conversation.contact.id,
+    capabilities,
+    returnBase: `${origin ?? ""}/pt/payment-return`,
+  };
 
   const limit = await rateLimit(`agent:${event.conversationId}`, {
     limit: MAX_REPLIES_PER_HOUR,
