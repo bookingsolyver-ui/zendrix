@@ -10,9 +10,10 @@ export const FEATURES = {
   // Operacionais
   contacts: true,
   aiOverview: true,
+  // Fixados no menu por decisão do produto (páginas ainda com dados de exemplo)
+  crm: true,
+  marketing: true,
   // Em construção
-  crm: false,
-  marketing: false,
   ecommerce: false,
   analytics: false,
   segments: false,
