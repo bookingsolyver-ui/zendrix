@@ -1,415 +1,46 @@
 {
   "Metadata": {
-    "title": "Zentrix - Venda globalmente, receba localmente",
-    "description": "A plataforma de pagamentos e e-commerce que liga o seu negócio a clientes em todo o mundo, com carteira multi-moeda e afiliados integrados."
+    "title": "Zentrix — Atendimento omnicanal com IA",
+    "description": "Responda a WhatsApp, Instagram e Messenger numa só caixa de entrada. Um assistente de IA treinado com os dados do seu negócio atende os clientes e a sua equipa assume quando quiser. 14 dias grátis, sem cartão."
   },
   "Landing": {
     "hero": {
-      "titleLine1": "O seu WhatsApp Business.",
-      "titleLine2": "Toda a equipa,",
-      "titleHighlight": "no mesmo número.",
-      "subtitle": "Respostas centralizadas para toda a equipa, um agente de IA treinado com os dados do seu negócio e dados isolados por empresa.",
+      "titleLine1": "Todos os seus canais.",
+      "titleLine2": "Uma só caixa de entrada,",
+      "titleHighlight": "com IA a atender.",
+      "subtitle": "WhatsApp, Instagram e Messenger chegam à mesma Inbox. A sua equipa responde a tudo num só sítio e um assistente de IA, treinado com os dados do seu negócio, atende os clientes por si.",
       "ctaPrimary": "Criar conta com trial de 14 dias",
       "ctaSecondary": "Ver preços",
       "phoneContact": "Ana Cliente",
-      "phoneMessage1": "Olá! Ainda tenho o carrinho aberto 👀",
-      "phoneMessage2": "Boa notícia! Recuperámos o seu carrinho e guardámos os artigos 🎉",
-      "phoneBadge": "Carrinho Recuperado",
-      "phonePayButton": "Pagar com Multicaixa/Pix",
-      "inboxTitle": "Shared Inbox",
+      "phoneMessage1": "Olá! Atendem ao sábado?",
+      "phoneMessage2": "Olá, Ana! Sim: ao sábado estamos abertos das 9h às 13h. Em que posso ajudar?",
+      "phoneBadge": "Respondido pela IA",
+      "inboxTitle": "Inbox",
       "inboxTimeNow": "Agora",
-      "inboxAssignedTo": "Atribuído a: Agente Carlos",
-      "inboxOnlineLabel": "Online",
-      "inboxNoteLabel": "Nota Interna",
-      "inboxNote": "A Ana vai pagar por referência Multicaixa, fiquem atentos ao sistema.",
+      "inboxChannel": "WhatsApp",
+      "inboxOnlineLabel": "IA ativa",
+      "inboxTakeoverLabel": "Assumir conversa",
+      "inboxTakeover": "A IA pausa e a sua equipa responde.",
       "inboxContact2Name": "João Pedro",
-      "inboxContact2Preview": "Qual é o IBAN?",
+      "inboxContact2Preview": "Obrigado, fico a aguardar.",
       "inboxContact2Time": "10:00"
     },
-    "sameNumber": {
-      "title": "O telemóvel continua.",
-      "titleHighlight": "A equipa entra junto.",
-      "subtitle": "Continue a usar o número de sempre — agora com toda a equipa a responder ao mesmo tempo, sem pisarem uns aos outros.",
-      "phoneBotName": "Zentrix Bot",
-      "phoneMessages": [
-        {
-          "from": "bot",
-          "text": "Olá! Bem-vindo à loja. Em que posso ajudar hoje? 👋"
-        },
-        {
-          "from": "customer",
-          "text": "Boa tarde, queria saber o estado da minha encomenda #4821"
-        },
-        {
-          "from": "bot",
-          "text": "Claro! Um momento, vou verificar e já lhe digo."
-        }
-      ],
-      "syncLabel": "Sincronização em tempo real",
-      "inboxTitle": "Shared Inbox",
-      "inboxContacts": [
-        {
-          "name": "Maria Fernandes",
-          "preview": "Já enviei o comprovativo ✅",
-          "time": "09:41"
-        },
-        {
-          "name": "João Kiala",
-          "preview": "Qual é o prazo de entrega?",
-          "time": "09:32"
-        },
-        {
-          "name": "Ana Paula",
-          "preview": "Obrigada pela ajuda! 🙏",
-          "time": "ontem"
-        }
-      ],
-      "activeContact": "Maria Fernandes",
-      "chatMessages": [
-        {
-          "from": "contact",
-          "text": "Boa tarde! Já fiz o pagamento via Multicaixa Express."
-        },
-        {
-          "from": "agent",
-          "text": "Recebido, Maria! Vou confirmar já o seu pedido e avanço com o envio."
-        }
-      ],
-      "internalNoteLabel": "Nota interna",
-      "internalNote": "A Maria já enviou o comprovativo. Confirmar stock antes de despachar.",
-      "inputPlaceholder": "Escreva uma mensagem...",
-      "sendLabel": "Enviar"
-    },
-    "omnichannel": {
-      "title": "Instagram e Facebook,",
-      "titleHighlight": "na mesma caixa do WhatsApp.",
-      "subtitle": "Direct, Messenger e WhatsApp caem na mesma fila. A sua equipa responde tudo num só lugar, sem trocar de app.",
-      "col1Label": "WhatsApp",
-      "col2Label": "Instagram Direct",
-      "col3Label": "Messenger",
-      "col1Message": "Ainda têm este vestido em M?",
-      "col2Message": "Vi no Reels, quanto custa?",
-      "col3Message": "Fazem entrega hoje?",
-      "queueNote": "Tudo cai na mesma fila do Inbox Zentrix."
-    },
-    "aiVoiceScheduling": {
-      "title": "A IA responde em áudio.",
-      "titleHighlight": "E marca as suas reuniões.",
-      "subtitle": "O seu assistente fala com o cliente como uma pessoa e agenda tudo sozinho, sem intervenção da sua equipa.",
-      "voiceLabel": "Nota de voz da IA",
-      "voiceDuration": "0:12",
-      "calendarTitle": "Google Calendar",
-      "calendarEvent": "Reunião com Ana Martins",
-      "calendarTime": "Amanhã, 15:00",
-      "calendarConfirmed": "Confirmado pela IA"
-    },
-    "automations": {
-      "title": "Do primeiro contacto",
-      "titleHighlight": "à próxima compra.",
-      "subtitle": "Crie fluxos visuais que trabalham por si, 24 horas por dia.",
-      "node1": "Gatilho: Carrinho abandonado",
-      "node2": "Aguardar 20 min",
-      "node3": "Enviar Cupão"
-    },
-    "improveWithAi": {
-      "eyebrow": "Melhorar com IA",
-      "title": "A sua ideia.",
-      "titleHighlight": "Com a voz da sua marca.",
-      "subtitle": "Escreva um rascunho e deixe a IA reescrever no tom da sua marca, mais curto ou mais persuasivo — sem perder as variáveis.",
-      "draftLabel": "O seu rascunho",
-      "draftText": "Olá '{{'1'}}', tem produtos no carrinho. Volte para finalizar a compra.",
-      "directions": {
-        "brandVoice": "Voz da marca",
-        "shorter": "Mais curto",
-        "persuasive": "Mais persuasivo"
-      },
-      "resultLabel": "Com Melhorar com IA",
-      "results": {
-        "brandVoice": "Olá '{{'1'}}'! Ficou alguma dúvida sobre a sua escolha? O seu carrinho está guardado à sua espera.",
-        "shorter": "Olá '{{'1'}}', o seu carrinho ainda está aberto. Toque aqui para finalizar.",
-        "persuasive": "Olá '{{'1'}}'! Últimas unidades no seu carrinho — finalize agora e garanta o seu pedido."
-      },
-      "variablePreserved": "Variável preservada"
-    },
-    "campaigns": {
-      "title": "Campanha em",
-      "titleHighlight": "três passos.",
-      "subtitle": "Escolha quem recebe, a mensagem e a hora. Veja o custo estimado antes de enviar.",
-      "step1Title": "Segmento",
-      "step1Description": "Combine regras de compra, carrinho ou tags e veja a contagem atualizar-se na hora.",
-      "segmentRule": "Cliente comprou nos últimos 90 dias",
-      "estimatedCostLabel": "Custo estimado",
-      "step2Title": "Template",
-      "step2Description": "Aprovado pela Meta, com variáveis da sua loja.",
-      "templateName": "promo-fim-de-semana",
-      "templateMessage": "Maria, este fim de semana é só até domingo: 20% em toda a loja 🎉",
-      "step3Title": "Disparo",
-      "step3Description": "Agora ou agendado. A Zentrix envia pela API oficial e mede o retorno.",
-      "resultsLabel": "Resultados",
-      "dispatchStats": [
-        {
-          "label": "Enviadas",
-          "value": "3.240"
-        },
-        {
-          "label": "Lidas",
-          "value": "2.180"
-        },
-        {
-          "label": "Cliques",
-          "value": "412"
-        },
-        {
-          "label": "Receita",
-          "value": "Kz 890K"
-        }
-      ]
-    },
-    "popupToWhatsapp": {
-      "title": "Do pop-up",
-      "titleHighlight": "ao WhatsApp.",
-      "subtitle": "Quem só estava a ver a loja deixa o WhatsApp e recebe a oferta na hora, no seu número.",
-      "step1Label": "Na sua loja",
-      "step1Title": "Pop-up com oferta",
-      "step1Description": "Capta o WhatsApp com um cupão ou raspadinha.",
-      "step2Label": "Na Zentrix",
-      "step2Title": "O evento chega",
-      "step2Trigger": "Gatilho de automação",
-      "step2Segment": "Filtro de segmento",
-      "step2Variable": "Variável de mensagem",
-      "step3Label": "No WhatsApp",
-      "step3Title": "Template aprovado",
-      "step3Message": "Olá! O seu cupão de 20% já está ativo 💚 Use até domingo."
-    },
-    "useCases": {
-      "title": "Feito para o seu negócio,",
-      "titleHighlight": "seja qual for.",
-      "subtitle": "Escolha o seu setor e veja a Zentrix em ação.",
-      "tabs": {
-        "moda": "Moda",
-        "clinicas": "Clínicas",
-        "cursos": "Cursos",
-        "restaurantes": "Restaurantes"
-      },
-      "timelines": {
-        "moda": [
-          {
-            "time": "10:02",
-            "text": "Cliente comenta no Reels"
-          },
-          {
-            "time": "10:05",
-            "text": "Automação envia Direct"
-          },
-          {
-            "time": "10:40",
-            "text": "Pagamento confirmado"
-          }
-        ],
-        "clinicas": [
-          {
-            "time": "09:15",
-            "text": "Paciente pede uma consulta no WhatsApp"
-          },
-          {
-            "time": "09:17",
-            "text": "IA agenda automaticamente no Google Calendar"
-          },
-          {
-            "time": "09:20",
-            "text": "Lembrete de confirmação enviado"
-          }
-        ],
-        "cursos": [
-          {
-            "time": "14:00",
-            "text": "Lead pergunta sobre o curso"
-          },
-          {
-            "time": "14:02",
-            "text": "IA envia vídeo de apresentação"
-          },
-          {
-            "time": "14:30",
-            "text": "Matrícula confirmada com Pix"
-          }
-        ],
-        "restaurantes": [
-          {
-            "time": "19:40",
-            "text": "Cliente pede o cardápio no WhatsApp"
-          },
-          {
-            "time": "19:42",
-            "text": "Bot sugere o prato do dia"
-          },
-          {
-            "time": "20:05",
-            "text": "Pedido confirmado e a caminho"
-          }
-        ]
-      }
-    },
-    "integrations": {
-      "label": "Conecta com as ferramentas que já usa"
-    },
-    "pricing": {
-      "title": "Preços simples,",
-      "titleHighlight": "sem surpresas.",
-      "subtitle": "Comece com 14 dias de teste grátis. Faça upgrade quando a sua operação crescer.",
-      "perMonth": "/mês",
-      "proBadge": "O teste começa aqui",
-      "ctaBasic": "Começar com Basic",
-      "ctaPro": "Começar agora",
-      "ctaEnterprise": "Falar com vendas",
-      "plans": {
-        "basic": {
-          "description": "Para começar a organizar vendas e atendimento.",
-          "features": [
-            "1.000 envios de mensagens / mês",
-            "1 número de WhatsApp",
-            "1 membro de equipa",
-            "CRM básico"
-          ]
-        },
-        "pro": {
-          "description": "Para equipas em crescimento que precisam de automação e IA.",
-          "features": [
-            "10.000 envios de mensagens / mês",
-            "3 números de WhatsApp",
-            "Caixas de entrada multiagente",
-            "Respostas de IA por texto e voz"
-          ]
-        },
-        "enterprise": {
-          "description": "Para operações de grande escala com necessidades avançadas.",
-          "features": [
-            "Envios de mensagens ilimitados",
-            "Números de WhatsApp ilimitados",
-            "Membros de equipa ilimitados",
-            "CRM completo com automações"
-          ]
-        }
-      },
-      "trialBadge": "14 dias de teste grátis",
-      "trialNote": "Todas as contas novas começam com 14 dias de teste. Durante o teste, o agente de IA fica disponível assim que preencher a ficha do seu negócio."
-    },
-    "workWith": {
-      "title": "Monte você mesmo.",
-      "titleHighlight": "Ou a Zentrix monta e opera.",
-      "subtitle": "A plataforma é a mesma nos três caminhos. O que muda é quem faz o trabalho.",
-      "selfServe": {
-        "title": "Você mesmo",
-        "description": "Assina, conecta e monta os seus fluxos. É como a maioria começa."
-      },
-      "setup": {
-        "title": "A gente implanta",
-        "description": "Conectamos a sua loja, escrevemos os templates e ligamos os funis. Depois a conta é sua."
-      },
-      "managed": {
-        "title": "A gente opera",
-        "description": "Campanhas, ajustes e leitura de resultados todos os meses. A sua equipa só atende."
-      }
-    },
-    "faq": {
-      "title": "As suas dúvidas,",
-      "titleHighlight": "respondidas.",
-      "subtitle": "Respostas diretas sobre como a Zentrix funciona.",
-      "q1": {
-        "question": "Vou perder o meu número de WhatsApp?",
-        "answer": "Não. O número continua no seu telemóvel e a sua equipa passa a atender também pela Zentrix, no mesmo número."
-      },
-      "q2": {
-        "question": "Vários atendentes podem usar o mesmo número?",
-        "answer": "Sim. Cada pessoa entra com o seu próprio login e atende na mesma caixa de entrada, com filas e transferência entre atendentes."
-      },
-      "q3": {
-        "question": "A Zentrix atende Instagram e Facebook?",
-        "answer": "Sim, a partir do plano Pro. Direct, Messenger e comentários chegam na mesma caixa do WhatsApp."
-      },
-      "q4": {
-        "question": "A IA responde em áudio?",
-        "answer": "Sim, no plano Enterprise. A IA pode responder com uma nota de voz, sempre ou só quando o cliente enviar áudio."
-      },
-      "q5": {
-        "question": "A IA marca reuniões na minha agenda?",
-        "answer": "Sim. Ligada ao Google Calendar, a IA consulta a disponibilidade e agenda diretamente na conversa."
-      },
-      "q6": {
-        "question": "Preciso de cartão de crédito para testar?",
-        "answer": "Não. O teste gratuito começa sem cartão e pode cancelar quando quiser."
-      },
-      "q7": {
-        "question": "Quanto custa?",
-        "answer": "A partir de Kz 35.000 por mês no plano Basic. O Pro (Kz 75.000) acrescenta multiagente e campanhas; o Enterprise (Kz 150.000) inclui atendimento por IA com voz e automações completas."
-      },
-      "q8": {
-        "question": "Funciona com a minha loja online?",
-        "answer": "Sim. Conectamos com as principais plataformas de e-commerce e qualquer sistema pode integrar por webhook."
-      },
-      "q9": {
-        "question": "Como funciona a recuperação de carrinho?",
-        "answer": "Assim que um cliente abandona o checkout, um fluxo automático envia lembretes com o link para finalizar a compra."
-      },
-      "q10": {
-        "question": "Posso cancelar quando quiser?",
-        "answer": "Sim, sem fidelidade. Cancela diretamente no painel, a qualquer momento."
-      },
-      "q11": {
-        "question": "Consigo saber que venda veio do WhatsApp?",
-        "answer": "Sim. Cada link é rastreado e cada venda é atribuída ao clique, à leitura da mensagem ou ao cupão usado."
-      },
-      "q12": {
-        "question": "Tem suporte em português?",
-        "answer": "Sim, toda a plataforma e o suporte estão disponíveis em português."
-      }
-    },
-    "finalCta": {
-      "title": "O seu número já é conhecido.",
-      "titleHighlight": "Agora ele trabalha com a sua equipa.",
-      "subtitle": "Conecte o seu WhatsApp Business, convide a equipa e comece a atender pela Zentrix hoje mesmo.",
-      "ctaPrimary": "Teste grátis",
-      "ctaSecondary": "Ver planos"
-    },
-    "features": {
-      "title": "Tudo o que precisa para atender",
-      "titleHighlight": "melhor e mais depressa.",
-      "subtitle": "Uma plataforma para a equipa, a IA e os dados do seu negócio.",
-      "items": {
-        "team": {
-          "title": "Vários operadores, um só número",
-          "text": "Toda a equipa responde a partir do mesmo número de WhatsApp Business, com conversas partilhadas, notas internas e atribuição."
-        },
-        "ai": {
-          "title": "IA treinada com os dados do negócio",
-          "text": "O agente responde com a ficha que preencher (produtos, preços, horários e regras) e passa a conversa a uma pessoa quando é preciso."
-        },
-        "security": {
-          "title": "Dados isolados por empresa",
-          "text": "Cada organização só vê os seus próprios dados. O isolamento multi-tenant é reforçado na base de dados (Supabase RLS) e as credenciais são guardadas cifradas."
-        },
-        "always": {
-          "title": "Atendimento automático 24/7",
-          "text": "Respostas por texto e por nota de voz a qualquer hora, com opção de pausar a IA em qualquer conversa."
-        }
-      }
-    },
     "preview": {
-      "title": "Equipa e IA na",
-      "titleHighlight": "mesma conversa.",
-      "subtitle": "Veja como a IA responde primeiro e a equipa assume quando o cliente precisa de uma pessoa.",
+      "title": "A IA responde primeiro.",
+      "titleHighlight": "A equipa assume quando quiser.",
+      "subtitle": "Veja como a IA atende com a ficha do seu negócio e como a sua equipa assume a conversa com um clique.",
       "window": "Inbox Zentrix",
       "sample": "Exemplo ilustrativo",
-      "customerMessage": "Olá! Quanto custa o plano Pro?",
+      "customerMessage": "Olá! Qual é o horário de atendimento?",
       "aiLabel": "Agente de IA",
-      "aiMessage": "Olá! O plano Pro custa 75.000 Kz por mês e inclui 3 números de WhatsApp. Quantas pessoas atendem os seus clientes hoje?",
-      "handoff": "Cliente pediu falar com uma pessoa",
-      "customerFollowup": "Prefiro falar com alguém da equipa, por favor.",
+      "aiMessage": "Olá! Estamos abertos de segunda a sexta, das 9h às 18h, e ao sábado até às 13h. Posso ajudar com mais alguma coisa?",
+      "handoff": "A equipa assumiu a conversa",
+      "customerFollowup": "Obrigada! Podem confirmar se têm disponibilidade amanhã de manhã?",
       "agentLabel": "Carlos · Equipa",
-      "agentMessage": "Olá Ana, sou o Carlos. Já vi a conversa e trato disso consigo agora.",
+      "agentMessage": "Olá Ana, sou o Carlos. Já vi a conversa e confirmo-lhe já a disponibilidade.",
       "c1": {
         "name": "Ana Cliente",
-        "preview": "Qual é o preço do plano Pro?"
+        "preview": "Obrigada! Podem confirmar se têm…"
       },
       "c2": {
         "name": "João Pedro",
@@ -419,13 +50,135 @@
         "name": "Marta S.",
         "preview": "Vocês têm horário ao sábado?"
       }
+    },
+    "features": {
+      "title": "Tudo o que precisa para atender",
+      "titleHighlight": "melhor e mais depressa.",
+      "subtitle": "Uma Inbox para a equipa, a IA e os seus canais.",
+      "items": {
+        "team": {
+          "title": "Equipa com papéis",
+          "text": "Convide colegas por e-mail como Proprietário, Gestor ou Agente. Todos veem as mesmas conversas e cada um só faz o que o seu papel permite."
+        },
+        "ai": {
+          "title": "IA treinada com a ficha do seu negócio",
+          "text": "O assistente responde com o que escrever na ficha: produtos, preços, horários e regras. Sem ficha, não responde: não inventa. Pause-o em qualquer conversa para responder você."
+        },
+        "queue": {
+          "title": "Envio com ritmo controlado",
+          "text": "As respostas saem por uma fila com ritmo controlado e novas tentativas, para proteger o seu número de bloqueios por excesso de envios."
+        },
+        "security": {
+          "title": "Dados isolados por empresa",
+          "text": "Cada organização só vê os seus próprios dados. O isolamento é reforçado na base de dados e as credenciais dos canais são guardadas cifradas."
+        }
+      }
+    },
+    "omnichannel": {
+      "title": "WhatsApp, Instagram e Messenger,",
+      "titleHighlight": "na mesma caixa de entrada.",
+      "subtitle": "As mensagens do WhatsApp, o Direct do Instagram e o Messenger chegam à mesma Inbox. A sua equipa responde a tudo num só lugar, sem trocar de app.",
+      "col1Label": "WhatsApp",
+      "col2Label": "Instagram Direct",
+      "col3Label": "Messenger",
+      "col1Message": "Boa tarde, vocês atendem ao sábado?",
+      "col2Message": "Olá! Qual é o vosso horário?",
+      "col3Message": "Podem enviar-me mais informações?",
+      "queueNote": "Tudo chega à mesma Inbox Zentrix, com o ícone de cada canal."
+    },
+    "howItWorks": {
+      "title": "Pronto em",
+      "titleHighlight": "três passos.",
+      "subtitle": "Do registo ao primeiro cliente atendido, sem instalar nada.",
+      "step1": {
+        "title": "Ligue um canal",
+        "text": "Ligue o WhatsApp, o Instagram ou o Messenger. As conversas passam a chegar à Inbox."
+      },
+      "step2": {
+        "title": "Preencha a ficha do negócio",
+        "text": "Escreva o que vende, os preços, os horários e as regras. É só com isto que a IA responde."
+      },
+      "step3": {
+        "title": "Ligue a IA",
+        "text": "Ative o assistente. Pode pausá-lo em qualquer conversa e assumir você."
+      }
+    },
+    "pricing": {
+      "title": "Um plano simples,",
+      "titleHighlight": "sem surpresas.",
+      "subtitle": "Comece com 14 dias de teste grátis, sem cartão. Depois, um único plano com tudo incluído.",
+      "trialBadge": "14 dias de teste grátis",
+      "planName": "Zentrix",
+      "planDescription": "Tudo o que precisa para atender os clientes em todos os canais.",
+      "priceAtCheckout": "O preço é mostrado antes de subscrever",
+      "features": [
+        "WhatsApp, Instagram e Messenger numa só Inbox",
+        "Assistente de IA treinado com a ficha do seu negócio",
+        "Equipa até 5 pessoas, com papéis",
+        "Envio com fila e novas tentativas",
+        "Dados isolados por empresa",
+        "Cancele quando quiser, sem fidelização"
+      ],
+      "cta": "Começar o teste grátis",
+      "trialNote": "Todas as contas novas começam com 14 dias de teste. Durante o teste, o agente de IA fica disponível assim que preencher a ficha do seu negócio."
+    },
+    "faq": {
+      "title": "As suas dúvidas,",
+      "titleHighlight": "respondidas.",
+      "subtitle": "Respostas diretas sobre como a Zentrix funciona.",
+      "q1": {
+        "question": "Que canais posso ligar?",
+        "answer": "WhatsApp (pela API oficial da Meta), Instagram (conta profissional) e Messenger (página do Facebook). Todos chegam à mesma Inbox."
+      },
+      "q2": {
+        "question": "Vou perder o meu número de WhatsApp?",
+        "answer": "O WhatsApp liga-se pela API oficial da Meta. Recomendamos um número dedicado. Se ligar um número que já usa na aplicação WhatsApp do telemóvel, esse número deixa de funcionar na aplicação."
+      },
+      "q3": {
+        "question": "Várias pessoas podem atender?",
+        "answer": "Sim. Convide a equipa por e-mail (até 5 pessoas) como Proprietário, Gestor ou Agente. Todos veem as mesmas conversas na Inbox."
+      },
+      "q4": {
+        "question": "Como funciona a IA?",
+        "answer": "A IA responde com base na ficha do negócio que preencher: produtos, preços, horários e regras. Se a informação não estiver na ficha, não inventa. Pode ligá-la ou desligá-la, e pausá-la em cada conversa para responder você."
+      },
+      "q5": {
+        "question": "A IA pode errar?",
+        "answer": "Sim. As respostas de IA podem conter erros ou omissões. Reveja a ficha, acompanhe as conversas na Inbox e assuma quando for preciso."
+      },
+      "q6": {
+        "question": "Os meus dados estão seguros?",
+        "answer": "Cada empresa só vê os seus próprios dados e as credenciais dos canais são guardadas cifradas. Pode eliminar a conta e todos os dados quando quiser."
+      },
+      "q7": {
+        "question": "Preciso de cartão de crédito para testar?",
+        "answer": "Não. O teste gratuito dura 14 dias e começa sem cartão."
+      },
+      "q8": {
+        "question": "Quanto custa?",
+        "answer": "Depois do teste há um único plano com tudo incluído. O preço é mostrado antes de subscrever, sem surpresas."
+      },
+      "q9": {
+        "question": "Posso cancelar quando quiser?",
+        "answer": "Sim, sem fidelização. Cancela no portal de faturação, a qualquer momento."
+      },
+      "q10": {
+        "question": "Em que língua está a plataforma?",
+        "answer": "O painel está em português. O site e o registo estão também disponíveis em inglês e espanhol."
+      }
+    },
+    "finalCta": {
+      "title": "Comece a atender",
+      "titleHighlight": "em todos os canais.",
+      "subtitle": "Ligue os seus canais, preencha a ficha do negócio e deixe a IA começar a atender. Teste 14 dias grátis, sem cartão.",
+      "ctaPrimary": "Teste grátis",
+      "ctaSecondary": "Ver preços"
     }
   },
   "Footer": {
-    "tagline": "Feito para vender globalmente.",
+    "tagline": "Atendimento omnicanal com IA.",
     "product": "Produto",
     "productPricing": "Preços",
-    "productIntegrations": "Integrações",
     "company": "Empresa",
     "companyContact": "Contacto",
     "legal": "Legal",
@@ -441,13 +194,10 @@
   "PublicHeader": {
     "resources": "Recursos",
     "pricing": "Preços",
-    "services": "Serviços",
-    "docs": "Docs",
-    "blog": "Blog",
-    "tutorials": "Tutoriais",
     "freeTrial": "Criar conta com trial de 14 dias",
     "login": "Entrar",
-    "freeTrialShort": "14 dias grátis"
+    "freeTrialShort": "14 dias grátis",
+    "faq": "Perguntas frequentes"
   },
   "Auth": {
     "login": {

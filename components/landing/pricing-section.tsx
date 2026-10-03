@@ -1,16 +1,14 @@
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { MONTHLY_PRICES, PLANS, formatPrice } from "@/components/dashboard/billing/pricing-data";
 
+// Um único plano, com tudo incluído. O valor só se mostra se estiver definido em NEXT_PUBLIC_PLAN_PRICE_LABEL
+// (texto livre, ex.: "29 € / mês"): um preço escrito aqui à mão podia divergir do que o Stripe cobra. Sem ele,
+// diz-se a verdade: o preço aparece antes de subscrever.
 export function PricingSection() {
   const t = useTranslations("Landing.pricing");
-
-  const ctaByPlan: Record<string, string> = {
-    basic: t("ctaBasic"),
-    pro: t("ctaPro"),
-    enterprise: t("ctaEnterprise"),
-  };
+  const features = t.raw("features") as string[];
+  const priceLabel = process.env.NEXT_PUBLIC_PLAN_PRICE_LABEL?.trim();
 
   return (
     <section id="pricing" className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
@@ -24,63 +22,31 @@ export function PricingSection() {
         <p className="mt-4 text-white/50">{t("subtitle")}</p>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {PLANS.map((plan) => {
-          const kz = formatPrice(MONTHLY_PRICES[plan.id].AOA, "AOA");
-          const brl = formatPrice(MONTHLY_PRICES[plan.id].BRL, "BRL");
-          const description = t(`plans.${plan.id}.description`);
-          const features = t.raw(`plans.${plan.id}.features`) as string[];
+      <div className="mx-auto mt-12 max-w-md">
+        <div className="pricing-pro-glow flex flex-col rounded-3xl border-2 bg-white/[0.03] p-7 sm:p-8">
+          <h3 className="text-base font-semibold text-foreground">{t("planName")}</h3>
+          <p className="mt-1.5 text-sm text-white/50">{t("planDescription")}</p>
 
-          return (
-            <div
-              key={plan.id}
-              className={`relative flex flex-col rounded-3xl p-7 transition-transform sm:p-8 ${
-                plan.highlight
-                  ? "pricing-pro-glow border-2 bg-white/[0.03] lg:-translate-y-2"
-                  : "border border-white/10 bg-white/[0.02]"
-              }`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 left-7 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-background">
-                  {t("proBadge")}
-                </span>
-              )}
+          <p className="mt-6 text-2xl font-semibold tracking-tight text-foreground">
+            {priceLabel || t("priceAtCheckout")}
+          </p>
 
-              <h3 className="text-base font-semibold text-foreground">{plan.name}</h3>
-              <p className="mt-1.5 text-sm text-white/50">{description}</p>
+          <ul className="mt-7 flex-1 space-y-2.5">
+            {features.map((feature) => (
+              <li key={feature} className="flex items-start gap-2 text-sm text-white/60">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                {feature}
+              </li>
+            ))}
+          </ul>
 
-              <div className="mt-6">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-semibold tracking-tight text-foreground">
-                    {kz}
-                  </span>
-                  <span className="text-sm text-white/40">{t("perMonth")}</span>
-                </div>
-                <p className="mt-1 text-xs text-white/40">{brl} / mês</p>
-              </div>
-
-              <ul className="mt-7 flex-1 space-y-2.5">
-                {features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-white/60">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/register"
-                className={`mt-7 w-full rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
-                  plan.highlight
-                    ? "neon-green-btn bg-green-500 text-background hover:bg-green-400"
-                    : "border border-white/15 text-foreground hover:border-white/30 hover:bg-white/[0.03]"
-                }`}
-              >
-                {ctaByPlan[plan.id]}
-              </Link>
-            </div>
-          );
-        })}
+          <Link
+            href="/register"
+            className="neon-green-btn mt-7 w-full rounded-full bg-green-500 px-5 py-2.5 text-center text-sm font-semibold text-background transition-colors hover:bg-green-400"
+          >
+            {t("cta")}
+          </Link>
+        </div>
       </div>
 
       <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-white/40">{t("trialNote")}</p>

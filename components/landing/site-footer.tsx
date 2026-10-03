@@ -11,7 +11,6 @@ export function SiteFooter() {
       title: t("product"),
       links: [
         { label: t("productPricing"), href: "#pricing" },
-        { label: t("productIntegrations"), href: "#section-integrations" },
       ],
     },
     {

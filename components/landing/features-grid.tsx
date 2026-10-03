@@ -1,11 +1,11 @@
 import { useTranslations } from "next-intl";
-import { Bot, Clock, ShieldCheck, Users } from "lucide-react";
+import { Bot, Send, ShieldCheck, Users } from "lucide-react";
 
 const FEATURES = [
   { key: "team", icon: Users },
   { key: "ai", icon: Bot },
+  { key: "queue", icon: Send },
   { key: "security", icon: ShieldCheck },
-  { key: "always", icon: Clock },
 ] as const;
 
 export function FeaturesGrid() {

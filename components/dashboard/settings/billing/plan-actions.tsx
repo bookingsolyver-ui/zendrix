@@ -46,9 +46,9 @@ export function PlanActions({
 
   return (
     <div className="flex flex-col gap-3 sm:items-end">
-      {!manage && BILLING_PROVIDERS.length > 1 && (
+      {!manage && BILLING_PROVIDERS.filter(isProviderAvailable).length > 1 && (
         <div role="radiogroup" aria-label="Método de pagamento" className="flex flex-wrap gap-2 sm:justify-end">
-          {BILLING_PROVIDERS.map((p) => {
+          {BILLING_PROVIDERS.filter(isProviderAvailable).map((p) => {
             const available = isProviderAvailable(p);
             const selected = p.id === providerId;
             return (

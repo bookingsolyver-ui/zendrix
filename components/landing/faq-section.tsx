@@ -14,8 +14,6 @@ const QUESTION_KEYS = [
   "q8",
   "q9",
   "q10",
-  "q11",
-  "q12",
 ] as const;
 
 export function FaqSection() {

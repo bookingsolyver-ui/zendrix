@@ -6,7 +6,7 @@ export function HeroMockupCollage() {
 
   return (
     <div className="relative mx-auto w-[300px] lg:mx-0 lg:h-[600px] lg:w-full lg:max-w-[640px]">
-      {/* Inbox partilhada — camada de fundo, colagem visível apenas em ecrãs largos */}
+      {/* Inbox — camada de fundo, colagem visível apenas em ecrãs largos */}
       <div className="hidden overflow-hidden rounded-2xl border border-white/10 bg-[#111] shadow-2xl lg:absolute lg:right-0 lg:top-16 lg:flex lg:w-[400px]">
         <div className="w-[150px] shrink-0 border-r border-white/5 bg-white/[0.02]">
           <div className="border-b border-white/5 px-3.5 py-3.5">
@@ -21,7 +21,7 @@ export function HeroMockupCollage() {
               </span>
               <span className="shrink-0 text-[9px] text-emerald-400">{t("inboxTimeNow")}</span>
             </div>
-            <p className="truncate text-[10px] text-white/40">{t("phonePayButton")}</p>
+            <p className="truncate text-[10px] text-white/40">{t("phoneMessage1")}</p>
           </div>
           <div className="border-l-2 border-transparent px-3.5 py-3">
             <div className="mb-1 flex items-center justify-between gap-1">
@@ -38,7 +38,7 @@ export function HeroMockupCollage() {
           <div className="flex items-center justify-between border-b border-white/5 px-4 py-3.5">
             <div className="min-w-0">
               <p className="truncate text-xs font-medium text-foreground">{t("phoneContact")}</p>
-              <p className="truncate text-[10px] text-white/40">{t("inboxAssignedTo")}</p>
+              <p className="truncate text-[10px] text-white/40">{t("inboxChannel")}</p>
             </div>
             <span className="shrink-0 rounded-md bg-emerald-500/10 px-2 py-1 text-[9px] font-medium text-emerald-400">
               {t("inboxOnlineLabel")}
@@ -54,8 +54,8 @@ export function HeroMockupCollage() {
             </div>
 
             <div className="mt-auto rounded-lg border border-dashed border-amber-400/30 bg-amber-400/10 p-2.5">
-              <p className="mb-1 text-[10px] font-semibold text-amber-400">{t("inboxNoteLabel")}</p>
-              <p className="text-[10px] leading-relaxed text-amber-200/70">{t("inboxNote")}</p>
+              <p className="mb-1 text-[10px] font-semibold text-amber-400">{t("inboxTakeoverLabel")}</p>
+              <p className="text-[10px] leading-relaxed text-amber-200/70">{t("inboxTakeover")}</p>
             </div>
           </div>
         </div>
