@@ -4,6 +4,7 @@ import {
   CreditCard,
   MessageCircle,
   Plug,
+  Share2,
   User,
   Users,
   Webhook,
@@ -36,6 +37,12 @@ const SETTINGS_LINKS = [
     icon: MessageCircle,
     title: "WhatsApp",
     description: "Ligue e gira os números de WhatsApp Business da sua conta.",
+  },
+  {
+    href: "/dashboard/settings/channels",
+    icon: Share2,
+    title: "Canais",
+    description: "Ligue o WhatsApp, o Instagram e o Messenger à sua conta.",
   },
   {
     href: "/dashboard/integrations",

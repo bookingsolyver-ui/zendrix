@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { metaWebhookSchema, parseMessagingEntries, parseMetaPayload } from "./meta-whatsapp.ts";
 import { stripeCheckoutSessionSchema, stripeEventSchema, stripeSubscriptionSchema, workspaceIdFromMetadata } from "./stripe.ts";
 import { createApiKeySchema } from "./api-keys.ts";
+import { callbackQuerySchema, parsePages, startQuerySchema } from "./meta-oauth.ts";
+import { decodeStateCookie, encodeStateCookie, newState, statesMatch } from "../meta/oauth-state.ts";
 import { sendTextSchema } from "./whatsapp-send.ts";
 
 const metaPayload = (value: unknown) => ({ entry: [{ changes: [{ field: "messages", value }] }] });
@@ -122,4 +124,45 @@ test("Instagram/Messenger: mensagens, anexos, estados; ecos e lixo ignorados", (
     { mid: "out1", status: "READ" },
   ]);
   assert.deepEqual(parseMessagingEntries([null, 1, {}]), []);
+});
+
+test("OAuth: páginas válidas, com Instagram ligado, e lixo ignorado", () => {
+  const pages = parsePages({
+    data: [
+      { id: "P1", name: "Loja", access_token: "tok1", instagram_business_account: { id: "IG1", username: "loja" } },
+      { id: "P2", access_token: "tok2" },
+      { id: "P3" }, // sem token: inutilizável
+      null,
+      "lixo",
+      { id: "P4", access_token: "tok4", instagram_business_account: "estranho" },
+    ],
+  });
+  assert.deepEqual(pages.map((p) => p.id), ["P1", "P2", "P4"]);
+  assert.equal(pages[0].instagram_business_account?.id, "IG1");
+  assert.equal(pages[2].instagram_business_account, undefined);
+  for (const bad of [null, {}, { data: "x" }, []]) assert.deepEqual(parsePages(bad), []);
+});
+
+test("OAuth: query do início e do callback", () => {
+  assert.ok(startQuerySchema.safeParse({ platform: "instagram", locale: "pt" }).success);
+  assert.ok(startQuerySchema.safeParse({ platform: "messenger" }).success);
+  assert.ok(!startQuerySchema.safeParse({ platform: "whatsapp" }).success);
+  assert.ok(!startQuerySchema.safeParse({}).success);
+  assert.ok(callbackQuerySchema.safeParse({ code: "abc", state: "x".repeat(32) }).success);
+  assert.ok(callbackQuerySchema.safeParse({ error: "access_denied" }).success);
+  assert.ok(!callbackQuerySchema.safeParse({ code: "abc", state: "curto" }).success);
+});
+
+test("OAuth: state anti-CSRF (cookie ida-e-volta, comparação, rejeição de cookies falsos)", () => {
+  const state = newState();
+  assert.ok(state.length >= 32);
+  assert.notEqual(state, newState());
+  const cookie = encodeStateCookie({ state, platform: "instagram", locale: "pt" });
+  assert.deepEqual(decodeStateCookie(cookie), { state, platform: "instagram", locale: "pt" });
+  assert.ok(statesMatch(state, decodeStateCookie(cookie)!.state));
+  assert.ok(!statesMatch(state, newState()));
+  assert.ok(!statesMatch(state, state.slice(0, -1)));
+  for (const bad of [undefined, "", "só", "a.b.c", `${state}.whatsapp.pt`, `${state}.instagram`, `${state}.instagram.pt.extra`]) {
+    assert.equal(decodeStateCookie(bad), null, String(bad));
+  }
 });

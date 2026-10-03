@@ -72,6 +72,12 @@ O schema muda com `npx prisma db push`, que se corre **localmente** (usa `DIRECT
 - **Variáveis:** `CRON_SECRET` (obrigatória para o cron), `OUTBOX_PER_SECOND`, `META_GRAPH_VERSION` (opcionais).
 - **Limitações:** a nota de voz continua a ser enviada directamente (só WhatsApp, desligada por defeito). Instagram/Messenger: só texto, e anexos recebidos ficam como `[image]`/`[audio]`. Os envios para Instagram e Messenger não foram testados contra a Meta real.
 
+## Ligar canais (self-serve, Facebook Login)
+- Página `/dashboard/settings/channels`: cartões de WhatsApp, Instagram e Messenger. O WhatsApp abre o ecrã próprio (`/dashboard/settings/whatsapp`); Instagram e Messenger iniciam o OAuth em `GET /api/meta/oauth/start?platform=…`, que gera o `state` anti-CSRF (cookie httpOnly) e redireciona para o Facebook. O regresso é `GET /api/meta/oauth`: troca o `code` por token curto e depois por **Long-Lived Token**, lista as páginas (`/me/accounts`) e as contas de Instagram ligadas, subscreve cada página a `messages`, e guarda em `SocialIntegration` (token **cifrado**) na organização da sessão. Só `OWNER`/`MANAGER`. Uma conta que já pertence a outra organização nunca é transferida.
+- **Variáveis (Vercel):** `NEXT_PUBLIC_META_APP_ID` (incorporada no build: faça redeploy depois de a definir), `META_APP_SECRET` (já existe), opcional `NEXT_PUBLIC_META_CONFIG_ID` (Login for Business). No painel da Meta adicione `https://<dominio>/api/meta/oauth` a "Valid OAuth Redirect URIs".
+- **Permissões:** `instagram_basic`, `instagram_manage_messages`, `pages_manage_metadata`, `pages_read_engagement`, `pages_messaging` e `pages_show_list` (necessária para listar as páginas). Enquanto a app estiver em modo de desenvolvimento só funcionam contas com papel na app; para clientes reais é preciso **App Review** (acesso avançado) e verificação do negócio.
+- Ainda não existe "Desligar canal" no ecrã.
+
 ## API Keys, papéis (RBAC) e validação
 - Papéis por utilizador: `OWNER` > `MANAGER` > `STAFF` (`User.role`, por omissão `STAFF`; quem cria a organização é `OWNER`). Faturação (`/api/stripe/*`) e gestão de chaves exigem `OWNER` ou `MANAGER`. Em código: `requireRole(["OWNER", "MANAGER"], request?)` (`lib/rbac.ts`); sem `request` só aceita sessão (Server Actions).
 - **Utilizadores que já existiam ficam `STAFF`**: corra `node scripts/backfill-roles.mjs` (`--dry` para ver) depois do `db push`, senão ninguém abre o Checkout.

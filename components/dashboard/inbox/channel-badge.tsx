@@ -12,6 +12,7 @@ const STYLE: Record<ChannelPlatform, string> = {
 const SIZE = {
   sm: { box: "h-4 w-4", icon: "h-2.5 w-2.5" },
   md: { box: "h-6 w-6", icon: "h-3.5 w-3.5" },
+  lg: { box: "h-11 w-11", icon: "h-5 w-5" },
 } as const;
 
 // O ícone do canal de uma conversa. `role="img"` + aria-label: o canal também é informação para quem não vê cores.
