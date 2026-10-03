@@ -16,7 +16,7 @@ export const FEATURES = {
   // Em construção
   ecommerce: false,
   analytics: false,
-  segments: false,
+  segments: true,
   aiPersona: false,
   automationsBuilder: false,
   integrations: false,

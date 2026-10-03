@@ -44,3 +44,6 @@ next-env.d.ts
 # Referências visuais pesadas (páginas guardadas), nunca para o git
 referencia-*.html
 refrencia-*.html
+# Variações de grafia das referências
+refer*cia-*.html
+refr*ncia-*.html
