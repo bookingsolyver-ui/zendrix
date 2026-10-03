@@ -47,7 +47,7 @@ export default async function TeamPage({
   }));
 
   const planActive = workspace
-    ? evaluateAccess(workspace.subStatus, workspace.trialEndsAt ? new Date(workspace.trialEndsAt) : null, new Date(), workspace.blocked).active
+    ? evaluateAccess(workspace.subStatus, workspace.trialEndsAt ? new Date(workspace.trialEndsAt) : null, new Date(), workspace.restriction).active
     : false;
 
   return (

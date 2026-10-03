@@ -73,10 +73,27 @@ model Workspace {
   // Suspensão pela administração da plataforma: sem acesso, sem envios, sem automações. Não apaga nada.
   blockedAt              DateTime?           @map("blocked_at")
   blockedReason          String?             @map("blocked_reason")
+  approvalStatus         ApprovalStatus      @default(APPROVED) @map("approval_status")
+  approvalDecidedAt      DateTime?           @map("approval_decided_at")
+  approvalDecidedBy      String?             @map("approval_decided_by") // User.id do administrador
+  approvalNote           String?             @map("approval_note") // motivo da rejeição
+  // Do Stripe (webhook ou sincronização manual): quando acaba o período pago e se está marcado para cancelar.
+  periodEnd              DateTime?           @map("period_end")
+  cancelAtPeriodEnd      Boolean             @default(false) @map("cancel_at_period_end")
+
+  @@index([approvalStatus])
 }
 
 // Papéis dentro de uma organização (RBAC), do mais para o menos poderoso. lib/roles.ts tem a hierarquia.
 // OWNER: tudo, incluindo faturação e chaves de API · MANAGER: gere a equipa e as chaves STAFF · STAFF: opera a inbox.
+// Aprovação manual de contas novas (moderação pela administração da plataforma). As organizações que já existiam
+// ficam APPROVED; as novas nascem PENDING_APPROVAL (a não ser que REQUIRE_ACCOUNT_APPROVAL=false).
+enum ApprovalStatus {
+  APPROVED
+  PENDING_APPROVAL
+  REJECTED
+}
+
 enum Role {
   OWNER
   MANAGER

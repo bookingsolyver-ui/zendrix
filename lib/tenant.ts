@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { isSubscriptionActive } from "@/lib/billing/policy";
+import { isSubscriptionActive, restrictionOf } from "@/lib/billing/policy";
 
 // A organização (tenant) a que uma mensagem pertence e o que ela permite fazer.
 // Tudo o que é específico de um cliente (ficha do negócio, agente ligado/desligado, subscrição) vem daqui,
@@ -40,6 +40,7 @@ export async function loadTenant(
       agentEnabled: true,
       agentKnowledge: true,
       blockedAt: true,
+      approvalStatus: true,
     },
   });
   if (!workspace) return null;
@@ -51,7 +52,7 @@ export async function loadTenant(
       workspace.subStatus,
       workspace.trialEndsAt,
       new Date(),
-      workspace.blockedAt !== null,
+      restrictionOf(workspace),
     ),
     agentEnabled: workspace.agentEnabled,
     knowledge: workspace.agentKnowledge?.trim()

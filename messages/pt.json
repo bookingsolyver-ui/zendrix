@@ -319,5 +319,14 @@
   },
   "Common": {
     "comingSoon": "«{feature}» ainda não está disponível."
+  },
+  "Approval": {
+    "title": "A sua conta está a aguardar aprovação pelo administrador",
+    "text": "Recebemos o seu registo e a nossa equipa está a revê-lo. Assim que for aprovado, a conta fica ativa e recebe um e-mail. Pode fechar esta página.",
+    "rejectedTitle": "O registo desta conta não foi aprovado",
+    "rejectedText": "Não foi possível aprovar este registo. Se acha que é um engano, contacte o suporte.",
+    "checkAgain": "Verificar novamente",
+    "logout": "Terminar sessão",
+    "reason": "Motivo indicado"
   }
 }

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { CurrentUserProvider } from "@/components/dashboard/current-user-context";
@@ -14,6 +15,8 @@ export default async function DashboardLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   const user = await getCurrentUser();
+  // Conta por aprovar (ou rejeitada): nenhuma página do painel, nem as definições, está disponível.
+  if (user?.workspace?.restriction === "pending_approval" || user?.workspace?.restriction === "rejected") redirect(`/${locale}/pending-approval`);
 
   return (
     <CurrentUserProvider user={user}>

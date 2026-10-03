@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { restrictionOf, type Restriction } from "@/lib/billing/policy";
 import type { Role } from "@/lib/roles";
 
 export interface CurrentUser {
@@ -16,8 +17,8 @@ export interface CurrentUser {
     subStatus: string;
     trialEndsAt: string | null; // ISO
     plan: string | null;
-    // Suspensa pela administração da plataforma (sem acesso).
-    blocked: boolean;
+    // Restrição imposta pela administração da plataforma (suspensa, por aprovar ou rejeitada); null = nenhuma.
+    restriction: Restriction | null;
   } | null;
 }
 
@@ -50,6 +51,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
             trialEndsAt: true,
             plan: true,
             blockedAt: true,
+            approvalStatus: true,
           },
         },
       },
@@ -66,7 +68,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
           subStatus: dbUser.workspace.subStatus,
           trialEndsAt: dbUser.workspace.trialEndsAt?.toISOString() ?? null,
           plan: dbUser.workspace.plan,
-          blocked: dbUser.workspace.blockedAt !== null,
+          restriction: restrictionOf(dbUser.workspace),
         },
       };
     }

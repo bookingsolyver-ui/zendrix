@@ -3,7 +3,7 @@ import { cache } from "react";
 import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { evaluateAccess, type Access } from "@/lib/billing/policy";
+import { evaluateAccess, restrictionOf, type Access } from "@/lib/billing/policy";
 import { prisma } from "@/lib/prisma";
 
 // Aplicação do paywall no servidor. A regra está em policy.ts; aqui lê-se o estado ATUAL da organização
@@ -13,11 +13,11 @@ import { prisma } from "@/lib/prisma";
 export const getAccess = cache(async (workspaceId: string): Promise<Access> => {
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
-    select: { subStatus: true, trialEndsAt: true, blockedAt: true },
+    select: { subStatus: true, trialEndsAt: true, blockedAt: true, approvalStatus: true },
   });
   // Organização que não existe: nada a que dar acesso.
   if (!workspace) return { active: false, reason: "canceled" };
-  return evaluateAccess(workspace.subStatus, workspace.trialEndsAt, new Date(), workspace.blockedAt !== null);
+  return evaluateAccess(workspace.subStatus, workspace.trialEndsAt, new Date(), restrictionOf(workspace));
 });
 
 // Resposta das rotas de API para quem não tem plano ativo. 402 = Payment Required.
@@ -33,7 +33,8 @@ export async function requireActivePlanForPage(locale: string) {
     user.workspace.subStatus,
     user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null,
     new Date(),
-    user.workspace.blocked,
+    user.workspace.restriction,
   );
+  if (!access.active && (access.reason === "pending_approval" || access.reason === "rejected")) redirect(`/${locale}/pending-approval`);
   if (!access.active) redirect(`/${locale}/dashboard/settings/billing?paywall=${access.reason}`);
 }

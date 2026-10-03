@@ -114,3 +114,39 @@ export function inviteEmail(input: { workspaceName: string; inviterName: string;
     html: layout({ lang, preheader: `${input.inviterName} invited you to the ${input.workspaceName} team.`, heading: "You've been invited to a team", paragraphs: [`<strong>${esc(input.inviterName)}</strong> invited you to the <strong>${esc(input.workspaceName)}</strong> team on Zentrix, as <strong>${esc(role)}</strong>.`], cta: { label: "Accept the invitation", url: input.url }, footnote: "The link is valid for 7 days. If you weren't expecting this invitation, ignore this message." }),
   };
 }
+
+// -------------------------------------------------------------------------------- conta recebida (por aprovar)
+export function pendingReviewEmail(input: { name?: string | null; lang: LegalLang }): EmailContent {
+  const { lang } = input;
+  const hello = greeting(input.name, lang);
+  if (lang === "pt") {
+    return {
+      subject: "Recebemos o seu registo na Zentrix",
+      text: `${hello}\n\nRecebemos o seu registo. Antes de ativar a conta, a nossa equipa vai revê-lo. Receberá um e-mail assim que for aprovado.`,
+      html: layout({ lang, preheader: "O seu registo está a ser revisto.", heading: "Recebemos o seu registo", paragraphs: [esc(hello), "Antes de ativar a conta, a nossa equipa vai revê-lo. Receberá um e-mail assim que for <strong>aprovado</strong>."] }),
+    };
+  }
+  return {
+    subject: "We received your Zentrix sign-up",
+    text: `${hello}\n\nWe received your sign-up. Our team will review it before activating the account. You will get an email as soon as it is approved.`,
+    html: layout({ lang, preheader: "Your sign-up is being reviewed.", heading: "We received your sign-up", paragraphs: [esc(hello), "Our team will review it before activating the account. You will get an email as soon as it is <strong>approved</strong>."] }),
+  };
+}
+
+// ------------------------------------------------------------------------------------------ conta aprovada
+export function accountApprovedEmail(input: { name?: string | null; dashboardUrl: string; lang: LegalLang }): EmailContent {
+  const { lang, dashboardUrl } = input;
+  const hello = greeting(input.name, lang);
+  if (lang === "pt") {
+    return {
+      subject: "A sua conta Zentrix foi aprovada",
+      text: `${hello}\n\nA sua conta foi aprovada e já está ativa, com 14 dias grátis a contar de hoje. Abra o painel: ${dashboardUrl}`,
+      html: layout({ lang, preheader: "A sua conta está ativa.", heading: "A sua conta foi aprovada", paragraphs: [esc(hello), "A sua conta já está ativa, com <strong>14 dias grátis</strong> a contar de hoje."], cta: { label: "Abrir o painel", url: dashboardUrl } }),
+    };
+  }
+  return {
+    subject: "Your Zentrix account was approved",
+    text: `${hello}\n\nYour account was approved and is now active, with a 14-day free trial starting today. Open the dashboard: ${dashboardUrl}`,
+    html: layout({ lang, preheader: "Your account is active.", heading: "Your account was approved", paragraphs: [esc(hello), "Your account is now active, with a <strong>14-day free trial</strong> starting today."], cta: { label: "Open the dashboard", url: dashboardUrl } }),
+  };
+}

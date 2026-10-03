@@ -319,5 +319,14 @@
   },
   "Common": {
     "comingSoon": "«{feature}» aún no está disponible."
+  },
+  "Approval": {
+    "title": "Tu cuenta está a la espera de la aprobación del administrador",
+    "text": "Hemos recibido tu registro y nuestro equipo lo está revisando. En cuanto se apruebe, la cuenta quedará activa y recibirás un correo. Puedes cerrar esta página.",
+    "rejectedTitle": "El registro de esta cuenta no fue aprobado",
+    "rejectedText": "No fue posible aprobar este registro. Si crees que es un error, contacta con soporte.",
+    "checkAgain": "Comprobar de nuevo",
+    "logout": "Cerrar sesión",
+    "reason": "Motivo indicado"
   }
 }

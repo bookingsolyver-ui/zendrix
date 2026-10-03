@@ -319,5 +319,14 @@
   },
   "Common": {
     "comingSoon": "“{feature}” isn’t available yet."
+  },
+  "Approval": {
+    "title": "Your account is waiting for administrator approval",
+    "text": "We received your sign-up and our team is reviewing it. As soon as it is approved the account becomes active and you will get an email. You can close this page.",
+    "rejectedTitle": "This account sign-up was not approved",
+    "rejectedText": "We could not approve this sign-up. If you think this is a mistake, please contact support.",
+    "checkAgain": "Check again",
+    "logout": "Log out",
+    "reason": "Reason given"
   }
 }

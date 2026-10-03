@@ -3,10 +3,11 @@ import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { Pill, TABLE, TD, TH, dateOnly, subTone } from "@/components/admin/ui";
 import { BTN_GHOST, BTN_PRIMARY, INPUT } from "@/components/dashboard/settings/ui";
+import { SubscriptionToggle } from "@/components/admin/subscription-toggle";
 import { listOrganizations } from "@/lib/admin/queries";
 import { ORG_FILTERS, SUB_STATUS_LABEL, parseOrgListQuery } from "@/lib/admin/schema";
 
-const FILTER_LABEL: Record<(typeof ORG_FILTERS)[number], string> = { all: "Todas", active: "Ativas", trialing: "Em teste", past_due: "Em atraso", canceled: "Canceladas", blocked: "Suspensas" };
+const FILTER_LABEL: Record<(typeof ORG_FILTERS)[number], string> = { all: "Todas", active: "Ativas", trialing: "Em teste", past_due: "Em atraso", canceled: "Canceladas", blocked: "Suspensas", pending: "Por aprovar", rejected: "Rejeitadas" };
 
 export default async function AdminOrganizationsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ page?: string; q?: string; status?: string }> }) {
   const { locale } = await params;
@@ -44,6 +45,7 @@ export default async function AdminOrganizationsPage({ params, searchParams }: {
               <th className={`${TH} text-right`}>Utilizadores</th>
               <th className={`${TH} text-right`}>Contactos</th>
               <th className={`${TH} text-right`}>Msgs 30 d</th>
+              <th className={TH}>Subscrição</th>
             </tr>
           </thead>
           <tbody>
@@ -61,16 +63,19 @@ export default async function AdminOrganizationsPage({ params, searchParams }: {
                   <div className="flex flex-wrap gap-1.5">
                     <Pill tone={subTone(row.subStatus)}>{SUB_STATUS_LABEL[row.subStatus] ?? row.subStatus}</Pill>
                     {row.blockedAt && <Pill tone="bad">Suspensa</Pill>}
+                    {row.approvalStatus === "PENDING_APPROVAL" && <Pill tone="warn">Por aprovar</Pill>}
+                    {row.approvalStatus === "REJECTED" && <Pill tone="bad">Rejeitada</Pill>}
                   </div>
                 </td>
                 <td className={`${TD} text-right`}>{row.users}</td>
                 <td className={`${TD} text-right`}>{row.contacts.toLocaleString("pt-PT")}</td>
                 <td className={`${TD} text-right`}>{row.messages30d.toLocaleString("pt-PT")}</td>
+                <td className={TD}>{row.approvalStatus === "APPROVED" ? <SubscriptionToggle id={row.id} name={row.name} subStatus={row.subStatus} /> : <span className="text-xs text-white/30">—</span>}</td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-white/40">
+                <td colSpan={8} className="px-4 py-10 text-center text-white/40">
                   Nenhuma organização encontrada.
                 </td>
               </tr>

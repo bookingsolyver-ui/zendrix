@@ -34,3 +34,15 @@ test("uma organização suspensa pela administração não tem acesso, tenha o p
   assert.deepEqual(evaluateAccess("trialing", new Date(Date.now() + 86_400_000), new Date(), true), { active: false, reason: "blocked" });
   assert.deepEqual(evaluateAccess("active", null, new Date(), false), { active: true });
 });
+
+test("conta por aprovar ou rejeitada não tem acesso; a aprovação manda sobre a suspensão", async () => {
+  const { evaluateAccess, restrictionOf } = await import("./policy.ts");
+  assert.equal(restrictionOf({ approvalStatus: "APPROVED", blockedAt: null }), null);
+  assert.equal(restrictionOf({ approvalStatus: "APPROVED", blockedAt: new Date() }), "blocked");
+  assert.equal(restrictionOf({ approvalStatus: "PENDING_APPROVAL", blockedAt: null }), "pending_approval");
+  assert.equal(restrictionOf({ approvalStatus: "PENDING_APPROVAL", blockedAt: new Date() }), "pending_approval");
+  assert.equal(restrictionOf({ approvalStatus: "REJECTED", blockedAt: null }), "rejected");
+  assert.deepEqual(evaluateAccess("trialing", new Date(Date.now() + 86_400_000), new Date(), "pending_approval"), { active: false, reason: "pending_approval" });
+  assert.deepEqual(evaluateAccess("active", null, new Date(), "rejected"), { active: false, reason: "rejected" });
+  assert.deepEqual(evaluateAccess("active", null, new Date(), null), { active: true });
+});

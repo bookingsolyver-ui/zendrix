@@ -26,7 +26,7 @@ export default async function BillingPage({
   const user = await getCurrentUser();
   // Sem plano ativo: o aviso aparece SEMPRE aqui (venha do redirecionamento do paywall ou de abrir a página).
   const access = user?.workspace
-    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null, new Date(), user.workspace.blocked)
+    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null, new Date(), user.workspace.restriction)
     : ({ active: true } as const);
   const workspaceId = user?.workspace?.id;
   const monthStart = new Date();

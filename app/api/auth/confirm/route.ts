@@ -2,7 +2,8 @@ import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { provisionUser } from "@/lib/auth/provision";
 import { emailConfigured, sendEmail } from "@/lib/email/send";
-import { emailLang, welcomeEmail } from "@/lib/email/templates";
+import { emailLang, pendingReviewEmail, welcomeEmail } from "@/lib/email/templates";
+import { prisma } from "@/lib/prisma";
 import { appOrigin } from "@/lib/http/origin";
 import { safeNextPath } from "@/lib/http/safe-next";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
@@ -54,11 +55,16 @@ export async function POST(request: Request) {
       const to = data.user.email;
       const userId = data.user.id;
       const dashboardUrl = `${appOrigin(request)}/${locale ?? "pt"}/dashboard`;
+      // Conta por aprovar: em vez das boas-vindas (a conta ainda não está ativa), um aviso de que foi recebida.
+      const pending = await prisma.user
+        .findUnique({ where: { authId: userId }, select: { workspace: { select: { approvalStatus: true } } } })
+        .then((row) => row?.workspace.approvalStatus === "PENDING_APPROVAL")
+        .catch(() => false);
       after(async () => {
         await sendEmail({
           to,
-          ...welcomeEmail({ name, dashboardUrl, lang: emailLang(locale) }),
-          idempotencyKey: `welcome-${userId}`,
+          ...(pending ? pendingReviewEmail({ name, lang: emailLang(locale) }) : welcomeEmail({ name, dashboardUrl, lang: emailLang(locale) })),
+          idempotencyKey: `${pending ? "pending" : "welcome"}-${userId}`,
         });
       });
     }

@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 import { requirePlatformAdminPage } from "@/lib/admin/guard";
+import { countPendingApprovals } from "@/lib/admin/queries";
 
 // A área do administrador da PLATAFORMA. Quem não for administrador vê um 404 (nem se revela que a área existe), e
 // nunca é indexada por motores de pesquisa.
@@ -14,7 +15,10 @@ export const metadata: Metadata = { title: "Administração · Zentrix", robots:
 const NAV = [
   { href: "/admin", label: "Visão geral" },
   { href: "/admin/organizations", label: "Organizações" },
+  { href: "/admin/approvals", label: "Aprovações" },
+  { href: "/admin/calendar", label: "Calendário" },
   { href: "/admin/billing", label: "Subscrições e pagamentos" },
+  { href: "/admin/diagnostics", label: "Diagnóstico" },
   { href: "/admin/audit", label: "Auditoria" },
 ] as const;
 
@@ -22,6 +26,7 @@ export default async function AdminLayout({ children, params }: { children: Reac
   const { locale } = await params;
   setRequestLocale(locale);
   const admin = await requirePlatformAdminPage();
+  const pending = await countPendingApprovals();
 
   return (
     <div className="min-h-screen">
@@ -33,6 +38,7 @@ export default async function AdminLayout({ children, params }: { children: Reac
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white">
                 {item.label}
+                {item.href === "/admin/approvals" && pending > 0 && <span className="ml-1.5 rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">{pending}</span>}
               </Link>
             ))}
           </nav>

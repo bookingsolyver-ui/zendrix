@@ -14,6 +14,7 @@ export interface OrgActionsProps {
   subStatus: string;
   plan: string | null;
   hasStripeSubscription: boolean;
+  approvalStatus: string;
 }
 
 async function patch(id: string, body: unknown) {
@@ -26,7 +27,7 @@ async function patch(id: string, body: unknown) {
   }
 }
 
-const ERRORS: Record<string, string> = { not_trialing: "Só se prolonga o teste de organizações em teste.", invalid_input: "Verifique os campos.", not_found: "Organização não encontrada." };
+const ERRORS: Record<string, string> = { no_stripe_subscription: "Esta organização não tem subscrição no Stripe.", stripe_unavailable: "Não foi possível falar com o Stripe.", already_approved: "Já estava aprovada.", not_pending: "Só se rejeitam contas por aprovar.", not_trialing: "Só se prolonga o teste de organizações em teste.", invalid_input: "Verifique os campos.", not_found: "Organização não encontrada." };
 
 // Bloquear/desbloquear, alterar o plano à mão e prolongar o teste. Só recebe texto e booleanos (nunca funções).
 export function OrgActions(props: OrgActionsProps) {
@@ -65,6 +66,19 @@ export function OrgActions(props: OrgActionsProps) {
 
   return (
     <div className="space-y-6">
+      {props.approvalStatus !== "APPROVED" && (
+        <div className={`${CARD} border-amber-400/30`}>
+          <h2 className="text-sm font-semibold text-white">{props.approvalStatus === "PENDING_APPROVAL" ? "Conta por aprovar" : "Registo rejeitado"}</h2>
+          <p className="mt-1 text-sm text-white/50">A empresa não consegue entrar enquanto a conta não for aprovada.</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button type="button" disabled={busy !== null} onClick={() => void run("approve", { action: "approve", notify: true }, `Aprovar «${props.name}» e avisar por e-mail?`)} className={BTN_PRIMARY}>
+              {busy === "approve" && <Loader2 className="h-4 w-4 animate-spin" />}
+              Aprovar
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={CARD}>
         <h2 className="text-sm font-semibold text-white">Acesso</h2>
         {props.blocked ? (
@@ -88,6 +102,22 @@ export function OrgActions(props: OrgActionsProps) {
 
       <div className={CARD}>
         <h2 className="text-sm font-semibold text-white">Subscrição (alteração manual)</h2>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <button type="button" disabled={busy !== null || props.subStatus === "active"} onClick={() => void run("activate", { action: "activate_subscription" }, `Ativar a subscrição de «${props.name}»? Fica com acesso de imediato.`)} className={BTN_PRIMARY}>
+            {busy === "activate" && <Loader2 className="h-4 w-4 animate-spin" />}
+            Ativar subscrição
+          </button>
+          <button type="button" disabled={busy !== null || props.subStatus === "canceled"} onClick={() => void run("suspend", { action: "suspend_subscription" }, `Suspender a subscrição de «${props.name}»? Perde o acesso de imediato.`)} className="rounded-full border border-red-500/40 px-5 py-2.5 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/10 disabled:opacity-50">
+            {busy === "suspend" && <Loader2 className="mr-2 inline h-4 w-4 animate-spin" />}
+            Suspender subscrição
+          </button>
+          {props.hasStripeSubscription && (
+            <button type="button" disabled={busy !== null} onClick={() => void run("sync", { action: "sync_stripe" })} className={BTN_GHOST}>
+              {busy === "sync" && <Loader2 className="mr-2 inline h-4 w-4 animate-spin" />}
+              Sincronizar com o Stripe
+            </button>
+          )}
+        </div>
         {props.hasStripeSubscription && <p className="mt-2 text-xs text-amber-300">Esta organização tem uma subscrição no Stripe: o próximo evento do Stripe volta a ser a fonte da verdade e pode repor o estado.</p>}
         <form onSubmit={onSubscription} className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_8rem_auto]">
           <select value={subStatus} onChange={(e) => setSubStatus(e.target.value)} aria-label="Estado" className={`${INPUT} bg-[#111]`}>

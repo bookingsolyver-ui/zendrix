@@ -26,7 +26,8 @@ export type AuthCode =
   | "no_workspace"
   | "forbidden"
   | "rate_limited"
-  | "subscription_required";
+  | "subscription_required"
+  | "account_not_approved";
 
 export class AuthError extends Error {
   constructor(
@@ -90,6 +91,8 @@ export async function authenticateRequest(request?: Request, options: AuthOption
   const me = await getCurrentUser();
   if (!me) return null;
   if (!me.workspace || !me.role) throw new AuthError("no_workspace", 403);
+  // Conta por aprovar (ou rejeitada): nada do produto funciona até a administração decidir.
+  if (me.workspace.restriction === "pending_approval" || me.workspace.restriction === "rejected") throw new AuthError("account_not_approved", 403);
   return {
     kind: "user",
     workspaceId: me.workspace.id,

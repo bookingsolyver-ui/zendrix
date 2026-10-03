@@ -5,7 +5,7 @@ export const SUB_STATUSES = ["trialing", "active", "past_due", "canceled"] as co
 export type SubStatusValue = (typeof SUB_STATUSES)[number];
 export const SUB_STATUS_LABEL: Record<string, string> = { trialing: "Em teste", active: "Ativa", past_due: "Em atraso", canceled: "Cancelada" };
 
-export const ORG_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "blocked"] as const;
+export const ORG_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "blocked", "pending", "rejected"] as const;
 export type OrgFilter = (typeof ORG_FILTERS)[number];
 export const PAGE_SIZE = 25;
 
@@ -34,6 +34,14 @@ export const adminActionSchema = z.discriminatedUnion("action", [
     trialDays: z.number().int().min(1).max(90).optional(),
   }),
   z.object({ action: z.literal("extend_trial"), days: z.number().int().min(1).max(90) }),
+  // Controlo direto do estado do plano: força-o já (fica no registo de auditoria).
+  z.object({ action: z.literal("activate_subscription") }),
+  z.object({ action: z.literal("suspend_subscription") }),
+  // Moderação de contas novas.
+  z.object({ action: z.literal("approve"), notify: z.boolean().default(false) }),
+  z.object({ action: z.literal("reject"), reason: z.string().trim().min(3).max(200) }),
+  // Lê a subscrição no Stripe e atualiza a data de renovação (não altera o estado).
+  z.object({ action: z.literal("sync_stripe") }),
 ]);
 export type AdminAction = z.infer<typeof adminActionSchema>;
 

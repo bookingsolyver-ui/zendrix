@@ -40,7 +40,7 @@ export default async function SalesPage({
   const workspaceId = user?.workspace?.id;
   const canManage = user?.role === "OWNER" || user?.role === "MANAGER";
   const planActive = user?.workspace
-    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null, new Date(), user.workspace.blocked).active
+    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null, new Date(), user.workspace.restriction).active
     : false;
 
   const [workspace, items, links] = workspaceId

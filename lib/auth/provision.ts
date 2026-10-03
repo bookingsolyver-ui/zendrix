@@ -2,6 +2,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { trialEndDate } from "@/lib/tenant";
+import { approvalRequired, initialApprovalStatus } from "@/lib/auth/approval";
 import { hashInviteToken, looksLikeInviteToken } from "@/lib/team/invite-token";
 
 interface ProvisionInput {
@@ -113,6 +114,9 @@ export async function provisionUser({
           ownerEmail: normalizedEmail,
           subStatus: "trialing",
           trialEndsAt: trialEndDate(),
+          // Conta nova: por aprovar pela administração (REQUIRE_ACCOUNT_APPROVAL=false aprova logo). Um convidado
+          // entra numa organização que já existe e está aprovada: não passa por aqui.
+          approvalStatus: initialApprovalStatus(approvalRequired(process.env.REQUIRE_ACCOUNT_APPROVAL)),
         },
       });
       return tx.user.create({

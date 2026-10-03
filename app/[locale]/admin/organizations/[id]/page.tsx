@@ -34,12 +34,17 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
         {w.plan && <Pill>{w.plan}</Pill>}
         {w.subStatus === "trialing" && w.trialEndsAt && <Pill tone="warn">Teste até {dateOnly.format(w.trialEndsAt)}</Pill>}
         <Pill tone={w.agentEnabled ? "good" : "default"}>{w.agentEnabled ? "IA ligada" : "IA desligada"}</Pill>
-        <Link href="/admin/organizations" className="ml-auto text-sm text-white/50 hover:text-white">
+        {w.approvalStatus === "PENDING_APPROVAL" && <Pill tone="warn">Por aprovar</Pill>}
+        {w.approvalStatus === "REJECTED" && <Pill tone="bad">Rejeitada</Pill>}
+        <Link href={`/admin/organizations/${w.id}/diagnostics`} className="ml-auto rounded-full border border-emerald-500/40 px-4 py-1.5 text-sm font-medium text-emerald-300 hover:bg-emerald-500/10">
+          Diagnóstico
+        </Link>
+        <Link href="/admin/organizations" className="py-1.5 text-sm text-white/50 hover:text-white">
           ← Todas as organizações
         </Link>
       </div>
 
-      <OrgActions id={w.id} name={w.name} blocked={w.blockedAt !== null} blockedReason={w.blockedReason} subStatus={w.subStatus} plan={w.plan} hasStripeSubscription={Boolean(w.stripeSubscriptionId)} />
+      <OrgActions id={w.id} name={w.name} blocked={w.blockedAt !== null} blockedReason={w.blockedReason} subStatus={w.subStatus} plan={w.plan} hasStripeSubscription={Boolean(w.stripeSubscriptionId)} approvalStatus={w.approvalStatus} />
 
       <Section title="Consumo">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -61,6 +66,7 @@ export default async function AdminOrganizationPage({ params }: { params: Promis
             ["Subscrição Stripe", shortId(w.stripeSubscriptionId)],
             ["Conta Stripe Connect (vendas da empresa)", w.stripeConnectAccountId ? shortId(w.stripeConnectAccountId) : "Não ligada"],
             ["Último evento de faturação", w.stripeEventAt ? dateTime.format(w.stripeEventAt) : "—"],
+            [w.cancelAtPeriodEnd ? "Acesso até (cancelada no fim do período)" : "Próxima renovação", w.periodEnd ? dateOnly.format(w.periodEnd) : "—"],
           ].map(([label, value]) => (
             <div key={label} className="flex items-center justify-between gap-3 bg-black/20 px-5 py-3">
               <dt className="text-white/50">{label}</dt>

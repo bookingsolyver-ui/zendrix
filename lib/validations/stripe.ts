@@ -27,11 +27,14 @@ export const stripeSubscriptionSchema = z.object({
   status: z.string().optional(),
   metadata,
   trial_end: z.number().nullish(), // segundos
+  current_period_end: z.number().nullish(), // segundos (versões antigas da API)
+  cancel_at_period_end: z.boolean().nullish(),
   items: z
     .object({
       data: z.array(
         z.object({
           price: z.object({ lookup_key: z.string().nullish(), nickname: z.string().nullish() }).nullish(),
+          current_period_end: z.number().nullish(), // segundos (versões recentes da API)
         }),
       ),
     })

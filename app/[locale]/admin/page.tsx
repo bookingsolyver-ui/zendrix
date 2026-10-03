@@ -19,6 +19,7 @@ export default async function AdminOverviewPage({ params }: { params: Promise<{ 
         <Stat label="Utilizadores" value={n(o.users)} />
         <Stat label="Contactos" value={n(o.contacts)} />
         <Stat label="Suspensas" value={n(o.blocked)} tone={o.blocked > 0 ? "warn" : "default"} />
+        <Stat label="Aguardam aprovação" value={n(o.pendingApprovals)} tone={o.pendingApprovals > 0 ? "warn" : "default"} hint="Contas novas por rever" />
         <Stat label="Mensagens enviadas (24 h)" value={n(o.messages24h.out)} hint={`${n(o.messages24h.in)} recebidas`} />
         <Stat label="Subscrições ativas" value={n(o.activeSubs)} hint="Ativas e ligadas ao Stripe" tone="good" />
         <Stat label="Receita mensal estimada" value={o.mrr ? money(o.mrr.amountMinor, o.mrr.currency) : "Indisponível"} hint={o.mrr ? "Subscrições ativas × preço do plano" : "Não foi possível ler o preço no Stripe"} />

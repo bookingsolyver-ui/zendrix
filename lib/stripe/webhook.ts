@@ -156,6 +156,9 @@ async function applySubscription(event: StripeEvent): Promise<ApplyResult> {
   const trialEnd =
     typeof sub.trial_end === "number" ? new Date(sub.trial_end * 1000) : null;
   const eventAt = new Date(event.created * 1000);
+  // O fim do período pago: a API antiga põe-no na subscrição, a recente nos itens.
+  const periodEndSeconds = sub.current_period_end ?? sub.items?.data[0]?.current_period_end;
+  const periodEnd = typeof periodEndSeconds === "number" ? new Date(periodEndSeconds * 1000) : null;
 
   try {
     // Atómico: só aplica se este evento for tão recente como o último aplicado. O Stripe não garante a ordem.
@@ -170,6 +173,8 @@ async function applySubscription(event: StripeEvent): Promise<ApplyResult> {
         stripeEventAt: eventAt,
         ...(org.stripeCustomerId ? {} : { stripeCustomerId: customerId }),
         ...(plan ? { plan } : {}),
+        ...(periodEnd ? { periodEnd } : {}),
+        cancelAtPeriodEnd: nextStatus === "canceled" ? false : Boolean(sub.cancel_at_period_end),
         ...(nextStatus === "trialing" && trialEnd
           ? { trialEndsAt: trialEnd }
           : {}),

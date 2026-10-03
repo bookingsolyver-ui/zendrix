@@ -45,3 +45,17 @@ test("prolongar o teste soma ao que resta, ou a hoje se já acabou", () => {
   assert.equal(extendedTrialEnd(new Date("2026-09-01T12:00:00Z"), 7, now).toISOString(), "2026-10-10T12:00:00.000Z");
   assert.equal(extendedTrialEnd(null, 3, now).toISOString(), "2026-10-06T12:00:00.000Z");
 });
+
+test("novas ações: ativar/suspender subscrição, aprovar, rejeitar e sincronizar", () => {
+  assert.ok(adminActionSchema.safeParse({ action: "activate_subscription" }).success);
+  assert.ok(adminActionSchema.safeParse({ action: "suspend_subscription" }).success);
+  const approve = adminActionSchema.safeParse({ action: "approve" });
+  assert.ok(approve.success && approve.data.action === "approve" && approve.data.notify === false);
+  assert.ok(adminActionSchema.safeParse({ action: "approve", notify: true }).success);
+  assert.equal(adminActionSchema.safeParse({ action: "reject" }).success, false);
+  assert.equal(adminActionSchema.safeParse({ action: "reject", reason: "x" }).success, false);
+  assert.ok(adminActionSchema.safeParse({ action: "reject", reason: "Não é uma empresa real" }).success);
+  assert.ok(adminActionSchema.safeParse({ action: "sync_stripe" }).success);
+  assert.equal(parseOrgListQuery({ status: "pending" }).status, "pending");
+  assert.equal(parseOrgListQuery({ status: "rejected" }).status, "rejected");
+});

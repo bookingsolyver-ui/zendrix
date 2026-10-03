@@ -31,7 +31,7 @@ export async function getPlanPrice(): Promise<StripePrice | null> {
 // ------------------------------------------------------------------------------------------- visão global
 export async function loadOverview() {
   const since24h = new Date(Date.now() - DAY);
-  const [orgs, byStatus, blocked, users, contacts, out24, in24, outboxByStatus, oldestPending, failed24, campaigns, automations, popups, integrations, deletions, activeSubs, price] = await Promise.all([
+  const [orgs, byStatus, blocked, users, contacts, out24, in24, outboxByStatus, oldestPending, failed24, campaigns, automations, popups, integrations, deletions, activeSubs, price, pendingApprovals] = await Promise.all([
     prisma.workspace.count(),
     prisma.workspace.groupBy({ by: ["subStatus"], _count: { _all: true } }),
     prisma.workspace.count({ where: { blockedAt: { not: null } } }),
@@ -49,6 +49,7 @@ export async function loadOverview() {
     prisma.dataDeletionRequest.count({ where: { status: "received" } }),
     prisma.workspace.count({ where: { subStatus: "active", stripeSubscriptionId: { not: null }, blockedAt: null } }),
     getPlanPrice(),
+    prisma.workspace.count({ where: { approvalStatus: "PENDING_APPROVAL" } }),
   ]);
   const statusCount = (status: string) => byStatus.find((row) => row.subStatus === status)?._count._all ?? 0;
   const outbox = (status: string) => outboxByStatus.find((row) => row.status === status)?._count._all ?? 0;
@@ -69,6 +70,7 @@ export async function loadOverview() {
     popups,
     integrations: { active: integrations.find((row) => row.status === "ACTIVE")?._count._all ?? 0, problem: integrations.filter((row) => row.status !== "ACTIVE").reduce((sum, row) => sum + row._count._all, 0) },
     pendingDeletions: deletions,
+    pendingApprovals,
   };
 }
 
@@ -90,12 +92,20 @@ export function configChecks(): { label: string; ok: boolean }[] {
 // -------------------------------------------------------------------------------------- organizações
 export async function listOrganizations(query: OrgListQuery) {
   const where: Prisma.WorkspaceWhereInput = {
-    ...(query.status === "blocked" ? { blockedAt: { not: null } } : query.status !== "all" ? { subStatus: query.status } : {}),
+    ...(query.status === "blocked"
+      ? { blockedAt: { not: null } }
+      : query.status === "pending"
+        ? { approvalStatus: "PENDING_APPROVAL" as const }
+        : query.status === "rejected"
+          ? { approvalStatus: "REJECTED" as const }
+          : query.status !== "all"
+            ? { subStatus: query.status }
+            : {}),
     ...(query.q ? { OR: [{ name: { contains: query.q, mode: "insensitive" } }, { ownerEmail: { contains: query.q, mode: "insensitive" } }, { id: query.q }] } : {}),
   };
   const [total, rows] = await Promise.all([
     prisma.workspace.count({ where }),
-    prisma.workspace.findMany({ where, orderBy: { createdAt: "desc" }, skip: (query.page - 1) * PAGE_SIZE, take: PAGE_SIZE, select: { id: true, name: true, ownerEmail: true, createdAt: true, subStatus: true, plan: true, trialEndsAt: true, blockedAt: true, stripeSubscriptionId: true } }),
+    prisma.workspace.findMany({ where, orderBy: { createdAt: "desc" }, skip: (query.page - 1) * PAGE_SIZE, take: PAGE_SIZE, select: { id: true, name: true, ownerEmail: true, createdAt: true, subStatus: true, plan: true, trialEndsAt: true, blockedAt: true, approvalStatus: true, stripeSubscriptionId: true } }),
   ]);
   const ids = rows.map((row) => row.id);
   const since30 = new Date(Date.now() - 30 * DAY);
@@ -117,7 +127,7 @@ export async function listOrganizations(query: OrgListQuery) {
 export async function loadOrganization(id: string) {
   const workspace = await prisma.workspace.findUnique({
     where: { id },
-    select: { id: true, name: true, ownerEmail: true, createdAt: true, subStatus: true, plan: true, trialEndsAt: true, blockedAt: true, blockedReason: true, stripeCustomerId: true, stripeSubscriptionId: true, stripeConnectAccountId: true, stripeEventAt: true, agentEnabled: true },
+    select: { id: true, name: true, ownerEmail: true, createdAt: true, subStatus: true, plan: true, trialEndsAt: true, blockedAt: true, blockedReason: true, approvalStatus: true, approvalNote: true, approvalDecidedAt: true, periodEnd: true, cancelAtPeriodEnd: true, stripeCustomerId: true, stripeSubscriptionId: true, stripeConnectAccountId: true, stripeEventAt: true, agentEnabled: true },
   });
   if (!workspace) return null;
   const since7 = new Date(Date.now() - 7 * DAY);
@@ -175,4 +185,30 @@ export async function loadBilling() {
 
 export async function loadAudit(take = 100) {
   return prisma.adminAuditLog.findMany({ orderBy: { createdAt: "desc" }, take, select: { id: true, adminEmail: true, workspaceId: true, action: true, details: true, createdAt: true } });
+}
+
+// ----------------------------------------------------------------------------------------- aprovações
+export const countPendingApprovals = () => prisma.workspace.count({ where: { approvalStatus: "PENDING_APPROVAL" } });
+
+export async function loadApprovals() {
+  const [pending, decided] = await Promise.all([
+    prisma.workspace.findMany({ where: { approvalStatus: "PENDING_APPROVAL" }, orderBy: { createdAt: "asc" }, take: 100, select: { id: true, name: true, ownerEmail: true, createdAt: true, users: { select: { email: true, name: true }, take: 3 } } }),
+    prisma.workspace.findMany({ where: { approvalDecidedAt: { not: null } }, orderBy: { approvalDecidedAt: "desc" }, take: 20, select: { id: true, name: true, ownerEmail: true, approvalStatus: true, approvalDecidedAt: true, approvalNote: true } }),
+  ]);
+  return { pending, decided };
+}
+
+// ------------------------------------------------------------------------------------------ calendário
+// As organizações com data crítica no intervalo (fim de teste, renovação, expiração).
+export async function loadCalendarOrgs(from: Date, to: Date) {
+  const rows = await prisma.workspace.findMany({
+    where: {
+      approvalStatus: "APPROVED",
+      OR: [{ subStatus: "trialing", trialEndsAt: { gte: from, lte: to } }, { subStatus: { in: ["active", "trialing"] }, periodEnd: { gte: from, lte: to } }],
+    },
+    take: 500,
+    select: { id: true, name: true, subStatus: true, trialEndsAt: true, periodEnd: true, cancelAtPeriodEnd: true, blockedAt: true },
+  });
+  const pastDue = await prisma.workspace.findMany({ where: { subStatus: "past_due", approvalStatus: "APPROVED" }, orderBy: { name: "asc" }, take: 50, select: { id: true, name: true, ownerEmail: true } });
+  return { orgs: rows.map((row) => ({ id: row.id, name: row.name, subStatus: row.subStatus, trialEndsAt: row.trialEndsAt, periodEnd: row.periodEnd, cancelAtPeriodEnd: row.cancelAtPeriodEnd, blocked: row.blockedAt !== null })), pastDue };
 }

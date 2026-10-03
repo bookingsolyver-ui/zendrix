@@ -28,7 +28,7 @@ export default async function ChannelsPage({
   const metaReady = metaOAuthConfig() !== null;
   // PAYWALL: sem plano ativo não se ligam canais novos (a rota OAuth também recusa).
   const planActive = user?.workspace
-    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null, new Date(), user.workspace.blocked).active
+    ? evaluateAccess(user.workspace.subStatus, user.workspace.trialEndsAt ? new Date(user.workspace.trialEndsAt) : null, new Date(), user.workspace.restriction).active
     : true;
 
   // Instagram e Messenger: Facebook Login. O botão é um link para a nossa rota, que gera o `state` e

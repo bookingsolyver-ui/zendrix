@@ -246,7 +246,7 @@ export async function runAutomations(options: { deadlineAt?: number } = {}): Pro
   const stale = await prisma.automationRunStep.updateMany({ where: { status: "PROCESSING", updatedAt: { lt: new Date(Date.now() - STALE_AFTER_MS) } }, data: { status: "FAILED", reason: "worker_interrupted", doneAt: new Date() } });
   summary.stale = stale.count;
 
-  const active = await prisma.automation.findMany({ where: { active: true, workspace: { blockedAt: null, subStatus: { in: ["active", "trialing"] } } }, orderBy: { updatedAt: "asc" }, take: 100, select: { id: true } });
+  const active = await prisma.automation.findMany({ where: { active: true, workspace: { blockedAt: null, approvalStatus: "APPROVED", subStatus: { in: ["active", "trialing"] } } }, orderBy: { updatedAt: "asc" }, take: 100, select: { id: true } });
   for (const automation of active) {
     if (options.deadlineAt !== undefined && Date.now() >= options.deadlineAt) break;
     try {
