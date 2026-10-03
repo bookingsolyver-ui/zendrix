@@ -1,7 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Download, Search } from "lucide-react";
+import { useMemo, useState, type FormEvent } from "react";
+import { Download, Loader2, Plus, Search } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import { Modal } from "@/components/ui/modal";
+import { BTN_GHOST, BTN_PRIMARY, INPUT } from "@/components/dashboard/settings/ui";
+import { callApi, errorMessage } from "@/lib/client/api";
 import { visibleName } from "@/lib/inbox/display";
 import { LEAD_STAGE_LABEL, type LeadStageName } from "@/lib/leads/lead";
 
@@ -44,7 +48,24 @@ function csvCell(value: string) {
 }
 
 export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function addContact(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    setBusy(true);
+    setError(null);
+    const result = await callApi("/api/contacts", "POST", { name: String(data.get("name") ?? ""), phone: String(data.get("phone") ?? ""), email: String(data.get("email") ?? "") });
+    setBusy(false);
+    if (result.ok) {
+      setAdding(false);
+      router.refresh();
+    } else setError(errorMessage(result.error));
+  }
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -92,6 +113,10 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
         </div>
 
         <div className="flex items-center gap-2">
+          <button type="button" onClick={() => { setError(null); setAdding(true); }} className={BTN_PRIMARY}>
+            <Plus className="h-4 w-4" />
+            Novo contacto
+          </button>
           <button
             type="button"
             onClick={exportCsv}
@@ -142,7 +167,7 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
               <tr>
                 <td colSpan={5} className="px-5 py-10 text-center text-sm text-muted">
                   {contacts.length === 0
-                    ? "Ainda não há contactos. Os clientes que escreverem para o seu WhatsApp aparecem aqui automaticamente."
+                    ? "Ainda não há contactos. Adicione um ou aguarde: quem escrever para o seu WhatsApp aparece aqui automaticamente."
                     : "Nenhum contacto encontrado."}
                 </td>
               </tr>
@@ -150,6 +175,30 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
           </tbody>
         </table>
       </div>
+
+      {adding && (
+        <Modal title="Novo contacto" onClose={() => setAdding(false)}>
+          <form onSubmit={addContact} className="space-y-3">
+            <input name="name" maxLength={120} placeholder="Nome (opcional)" aria-label="Nome" className={`${INPUT} w-full`} />
+            <input name="phone" required inputMode="tel" placeholder="Telemóvel com indicativo: +351 912 345 678" aria-label="Telemóvel" className={`${INPUT} w-full`} />
+            <input name="email" type="email" maxLength={254} placeholder="E-mail (opcional)" aria-label="E-mail" className={`${INPUT} w-full`} />
+            {error && (
+              <p role="alert" className="text-sm text-red-300">
+                {error}
+              </p>
+            )}
+            <div className="flex gap-2 pt-1">
+              <button type="submit" disabled={busy} className={BTN_PRIMARY}>
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+                Guardar
+              </button>
+              <button type="button" onClick={() => setAdding(false)} className={BTN_GHOST}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }

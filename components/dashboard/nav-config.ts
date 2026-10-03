@@ -75,18 +75,21 @@ const ALL_NAV_ENTRIES: NavEntry[] = [
         label: "Campanhas",
         href: "/dashboard/marketing/campaigns",
         icon: Megaphone,
+        feature: "campaigns",
       },
       {
         label: "Automações",
         href: "/dashboard/marketing/automations",
         icon: Workflow,
+        feature: "marketingAutomations",
       },
       {
         label: "Templates",
         href: "/dashboard/marketing/templates",
         icon: LayoutTemplate,
+        feature: "templates",
       },
-      { label: "Popups", href: "/dashboard/marketing/popups", icon: Sparkles },
+      { label: "Popups", href: "/dashboard/marketing/popups", icon: Sparkles, feature: "popups" },
     ],
   },
   {
@@ -186,7 +189,7 @@ export const NAV_ENTRIES: NavEntry[] = ALL_NAV_ENTRIES.flatMap((entry): NavEntry
   if (entry.type === "link") return [entry];
   const items = entry.items.filter(enabled);
   if (items.length === 0) return [];
-  if (items.length === 1 && entry.label === "Contatos") return [{ type: "link", ...items[0], label: "Contatos" }];
+  if (items.length === 1) return [{ type: "link", ...items[0], label: entry.label }];
   return [{ ...entry, items }];
 });
 

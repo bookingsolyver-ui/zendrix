@@ -1,43 +1,51 @@
 import { setRequestLocale } from "next-intl/server";
-import { RefreshCw } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
-import { MiniCalendar } from "@/components/dashboard/crm/mini-calendar";
-import { GoogleCalendarPanel } from "@/components/dashboard/crm/google-calendar-panel";
-import { UpcomingAppointments } from "@/components/dashboard/crm/agenda-list/upcoming-appointments";
+import { AppointmentsList } from "@/components/dashboard/settings/schedule/appointments-list";
+import { BTN_GHOST } from "@/components/dashboard/settings/ui";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { prisma } from "@/lib/prisma";
+import { DEFAULT_SCHEDULE_CONFIG, parseScheduleConfig } from "@/lib/schedule/config";
+import { listUpcomingAppointments } from "@/lib/schedule/service";
+import { formatSlotHuman } from "@/lib/schedule/slots";
 
-export default async function CrmAgendaPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+// A agenda do CRM mostra as marcações reais (as que a IA faz na conversa e as que forem criadas). Os horários
+// disponíveis definem-se em Definições > Agenda.
+export default async function CrmAgendaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const user = await getCurrentUser();
+  const canManage = user?.role === "OWNER" || user?.role === "MANAGER";
+  const workspace = user?.workspace ? await prisma.workspace.findUnique({ where: { id: user.workspace.id }, select: { scheduleConfig: true } }) : null;
+  const config = parseScheduleConfig(workspace?.scheduleConfig) ?? DEFAULT_SCHEDULE_CONFIG;
+  const upcoming = user?.workspace ? await listUpcomingAppointments(user.workspace.id) : [];
 
   return (
     <>
       <DashboardPageHeader
         title="Agenda"
-        subtitle="Consulte e agende reuniões e compromissos da equipa."
+        subtitle="As marcações confirmadas, ordenadas por data."
         action={
-          <Link
-            href="/dashboard/integrations"
-            className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.03]"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Sincronizar Google Calendar
-          </Link>
+          canManage ? (
+            <Link href="/dashboard/settings/schedule" className={`${BTN_GHOST} flex items-center gap-2`}>
+              <Settings2 className="h-4 w-4" />
+              Definir horários
+            </Link>
+          ) : undefined
         }
       />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-        <MiniCalendar />
-        <GoogleCalendarPanel />
-      </div>
-
-      <div className="mt-6">
-        <UpcomingAppointments />
-      </div>
+      <AppointmentsList
+        canManage={canManage}
+        appointments={upcoming.map((a) => ({
+          id: a.id,
+          customerName: a.customerName,
+          customerEmail: a.customerEmail,
+          service: a.service,
+          when: formatSlotHuman(a.startsAt.getTime(), config.timezone),
+        }))}
+      />
     </>
   );
 }

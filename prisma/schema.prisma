@@ -60,6 +60,10 @@ model Workspace {
   followUpConfig         Json?               @map("follow_up_config") // lib/followups/config.ts
   scheduleConfig         Json?               @map("schedule_config") // lib/schedule/config.ts
   paymentItems           PaymentItem[]
+  tasks                  Task[]
+  docs                   Doc[]
+  segments               Segment[]
+  messageTemplates       MessageTemplate[]
   paymentLinks           PaymentLink[]
   followUps              FollowUp[]
   appointments           Appointment[]
@@ -353,4 +357,79 @@ model Appointment {
 
   @@unique([workspaceId, slotKey])
   @@index([workspaceId, startsAt])
+}
+
+// ─── CRM, segmentos e templates ───
+
+enum TaskStatus {
+  TODO
+  DOING
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// Uma tarefa do quadro do CRM (kanban). A ordem dentro de cada coluna é `position` (crescente).
+model Task {
+  id          String       @id @default(cuid())
+  workspaceId String
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueAt       DateTime?
+  position    Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status, position])
+}
+
+// Um documento partilhado com a equipa (guiões, políticas, notas).
+model Doc {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  title        String
+  body         String    @default("")
+  lastEditedBy String? // nome (ou e-mail) de quem o guardou por último
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, updatedAt])
+}
+
+// Um segmento dinâmico de contactos: as regras (JSON validado em lib/segments/rules.ts) são avaliadas sempre que se
+// conta ou lista, por isso quem entra e sai atualiza-se sozinho.
+model Segment {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  rules       Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+// Um modelo de mensagem guardado pela organização (rascunho: ainda não é submetido à Meta a partir daqui).
+model MessageTemplate {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  category    String // UTILITY | MARKETING
+  language    String    @default("pt_PT")
+  body        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
 }

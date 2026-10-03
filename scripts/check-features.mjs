@@ -6,15 +6,15 @@ import { join } from "node:path";
 
 // Onde "Em breve" é aceitável: módulos ainda não lançados, o checkout de e-commerce e o próprio componente.
 const HIDDEN = [
-  "app/[locale]/dashboard/(app)/crm/",
-  "app/[locale]/dashboard/(app)/marketing/",
+  "app/[locale]/dashboard/(app)/marketing/campaigns/",
+  "app/[locale]/dashboard/(app)/marketing/automations/",
+  "app/[locale]/dashboard/(app)/marketing/popups/",
   "app/[locale]/dashboard/(app)/ecommerce/",
   "app/[locale]/dashboard/(app)/analytics/",
   "app/[locale]/dashboard/(app)/webhooks/",
   "app/[locale]/dashboard/(app)/integrations/",
   "app/[locale]/dashboard/(app)/automations/",
   "app/[locale]/dashboard/(app)/ai/settings/",
-  "components/dashboard/crm/",
   "components/dashboard/marketing/",
   "components/dashboard/ecommerce/",
   "components/dashboard/analytics/",
