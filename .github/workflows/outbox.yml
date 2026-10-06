@@ -3,6 +3,9 @@ name: outbox
 # De 5 em 5 minutos: reenvia a fila de saída da Meta (tentativas por fazer, mensagens que ficaram para trás) e
 # corre os seguimentos automáticos (reengajamento), as campanhas (arranque das agendadas e envio em lotes) e as
 # automações (varrimento de eventos e execução das ações) e os e-mails (avisos de fim de teste e reenvios).
+# Também corre a automação do Zetrix: de 5 em 5 minutos o auto-sync (notas de voz), o handoff (negócios ganhos) e o
+# nightwatch (triagem noturna); e, uma vez por dia às 08:00 UTC, os alertas inteligentes e as cobranças; à segunda-feira,
+# a procura de duplicados. Todos são idempotentes. Um disparo manual (workflow_dispatch) corre todos.
 # Substitui o cron por minuto da Vercel, que só existe no plano Pro. O endpoint exige o CRON_SECRET.
 #
 # Configurar em GitHub → Settings → Secrets and variables → Actions:
@@ -18,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Chamar /api/cron/process-outbox, /follow-ups, /campaigns, /automations e /emails
+      - name: Chamar os crons (/api/cron/*)
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
@@ -27,11 +30,29 @@ jobs:
             echo "::warning::CRON_SECRET ou APP_URL não estão definidos nos secrets do repositório; nada a fazer."
             exit 0
           fi
+          # Aparar espaços e mudanças de linha escondidos nos secrets (a causa mais comum de um 401 com o segredo «certo»)
+          # e a barra final do endereço.
+          CRON_SECRET="$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')"
+          APP_URL="$(printf '%s' "$APP_URL" | tr -d '[:space:]')"; APP_URL="${APP_URL%/}"
           fail=0
-          for path in process-outbox follow-ups campaigns automations emails; do
+          paths="process-outbox follow-ups campaigns automations emails auto-sync handoff nightwatch"
+          # Os trabalhos pesados não correm de 5 em 5 minutos: só na janela das 08:00 UTC (3 disparos de 5 min, para
+          # sobreviver a atrasos do GitHub; são idempotentes). O data-cleaner só à segunda-feira.
+          hour="$(date -u +%H)"; minute="$(date -u +%M)"; weekday="$(date -u +%u)"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || { [ "$hour" = "08" ] && [ "$minute" -lt 15 ]; }; then
+            paths="$paths smart-alerts cash-collector"
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$weekday" = "1" ]; then paths="$paths data-cleaner"; fi
+          fi
+          for path in $paths; do
             status=$(curl -sS -o response.json -w "%{http_code}" --max-time 90 \
               -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/$path")
             echo "$path: HTTP $status"; cat response.json; echo
-            [ "$status" = "200" ] || fail=1
+            case "$status" in
+              200) ;;
+              401) echo "::error::$path: 401. O servidor recebeu o pedido mas o CRON_SECRET do GitHub (Settings → Secrets → Actions) não coincide com o da Vercel (Settings → Environment Variables, ambiente Production). Defina o MESMO valor nos dois sítios e faça redeploy na Vercel."; fail=1 ;;
+              503) echo "::error::$path: 503. O CRON_SECRET não está definido na Vercel (Production)."; fail=1 ;;
+              404|405) echo "::error::$path: $status. O APP_URL ($APP_URL) não aponta para o deploy de produção certo."; fail=1 ;;
+              *) fail=1 ;;
+            esac
           done
           exit $fail

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { ChevronDown, Loader2, LogOut, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
-import { NAV_ENTRIES, NAV_FOOTER_ENTRIES, type NavGroup } from "@/components/dashboard/nav-config";
+import { useCurrentUser } from "@/components/dashboard/current-user-context";
+import { MOTHERSHIP_LINK, NAV_ENTRIES, NAV_FOOTER_ENTRIES, type NavEntry, type NavGroup } from "@/components/dashboard/nav-config";
 
 function isGroupActive(group: NavGroup, pathname: string) {
   return group.items.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
@@ -15,13 +16,24 @@ export function Sidebar({
   onToggleCollapsed,
   mobileOpen,
   onCloseMobile,
+  showMothership = false,
 }: {
   collapsed: boolean;
   onToggleCollapsed: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
+  // Decidido no servidor (só o fundador/CTO). Esconder o link não é a segurança: /super-admin responde 404 a todos os outros.
+  showMothership?: boolean;
 }) {
   const pathname = usePathname();
+  const role = useCurrentUser()?.role;
+  const isManager = role === "OWNER" || role === "MANAGER";
+  // Os vendedores não veem o que as APIs lhes recusariam.
+  const entries: NavEntry[] = NAV_ENTRIES.flatMap((entry): NavEntry[] => {
+    if (entry.type === "link") return !entry.managersOnly || isManager ? [entry] : [];
+    const items = entry.items.filter((item) => !item.managersOnly || isManager);
+    return items.length === 0 ? [] : items.length === 1 ? [{ type: "link", ...items[0], label: entry.label }] : [{ ...entry, items }];
+  });
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -94,7 +106,7 @@ export function Sidebar({
         </div>
 
         <nav className="scrollbar-thin flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {NAV_ENTRIES.map((entry) => {
+          {entries.map((entry) => {
             if (entry.type === "link") {
               const isActive = pathname === entry.href;
               const Icon = entry.icon;
@@ -178,6 +190,16 @@ export function Sidebar({
         </nav>
 
         <div className="space-y-1 border-t border-border px-3 py-4">
+          {showMothership && (
+            <Link
+              href={MOTHERSHIP_LINK.href}
+              title={collapsed ? MOTHERSHIP_LINK.label : undefined}
+              className={`mb-2 flex items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm font-semibold text-neon-green transition-colors hover:bg-surface-2 ${collapsed ? "justify-center" : ""}`}
+            >
+              <MOTHERSHIP_LINK.icon className="h-[18px] w-[18px] shrink-0" />
+              {!collapsed && MOTHERSHIP_LINK.label}
+            </Link>
+          )}
           {NAV_FOOTER_ENTRIES.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;

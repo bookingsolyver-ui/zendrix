@@ -684,3 +684,279 @@ model SystemNotice {
   totalRecipients Int       @default(0)
   createdAt       DateTime  @default(now())
 }
+
+// ─── Automação (Auto-Sync, Alertas Inteligentes, Magic Importer) ───
+// Modelos acrescentados sem relações para os modelos existentes (só ids em texto, como AdminAuditLog): nada do que já
+// existia muda. Isolamento por organização garantido pelo `workspaceId` em todas as consultas (lib/integrations, lib/alerts).
+
+// Nota no perfil de um contacto. `sourceKey` único impede duplicar a mesma origem (ex.: o mesmo áudio do WhatsApp).
+model ContactNote {
+  id          String   @id @default(cuid())
+  workspaceId String
+  contactId   String
+  source      String // whatsapp_audio | import | manual
+  sourceKey   String?  @unique // ex.: "wa:<waMessageId>"
+  body        String
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId, contactId, createdAt])
+}
+
+// Notificação dentro da aplicação (o que o <SmartAlertToast /> mostra). A chave única (organização + dedupeKey) faz
+// com que repetir o varrimento diário nunca duplique o mesmo aviso.
+model AppNotification {
+  id          String    @id @default(cuid())
+  workspaceId String
+  kind        String // churn_risk | margin_risk | payment_received | import_done
+  severity    String    @default("warning") // info | warning | critical
+  title       String
+  body        String
+  contactId   String?
+  dedupeKey   String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([workspaceId, dedupeKey])
+  @@index([workspaceId, readAt, createdAt])
+}
+
+// Eventos recebidos de integrações externas (banco, faturação AGT). A chave única (fornecedor + id do evento) é a
+// idempotência: o fornecedor repete webhooks, e cada um só se aplica uma vez.
+model IntegrationEvent {
+  id          String   @id @default(cuid())
+  provider    String // bank | agt
+  externalId  String
+  workspaceId String?
+  outcome     String // applied | ignored | rejected
+  detail      String?
+  createdAt   DateTime @default(now())
+
+  @@unique([provider, externalId])
+  @@index([createdAt])
+}
+
+// ─── Ecosystem Expansion Pack (Fortress, Handoff, Nightwatch, Cash-Collector, Data-Cleaner) ───
+// Tudo isolado e sem relações para os modelos existentes (ids em texto). Ver docs/zetrix-expansion.md.
+
+// Quem é o responsável por um cliente (o «assigned_to»). Tabela à parte: Contact não muda. O papel de vendedor é STAFF.
+model ClientAssignment {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  contactId        String
+  assignedToUserId String // User.id
+  assignedById     String? // User.id (null = automático, ex.: Nightwatch)
+  assignedAt       DateTime @default(now())
+
+  @@unique([workspaceId, contactId])
+  @@index([workspaceId, assignedToUserId])
+}
+
+// Conta bloqueada pelo Fortress (o «is_locked»). Só um OWNER/MANAGER desbloqueia (unlockedAt).
+model UserLock {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String // User.id
+  reason      String
+  lockedAt    DateTime  @default(now())
+  unlockedAt  DateTime?
+  unlockedBy  String?
+
+  @@index([workspaceId, userId, unlockedAt])
+}
+
+// O «audit_logs» da organização: só se acrescenta (um trigger SQL recusa UPDATE e DELETE). Milissegundos em createdAt.
+model AuditEvent {
+  id          String   @id @default(cuid())
+  workspaceId String
+  actorUserId String? // quem fez (null = sistema)
+  action      String // fortress.locked | handoff.won | merge.contacts | ...
+  entityType  String
+  entityId    String
+  details     Json?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, entityType, entityId])
+}
+
+// Registo bloqueado (negócio ganho): o vendedor deixa de poder editar. Uma linha por contacto; nunca se apaga.
+model RecordLock {
+  id          String   @id @default(cuid())
+  workspaceId String
+  contactId   String
+  reason      String // won_handoff
+  lockedAt    DateTime @default(now())
+  details     Json?
+
+  @@unique([workspaceId, contactId])
+}
+
+// Triagem noturna: em que pergunta vai a conversa. Uma por conversa.
+model NightwatchSession {
+  id             String   @id @default(cuid())
+  workspaceId    String
+  conversationId String   @unique
+  step           Int      @default(0) // quantas perguntas já foram feitas
+  lastMessageId  String? // a última mensagem do cliente já tratada (idempotência)
+  answers        Json     @default("[]")
+  status         String   @default("ACTIVE") // ACTIVE | QUALIFIED | ABANDONED
+  startedAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([workspaceId, status])
+}
+
+// Uma cobrança (fatura/negócio a receber). Os lembretes escalam com `remindersSent`.
+model Receivable {
+  id               String    @id @default(cuid())
+  workspaceId      String
+  contactId        String
+  reference        String // número da fatura
+  description      String?
+  amountMinor      Int
+  currency         String // AOA | EUR | ...
+  dueAt            DateTime
+  status           String    @default("PENDING") // PENDING | PAID | CANCELLED
+  paymentReference String? // referência de pagamento a enviar ao cliente (ex.: Multicaixa)
+  remindersSent    Int       @default(0)
+  lastReminderAt   DateTime?
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@unique([workspaceId, reference])
+  @@index([status, dueAt])
+}
+
+// Pares de contactos que parecem ser a mesma pessoa. A decisão é humana (merge ou dispensar).
+model DuplicateCandidate {
+  id          String   @id @default(cuid())
+  workspaceId String
+  primaryId   String // o registo a manter (o mais antigo)
+  duplicateId String
+  score       Float
+  reasons     Json
+  status      String   @default("PENDING") // PENDING | MERGED | DISMISSED
+  createdAt   DateTime @default(now())
+
+  @@unique([workspaceId, primaryId, duplicateId])
+  @@index([workspaceId, status])
+}
+
+// «Soft delete» de um contacto fundido: o registo fica (com o retrato do que tinha), marcado como fundido no principal.
+model MergedContact {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  contactId    String // o redundante
+  mergedIntoId String
+  mergedById   String?
+  snapshot     Json
+  mergedAt     DateTime @default(now())
+
+  @@unique([workspaceId, contactId])
+}
+
+// ─── C-Level layer (Predictive CFO, Portal, Audit Ledger) ───
+// Sem relações para os modelos existentes (só ids em texto).
+
+// Uma proposta/orçamento enviada a um cliente por um link mágico (Zetrix Portal). O token só existe no link: aqui guarda-se
+// o hash SHA-256 (como TeamInvite e ApiKey). O total é SEMPRE recalculado no servidor a partir das linhas.
+model Proposal {
+  id                String    @id @default(cuid())
+  workspaceId       String
+  contactId         String
+  title             String
+  lines             Json // [{ description, quantity, unitMinor }]
+  amountMinor       Int
+  currency          String
+  status            String    @default("SENT") // SENT | APPROVED | REVOKED
+  tokenHash         String    @unique
+  tokenExpiresAt    DateTime
+  approvedAt        DateTime?
+  approvedIp        String?
+  approvedUserAgent String?
+  createdById       String?
+  createdAt         DateTime  @default(now())
+
+  @@index([workspaceId, status, createdAt])
+  @@index([workspaceId, contactId])
+}
+
+// O livro de auditoria de conformidade (RGPD): quem fez o quê, com o antes e o depois. Só se acrescenta (trigger SQL).
+// Sem relações, de propósito: nunca bloqueia consultas nem a eliminação de uma organização, e sobrevive-lhe.
+model ZetrixAuditLog {
+  id              String   @id @default(cuid())
+  workspaceId     String?
+  entityType      String   @map("entity_type")
+  entityId        String   @map("entity_id")
+  action          String // CREATE | UPDATE | DELETE | EXPORT
+  previousPayload Json?    @map("previous_payload")
+  newPayload      Json?    @map("new_payload")
+  actorId         String?  @map("actor_id")
+  ipAddress       String?  @map("ip_address")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([workspaceId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+// ─── Mothership (Super-Admin da equipa Zetrix) ───
+// Tabelas ZetrixAdmin_*: só o servidor lhes toca (RLS fechado). Sem relações para os modelos existentes.
+
+// Um interruptor de funcionalidade por organização. Sem linha = ligado. `flag = "*"` é a «torneira»: desliga todas as
+// funcionalidades premium da organização de uma vez.
+model ZetrixAdmin_FeatureFlag {
+  id          String   @id @default(cuid())
+  workspaceId String
+  flag        String
+  enabled     Boolean
+  reason      String?
+  updatedBy   String // e-mail do administrador
+  updatedAt   DateTime @updatedAt
+
+  @@unique([workspaceId, flag])
+  @@index([flag])
+}
+
+// Erros, alertas de quota e outros eventos operacionais. `fingerprint` agrupa o mesmo erro (e limita os alertas).
+model ZetrixAdmin_Event {
+  id          String   @id @default(cuid())
+  severity    String // info | warning | critical
+  kind        String // server_error | unauthorized | upstream_timeout | db_error | quota_exceeded | ...
+  workspaceId String?
+  route       String
+  message     String
+  details     Json?
+  fingerprint String
+  alerted     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([fingerprint, createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+// Consumo diário por organização e métrica (ex.: ai_calls). Incremento atómico (INSERT ... ON CONFLICT).
+model ZetrixAdmin_Usage {
+  id          String   @id @default(cuid())
+  workspaceId String
+  day         String // AAAA-MM-DD (UTC)
+  metric      String
+  count       Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([workspaceId, day, metric])
+  @@index([day, metric])
+}
+
+// Limite diário próprio de uma organização (acordos comerciais, planos superiores). Sem linha = o limite global.
+model ZetrixAdmin_QuotaOverride {
+  id          String   @id @default(cuid())
+  workspaceId String
+  metric      String
+  dailyLimit  Int
+  updatedBy   String
+  updatedAt   DateTime @updatedAt
+
+  @@unique([workspaceId, metric])
+}

@@ -8,8 +8,10 @@ import {
   Calendar,
   CreditCard,
   DollarSign,
+  FileSignature,
   FileText,
   Filter,
+  GitMerge,
   Inbox,
   KanbanSquare,
   LayoutDashboard,
@@ -17,11 +19,15 @@ import {
   Megaphone,
   Package,
   Plug,
+  Receipt,
+  Rocket,
   Settings,
   ShoppingCart,
   Sparkles,
   Target,
+  TrendingUp,
   Truck,
+  Upload,
   UserCog,
   Users,
   Webhook,
@@ -34,6 +40,8 @@ export type NavLeaf = {
   icon: LucideIcon;
   // Só aparece se esta funcionalidade estiver pronta (lib/features.ts).
   feature?: FeatureId;
+  // Só proprietários e gestores (as páginas e as APIs recusam os vendedores).
+  managersOnly?: boolean;
 };
 
 export type NavGroup = {
@@ -104,6 +112,11 @@ const ALL_NAV_ENTRIES: NavEntry[] = [
         icon: Filter,
         feature: "segments",
       },
+      { label: "Importar", href: "/dashboard/contacts/import", icon: Upload, managersOnly: true },
+      { label: "Previsões Financeiras", href: "/dashboard/contacts/forecast", icon: TrendingUp, managersOnly: true },
+      { label: "Orçamentos B2B", href: "/dashboard/contacts/proposals", icon: FileSignature, managersOnly: true },
+      { label: "Cobranças Auto", href: "/dashboard/contacts/receivables", icon: Receipt, managersOnly: true },
+      { label: "Limpeza de Dados", href: "/dashboard/contacts/duplicates", icon: GitMerge, managersOnly: true },
     ],
   },
   {
@@ -194,3 +207,6 @@ export const NAV_ENTRIES: NavEntry[] = ALL_NAV_ENTRIES.flatMap((entry): NavEntry
 });
 
 export const NAV_FOOTER_ENTRIES: NavLeaf[] = ALL_NAV_FOOTER_ENTRIES.filter(enabled);
+
+// A Nave-Mãe (super-admin da equipa Zetrix): fora do menu normal; só se mostra a quem o servidor confirmar (ver o layout do painel).
+export const MOTHERSHIP_LINK: NavLeaf = { label: "Nave-Mãe (God Mode)", href: "/super-admin", icon: Rocket };

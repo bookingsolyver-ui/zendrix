@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardTopbar } from "@/components/dashboard/topbar";
 
-export function DashboardShell({ children }: { children: ReactNode }) {
+export function DashboardShell({ children, showMothership = false }: { children: ReactNode; showMothership?: boolean }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -15,6 +15,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         onToggleCollapsed={() => setCollapsed((value) => !value)}
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
+        showMothership={showMothership}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardTopbar onOpenMobileMenu={() => setMobileOpen(true)} />
