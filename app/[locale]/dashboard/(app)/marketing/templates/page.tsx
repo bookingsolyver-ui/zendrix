@@ -21,7 +21,7 @@ export default async function TemplatesPage({ params }: { params: Promise<{ loca
 
   const user = await getCurrentUser();
   const rows = user?.workspace
-    ? await prisma.messageTemplate.findMany({ where: { workspaceId: user.workspace.id }, orderBy: { createdAt: "desc" }, select: { id: true, name: true, category: true, language: true, body: true } })
+    ? await prisma.messageTemplate.findMany({ where: { workspaceId: user.workspace.id }, orderBy: { createdAt: "desc" }, select: { id: true, name: true, category: true, language: true, body: true, metaStatus: true, rejectedReason: true } })
     : [];
   const templates: TemplateView[] = rows.map((row) => ({ ...row, category: row.category === "MARKETING" ? "MARKETING" : "UTILITY" }));
 
@@ -33,7 +33,7 @@ export default async function TemplatesPage({ params }: { params: Promise<{ loca
         <MarketingHero
           icon={MessageSquareText}
           title="Modelos de mensagem"
-          description="Guarde os textos que a equipa usa com mais frequência. Para enviar mensagens fora da janela de 24 horas, o WhatsApp exige modelos aprovados pela Meta, que se submetem no WhatsApp Manager."
+          description="Guarde os textos que a equipa usa com mais frequência. Para enviar mensagens fora da janela de 24 horas, o WhatsApp exige modelos aprovados pela Meta: submeta-os daqui e use «Sincronizar com a Meta» para ver a aprovação."
           bullets={["Variáveis como nome, valor ou data", "Categorias: utilidade e marketing", "Edição e organização por toda a equipa"]}
         />
 

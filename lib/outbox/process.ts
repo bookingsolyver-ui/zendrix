@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { backoffSeconds, MAX_ATTEMPTS } from "@/lib/meta/errors";
 import { markIntegrationExpired } from "@/lib/meta/integration-health";
-import { sendTextToMeta } from "@/lib/meta/send";
+import { sendTextToMeta, type MetaSendResult } from "@/lib/meta/send";
+import { sendTemplateToMeta } from "@/lib/meta/templates-api";
 import { rateLimit } from "@/lib/rate-limit";
 import type { PlatformName } from "@/lib/outbox/split-text";
 import { outboxPayloadSchema, type OutboxPayload } from "@/lib/validations/outbox";
@@ -208,7 +209,11 @@ async function deliver(
   credentials: Credentials,
   cache: Map<string, Credentials | null>,
 ): Promise<Outcome> {
-  const result = await sendTextToMeta(row.platform, credentials, payload.to, payload.text);
+  // Modelo aprovado (WhatsApp): mesmo caminho de resultado que o texto, só muda o pedido à Meta.
+  const result =
+    payload.kind === "template"
+      ? await sendTemplateResult(credentials, payload)
+      : await sendTextToMeta(row.platform, credentials, payload.to, payload.text);
 
   if (result.ok) {
     // A Meta já entregou. Se esta gravação falhar, a linha fica PROCESSING e acaba FAILED (nunca reenvia).
@@ -246,6 +251,14 @@ async function deliver(
     return "retried";
   }
   return markFailed(row, payload, result.failure.reason);
+}
+
+async function sendTemplateResult(
+  credentials: Credentials,
+  payload: Extract<OutboxPayload, { kind: "template" }>,
+): Promise<MetaSendResult> {
+  const sent = await sendTemplateToMeta(credentials, payload.to, payload.templateName, payload.language, payload.params);
+  return sent.ok ? { ok: true, externalId: sent.data.externalId } : sent;
 }
 
 function safeJson(text: string): unknown {

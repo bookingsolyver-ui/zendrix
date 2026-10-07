@@ -9,6 +9,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const id = idSchema.safeParse((await params).id);
     const body = templateInputSchema.safeParse(await request.json().catch(() => null));
     if (!id.success || !body.success) return fail("invalid_input", 400);
+    // Em análise ou aprovado na Meta, o texto local tem de ser igual ao da Meta: não se edita (crie outro modelo).
+    const current = await prisma.messageTemplate.findFirst({ where: { id: id.data, workspaceId: who.workspaceId }, select: { metaStatus: true } });
+    if (current && ["PENDING", "APPROVED"].includes(current.metaStatus)) return fail("locked_by_meta", 409);
     try {
       const { count } = await prisma.messageTemplate.updateMany({ where: { id: id.data, workspaceId: who.workspaceId }, data: body.data });
       return count > 0 ? ok() : fail("not_found", 404);

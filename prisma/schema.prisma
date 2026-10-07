@@ -455,6 +455,14 @@ model MessageTemplate {
   category    String // UTILITY | MARKETING
   language    String    @default("pt_PT")
   body        String
+  // Estado na Meta: DRAFT (só local) | PENDING | APPROVED | REJECTED | PAUSED | DISABLED. Só APPROVED envia.
+  metaStatus       String    @default("DRAFT")
+  metaTemplateId   String?   @map("meta_template_id")
+  rejectedReason   String?   @map("rejected_reason")
+  submittedAt      DateTime? @map("submitted_at")
+  syncedAt         DateTime? @map("synced_at")
+  // false = tem cabeçalho/botões dinâmicos que o Zetrix ainda não preenche: não aparece no seletor da Inbox.
+  sendable         Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

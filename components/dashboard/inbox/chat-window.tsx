@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Bot, Clock, Loader2, Pause, Send } from "lucide-react";
+import { Bot, Clock, FileText, Loader2, Pause, Send } from "lucide-react";
 import { contactLabel } from "@/lib/inbox/display";
 import { channelOf, CHANNEL_LABEL } from "@/lib/inbox/channels";
 import { LEAD_STAGE_LABEL } from "@/lib/leads/lead";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
+import { TemplatePicker } from "@/components/dashboard/inbox/template-picker";
 import { REPLY_WINDOW_MS, type ChatMessage, type ConversationSummary } from "@/lib/inbox/types";
 
 const POLL_MS = 3000;
@@ -28,7 +29,7 @@ const QUEUE_LABEL: Record<string, string> = {
 
 const SEND_ERRORS: Record<string, string> = {
   window_closed:
-    "Passaram mais de 24 h desde a última mensagem do cliente. A Meta só permite responder com um template.",
+    "Passaram mais de 24 h desde a última mensagem do cliente. A Meta só permite responder com um template aprovado: use o botão «Enviar template».",
   token_expired: "O token da Meta expirou. Atualize-o em Definições → WhatsApp.",
   rate_limited: "Está a enviar depressa demais. Aguarde um instante.",
   no_integration: "Não há nenhum canal ligado a esta conversa.",
@@ -54,6 +55,7 @@ export function ChatWindow({
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   // Optimistic value while the pause request is in flight; the list poll is the source of truth after.
   const [pendingPause, setPendingPause] = useState<boolean | null>(null);
   const [pauseError, setPauseError] = useState(false);
@@ -258,7 +260,7 @@ export function ChatWindow({
               )}
               <p
                 className={`whitespace-pre-wrap break-words ${
-                  message.type !== "text" && message.type !== "audio" ? "italic opacity-80" : ""
+                  message.type !== "text" && message.type !== "audio" && message.type !== "template" ? "italic opacity-80" : ""
                 }`}
               >
                 {message.body}
@@ -292,9 +294,15 @@ export function ChatWindow({
           </p>
         )}
         {!isLoading && !canReply && (
-          <p className="mb-2 text-xs text-muted">
-            {SEND_ERRORS.window_closed}
-          </p>
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <p className="text-xs text-muted">{SEND_ERRORS.window_closed}</p>
+            {conversation.platform === "WHATSAPP" && (
+              <button type="button" onClick={() => setPickerOpen(true)} className="neon-green-btn flex shrink-0 items-center gap-1.5 rounded-full bg-green-500 px-3.5 py-1.5 text-xs font-semibold text-background hover:bg-green-400">
+                <FileText className="h-3.5 w-3.5" />
+                Enviar template
+              </button>
+            )}
+          </div>
         )}
         {sendError && (
           <p role="alert" className="mb-2 text-xs text-danger">
@@ -302,6 +310,11 @@ export function ChatWindow({
           </p>
         )}
         <div className="flex items-end gap-2">
+          {conversation.platform === "WHATSAPP" && (
+            <button type="button" onClick={() => setPickerOpen(true)} aria-label="Enviar template" title="Enviar um template aprovado pela Meta" className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-surface-2">
+              <FileText className="h-4 w-4" />
+            </button>
+          )}
           <textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
@@ -323,6 +336,17 @@ export function ChatWindow({
           </button>
         </div>
       </form>
+
+      {pickerOpen && (
+        <TemplatePicker
+          conversationId={id}
+          onClose={() => setPickerOpen(false)}
+          onSent={(message) => {
+            setMessages((previous) => [...previous, message]);
+            onActivity();
+          }}
+        />
+      )}
     </div>
   );
 }
