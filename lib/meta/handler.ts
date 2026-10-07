@@ -28,9 +28,10 @@ function safeEqual(a: string, b: string) {
 export async function handleMetaGet(request: Request) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get("hub.mode");
-  const token = searchParams.get("hub.verify_token");
+  const token = searchParams.get("hub.verify_token")?.trim() ?? null;
   const challenge = searchParams.get("hub.challenge");
-  const expected = process.env.WHATSAPP_VERIFY_TOKEN;
+  // trim: um espaço ou mudança de linha colado no valor da Vercel faria a validação falhar sem razão visível.
+  const expected = process.env.WHATSAPP_VERIFY_TOKEN?.trim();
 
   if (expected && mode === "subscribe" && token && challenge && safeEqual(token, expected)) {
     return new Response(challenge, { status: 200, headers: { "Content-Type": "text/plain" } });
@@ -115,13 +116,19 @@ export async function handleMetaPost(request: Request) {
   // so it can never delay Meta or affect what was just saved; it only ever logs its own errors.
   // As respostas não vão directo à Meta: ficam na fila de saída (lib/outbox).
   after(async () => {
-    const events = [...freshEvents];
-    // processInboundAudio nunca lança; devolve null se AUDIO_INBOUND está desligado.
-    for (const job of audioJobs) {
-      const event = await processInboundAudio(job);
-      if (event) events.push(event);
-    }
-    await runAgentSafely(events);
+    // Texto e áudio correm EM PARALELO: uma nota de voz (descarregar + transcrever) nunca atrasa as mensagens
+    // de texto, e várias notas de voz transcrevem-se ao mesmo tempo. Cada conversa continua a responder só à
+    // mensagem mais recente (hasNewerInbound), por isso a ordem não se estraga. Nunca lançam.
+    await Promise.all([
+      runAgentSafely(freshEvents),
+      Promise.all(
+        audioJobs.map(async (job) => {
+          // processInboundAudio nunca lança; o agente corre assim que ESTE áudio fica transcrito.
+          const event = await processInboundAudio(job);
+          if (event) await runAgentSafely([event]);
+        }),
+      ),
+    ]);
     // Qualquer evento da Meta aproveita para reenviar o que ficou na fila (tentativas por fazer, etc.): num
     // plano sem cron por minuto, é o tráfego real que mantém a fila a andar.
     await drainOutbox(8_000);

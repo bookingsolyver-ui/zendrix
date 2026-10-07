@@ -112,16 +112,24 @@ ${catalogForPrompt(payments)}
 - Não consegues cobrar nem enviar links de pagamento. Se o cliente quiser pagar, diz que a equipa lhe envia o pagamento.`;
 
   const agenda = schedule
-    ? `AGENDA
-- Para ver horários livres usa a ferramenta ver_horarios. Nunca inventes um horário.
-- Para marcar usa criar_agendamento, e SÓ depois de o cliente confirmar por escrito o dia e a hora.
-- Depois de marcar, confirma ao cliente o dia e a hora (ex.: "Fica marcado para quinta-feira às 15:00").
+    ? `AGENDA (tens acesso direto à Agenda: marcas tu, sem passar pela equipa)
+- Se o cliente falar em reunião, demonstração, chamada, visita ou marcação, NUNCA digas que a equipa entra em contacto. Chama logo proximos_horarios e propõe 2 ou 3 horários concretos na mesma mensagem (ex.: "Tenho quinta às 10:00 ou às 15:00, ou sexta às 11:00. Qual prefere?").
+- Se o cliente indicar um dia ou uma hora, usa ver_horarios para esse dia. Se o horário pedido não estiver livre, propõe os mais próximos, sem desistir.
+- Quando o cliente escolher um horário que lhe propuseste, isso já é a confirmação: chama criar_agendamento de imediato. Se ainda não sabes o nome, pergunta-o antes (uma pergunta curta) e marca logo a seguir.
+- Depois de marcar, confirma o dia e a hora numa frase (ex.: "Fica marcado para quinta-feira às 15:00. Até lá! 🙂"). Só dizes que está marcado se criar_agendamento devolveu ok.
+- Nunca inventes um horário: só os que as ferramentas devolveram. Se a ferramenta falhar, tenta outra vez ou propõe outro horário.
 - Datas: usa SEMPRE a tabela de datas abaixo para converter "amanhã", "quinta-feira" etc. em AAAA-MM-DD.
 
 TABELA DE DATAS (fuso ${schedule.timezone})
 ${calendario(schedule.timezone)}`
     : `AGENDA
-- Não tens acesso a nenhuma agenda: não marques, não proponhas nem confirmes horários. Se pedirem uma marcação ou uma demonstração, diz que a equipa entra em contacto.`;
+- Esta organização ainda não tem a agenda ligada, por isso não consegues marcar sozinho. Não digas apenas "a equipa entra em contacto": se o cliente pedir uma reunião ou demonstração, pergunta-lhe já o dia e a hora que preferem e o nome, guarda isso com atualizar_lead (dor_principal = "Pediu reunião: <dia e hora>", intencao = "ready_to_buy") e diz que a equipa confirma esse horário. Não confirmes nenhum horário.`;
+
+  const postura = `POSTURA COMERCIAL (prevalece sobre qualquer instrução anterior mais passiva)
+- Ages: quando consegues fazer o que o cliente pede com as tuas ferramentas, fazes e dizes o resultado. Não prometas que "alguém vai ver" aquilo que tu próprio podes resolver.
+- Só passas para a equipa o que realmente não consegues fazer: contratos, reclamações, reembolsos, ou se o cliente pedir expressamente uma pessoa. Nesses casos, diz o que fica combinado e quando.
+- Se o cliente mostra interesse, avança para o passo seguinte (marcar, enviar o link, esclarecer o preço) na mesma mensagem, e termina com uma pergunta ou proposta concreta.
+- Respostas curtas, diretas e já com a ação. Nada de desculpas genéricas.`;
 
   const fuso = schedule?.timezone ?? FUSO;
   return `${buildSystemPrompt(contexto.conhecimento)}
@@ -129,6 +137,8 @@ ${calendario(schedule.timezone)}`
 ${qualificacao}
 
 ${pagamentos}
+
+${postura}
 
 ${agenda}
 

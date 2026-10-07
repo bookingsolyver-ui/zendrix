@@ -150,7 +150,18 @@ async function handle(event: AgentEvent) {
   // O que esta organização consegue fazer (agenda, pagamentos) decide as ferramentas e as regras do prompt.
   // Sem endereço público configurado não se enviam links de pagamento (o Stripe não saberia para onde devolver).
   const origin = publicOrigin();
-  const capabilities = await loadAgentCapabilities(event.workspaceId);
+  // Leituras independentes em paralelo (menos tempo antes de chegar ao modelo).
+  const [capabilities, rows] = await Promise.all([
+    loadAgentCapabilities(event.workspaceId),
+    event.unintelligible
+      ? Promise.resolve([])
+      : prisma.message.findMany({
+          where: { conversationId: event.conversationId },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+          select: { direction: true, type: true, body: true, createdAt: true },
+        }),
+  ]);
   if (!origin) capabilities.payments = { connected: false, items: [] };
   const contexto = {
     workspaceId: tenant.workspaceId,
@@ -180,12 +191,6 @@ async function handle(event: AgentEvent) {
     // Sem transcrição não há nada para o modelo ler: resposta fixa, sem gastar uma chamada.
     reply = UNINTELLIGIBLE_REPLY;
   } else {
-    const rows = await prisma.message.findMany({
-      where: { conversationId: event.conversationId },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      select: { direction: true, type: true, body: true, createdAt: true },
-    });
     const historico = rows.reverse().map((r) => ({
       direction: r.direction === "OUT" ? ("OUT" as const) : ("IN" as const),
       type: r.type,

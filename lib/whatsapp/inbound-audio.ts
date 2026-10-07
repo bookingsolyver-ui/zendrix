@@ -32,8 +32,6 @@ export const UNTRANSCRIBED_BODY =
 export async function processInboundAudio(
   job: AudioJob,
 ): Promise<AgentEvent | null> {
-  if (!audioInboundEnabled()) return null;
-
   const event = (unintelligible: boolean): AgentEvent => ({
     workspaceId: job.workspaceId,
     conversationId: job.conversationId,
@@ -41,6 +39,10 @@ export async function processInboundAudio(
     type: "audio",
     unintelligible,
   });
+
+  // Desligado: nada sai do servidor (privacidade), mas o cliente não fica sem resposta à espera de um "olá":
+  // o agente pede-lhe que escreva. (O agente só responde se a organização o tiver ligado.)
+  if (!audioInboundEnabled()) return event(true);
 
   try {
     // Descarregar, guardar e transcrever custa dinheiro (e envia a voz do cliente a um terceiro): só para

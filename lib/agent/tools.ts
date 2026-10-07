@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/payments/catalog";
 import { prisma } from "@/lib/prisma";
 import type { ScheduleConfig } from "@/lib/schedule/config";
 import { bookAppointment, freeSlotsFor, loadScheduleConfig } from "@/lib/schedule/service";
-import { formatSlotHuman, isValidDateISO } from "@/lib/schedule/slots";
+import { addDaysISO, formatSlotHuman, isValidDateISO, todayISO, weekdayOf } from "@/lib/schedule/slots";
 
 // As ferramentas que a IA pode usar numa conversa. O modelo só PEDE; quem decide e executa é este código, que
 // valida tudo (a IA pode enganar-se ou ser enganada pelo cliente). Cada ferramenta só existe se a organização
@@ -67,8 +67,17 @@ export function buildTools(capabilities: AgentCapabilities): ToolDefinition[] {
       {
         type: "function",
         function: {
+          name: "proximos_horarios",
+          description:
+            "Devolve de uma vez os próximos dias com horários livres (até 3 dias, com até 4 horas cada). Usa-a PRIMEIRO, logo que o cliente pedir uma reunião, demonstração ou marcação, e propõe-lhe 2 ou 3 opções na mesma resposta. Não precisa de data.",
+          parameters: { type: "object", properties: {} },
+        },
+      },
+      {
+        type: "function",
+        function: {
           name: "ver_horarios",
-          description: "Lista os horários livres de um dia na agenda.",
+          description: "Lista os horários livres de um dia concreto na agenda (quando o cliente pede um dia específico).",
           parameters: {
             type: "object",
             properties: { data: { type: "string", description: "Dia AAAA-MM-DD, tirado da tabela de datas." } },
@@ -80,7 +89,8 @@ export function buildTools(capabilities: AgentCapabilities): ToolDefinition[] {
         type: "function",
         function: {
           name: "criar_agendamento",
-          description: "Marca um horário. Só depois de o cliente confirmar por escrito o dia e a hora.",
+          description:
+            "Marca um horário e grava-o na Agenda. Chama-a assim que o cliente escolher um dos horários que lhe propuseste (\"pode ser quinta às 15\" já é a confirmação): não peças uma segunda confirmação. Se ainda não sabes o nome, pergunta-o antes.",
           parameters: {
             type: "object",
             properties: {
@@ -126,6 +136,8 @@ export function catalogForPrompt(payments: PaymentCapability): string {
 
 // ----------------------------------------------------------------------------------------------- execução
 const OFFER_HOURS = 12;
+const PROPOSED_DAYS = 3;
+const PROPOSED_PER_DAY = 4;
 const slotLabel = (date: string, time: string) => `${date} ${time}`;
 
 type Args = Record<string, unknown>;
@@ -140,6 +152,33 @@ export async function executeTool(context: ToolContext, name: string, args: Args
       const result = await applyLeadUpdate({ workspaceId: context.workspaceId, contactId: context.contactId, update });
       if (!result) return { erro: "Contacto não encontrado." };
       return { ok: true, estado: result.stage, guardado: result.saved, rejeitado: result.rejected };
+    }
+
+    case "proximos_horarios": {
+      const config = context.capabilities.schedule;
+      if (!config) return { erro: "Não há agenda configurada." };
+      const today = todayISO(Date.now(), config.timezone);
+      const days: { data: string; dia_da_semana: string; livres: string[] }[] = [];
+      const offers: { workspaceId: string; contact: string; slot: string; expiresAt: Date }[] = [];
+      const expiresAt = new Date(Date.now() + OFFER_HOURS * 3_600_000);
+      // Percorre os dias por ordem até juntar 3 com vagas (ou esgotar a janela de marcação da organização).
+      for (let i = 0; i <= config.maxDaysAhead && days.length < PROPOSED_DAYS; i++) {
+        const date = addDaysISO(today, i);
+        const free = (await freeSlotsFor(context.workspaceId, config, date)).map((slot) => slot.time);
+        if (free.length === 0) continue;
+        // Espalha as opções pelo dia (manhã e tarde) em vez de dar as 4 primeiras seguidas.
+        const picked = free.length <= PROPOSED_PER_DAY ? free : Array.from({ length: PROPOSED_PER_DAY }, (_, k) => free[Math.floor((k * free.length) / PROPOSED_PER_DAY)]);
+        days.push({ data: date, dia_da_semana: weekdayOf(date), livres: picked });
+        for (const time of picked) offers.push({ workspaceId: context.workspaceId, contact: context.contactWaId, slot: slotLabel(date, time), expiresAt });
+      }
+      if (days.length === 0) return { livres: [], aviso: "Não há horários livres nos próximos dias." };
+      await prisma.offeredSlot.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+      await prisma.offeredSlot.createMany({ data: offers, skipDuplicates: true });
+      await prisma.offeredSlot.updateMany({
+        where: { workspaceId: context.workspaceId, contact: context.contactWaId, slot: { in: offers.map((offer) => offer.slot) } },
+        data: { expiresAt },
+      });
+      return { dias: days };
     }
 
     case "ver_horarios": {
