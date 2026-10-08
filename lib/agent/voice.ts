@@ -1,9 +1,11 @@
 import "server-only";
+import { voiceboxConfigured, voiceboxSpeech } from "@/lib/voicebox/client";
 // Text-to-speech para o agente: transforma a resposta em áudio pronto para o WhatsApp.
 //
 // Tudo passa por memória (Buffer): uma resposta curta dá alguns KB, não há disco nem bucket.
-// Ordem de preferência: Ogg/Opus mono (aparece como nota de voz). Nem a OpenAI nem o ElevenLabs
-// documentam em que contentor o "opus" vem, por isso o ficheiro é INSPECIONADO antes de ser usado;
+// Fornecedor por omissão: a Voicebox (servidor próprio, lib/voicebox); a OpenAI continua disponível com
+// TTS_PROVIDER=openai. Ordem de preferência: Ogg/Opus mono (aparece como nota de voz). O contentor do "opus"
+// varia entre fornecedores, por isso o ficheiro é INSPECIONADO antes de ser usado;
 // se não for Ogg/Opus mono, passa a MP3 (que o WhatsApp também aceita, como ficheiro de áudio).
 // Nada aqui lança erros: em qualquer falha devolve null e o agente responde por texto.
 
@@ -17,6 +19,10 @@ type Format = "opus" | "mp3";
 
 const TIMEOUT_MS = 30_000;
 const MAX_BYTES = 16 * 1024 * 1024; // limite do WhatsApp para áudio
+
+// Como a voz acompanha o texto. "text_then_voice" (por omissão): o texto sai logo e a nota de voz segue assim
+// que a síntese acaba, em paralelo. "voice_only": só a voz (o texto só se a voz falhar).
+export const voiceDelivery = () => (process.env.AGENT_VOICE_DELIVERY === "voice_only" ? "voice_only" : "text_then_voice");
 
 export const voiceEnabled = () => process.env.AGENT_VOICE === "true";
 
@@ -91,33 +97,26 @@ async function synthesizeOpenAI(text: string, format: Format) {
   );
 }
 
-// Voz pré-definida da ElevenLabs ("Sarah"): existe em todas as contas e fala português com o modelo
-// multilingual. As vozes da Voice Library (incluindo pt-PT) escolhem-se com ELEVENLABS_VOICE_ID.
-export const DEFAULT_ELEVENLABS_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
-
-async function synthesizeElevenLabs(text: string, format: Format) {
-  const voiceId = encodeURIComponent(process.env.ELEVENLABS_VOICE_ID || DEFAULT_ELEVENLABS_VOICE_ID);
-  const outputFormat = format === "opus" ? "opus_48000_32" : "mp3_44100_64";
-  return readAudio(
-    await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=${outputFormat}`, {
-      method: "POST",
-      headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY ?? "", "Content-Type": "application/json" },
-      body: JSON.stringify({ text, model_id: process.env.ELEVENLABS_MODEL || "eleven_multilingual_v2" }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    })
-  );
-}
-
-const provider = () => (process.env.TTS_PROVIDER === "elevenlabs" ? "elevenlabs" : "openai");
+// TTS_PROVIDER=voicebox | openai. Sem ele: Voicebox se VOICEBOX_URL existir, senão OpenAI.
+const provider = () =>
+  process.env.TTS_PROVIDER === "openai" ? "openai" : process.env.TTS_PROVIDER === "voicebox" || voiceboxConfigured() ? "voicebox" : "openai";
 
 function configured() {
-  return provider() === "elevenlabs"
-    ? Boolean(process.env.ELEVENLABS_API_KEY)
-    : Boolean(process.env.OPENAI_API_KEY);
+  return provider() === "voicebox" ? voiceboxConfigured() : Boolean(process.env.OPENAI_API_KEY);
 }
 
 const synthesize = (text: string, format: Format) =>
-  provider() === "elevenlabs" ? synthesizeElevenLabs(text, format) : synthesizeOpenAI(text, format);
+  provider() === "voicebox" ? voiceboxSpeech(text, format).catch(markVoiceboxDown) : synthesizeOpenAI(text, format);
+
+// Servidor Voicebox em baixo (rede, 5xx, a carregar o modelo): não insistir durante um minuto, para as
+// respostas seguintes irem logo só por texto em vez de esperarem pelo tempo limite.
+let voiceboxDownUntil = 0;
+const VOICEBOX_PAUSE_MS = 60_000;
+function markVoiceboxDown(err: unknown): never {
+  const message = err instanceof Error ? err.message : "";
+  if (!/Voicebox 4\d\d/.test(message)) voiceboxDownUntil = Date.now() + VOICEBOX_PAUSE_MS;
+  throw err;
+}
 
 // ---------------------------------------------------------------- API
 // Aprende, por processo, se o "opus" do fornecedor serve: falhou uma vez, passa logo a MP3.
@@ -129,11 +128,12 @@ const OUT_OF_CREDIT_PAUSE_MS = 10 * 60 * 1000;
 export async function synthesizeSpeech(text: string): Promise<Speech | null> {
   if (!eligibleForVoice(text)) return null;
   if (Date.now() < blockedUntil) return null; // conta sem crédito: responde logo por texto, sem esperar
+  if (provider() === "voicebox" && Date.now() < voiceboxDownUntil) return null;
 
   if (!configured()) {
     if (!warnedMissingKey) {
       warnedMissingKey = true;
-      console.warn("[voice] AGENT_VOICE=true mas faltam as chaves do fornecedor de TTS; respostas por texto");
+      console.warn("[voice] AGENT_VOICE=true mas falta VOICEBOX_URL (ou OPENAI_API_KEY com TTS_PROVIDER=openai); respostas por texto");
     }
     return null;
   }
@@ -156,7 +156,7 @@ export async function synthesizeSpeech(text: string): Promise<Speech | null> {
     if (err instanceof OutOfCreditError) {
       blockedUntil = Date.now() + OUT_OF_CREDIT_PAUSE_MS;
       console.error(
-        `[voice] a conta do fornecedor de TTS (${provider()}) está SEM CRÉDITO/QUOTA: as respostas vão por texto durante 10 minutos. Adicione saldo ou use TTS_PROVIDER=elevenlabs.`
+        `[voice] a conta do fornecedor de TTS (${provider()}) está SEM CRÉDITO/QUOTA: as respostas vão por texto durante 10 minutos. Adicione saldo ou use a Voicebox (VOICEBOX_URL).`
       );
       return null;
     }
@@ -170,4 +170,5 @@ export const __resetVoiceState = () => {
   preferred = "opus";
   warnedMissingKey = false;
   blockedUntil = 0;
+  voiceboxDownUntil = 0;
 };

@@ -6,7 +6,7 @@ import {
   sendTextInConversation,
 } from "@/lib/whatsapp/cloud";
 import { chaveOk, gerarResposta } from "./cerebro";
-import { synthesizeSpeech, voiceWanted } from "./voice";
+import { synthesizeSpeech, voiceDelivery, voiceWanted } from "./voice";
 import { loadTenant } from "@/lib/tenant";
 import { drainOutbox } from "@/lib/outbox/process";
 import { loadAgentCapabilities } from "./tools";
@@ -220,14 +220,15 @@ async function handle(event: AgentEvent) {
   }
   if (!reply) return;
 
-  // Voz (desligada por defeito): converter em áudio é outro passo lento, por isso faz-se ANTES das
-  // verificações abaixo, que têm de correr o mais perto possível do envio. Se falhar: texto.
-  // Só em voz se o cliente falou (modo espelho) e se a resposta é normal: o pedido "escreva-me"
-  // seria absurdo dito em voz alta.
-  const speech =
-    voiceWanted(event.type) && !fixedReply
-      ? await synthesizeSpeech(reply)
-      : null;
+  // Voz (desligada por defeito). Só em voz se o cliente falou (modo espelho) e se a resposta é normal: o
+  // pedido "escreva-me" seria absurdo dito em voz alta.
+  const wantsVoice = voiceWanted(event.type) && !fixedReply;
+
+  // Entrega por omissão (text_then_voice): o texto sai JÁ e a síntese de voz corre em paralelo, começando antes
+  // do envio; a nota de voz segue quando estiver pronta. (voice_only: só a voz, o texto só se ela falhar.)
+  const textFirst = wantsVoice && voiceDelivery() === "text_then_voice";
+  const speechPromise = wantsVoice ? synthesizeSpeech(reply) : null;
+  const speech = textFirst ? null : ((await speechPromise?.catch(() => null)) ?? null);
 
   // O modelo demora segundos: se um humano pausou a IA entretanto, a resposta é descartada.
   if (await isPaused(event.conversationId)) return;
@@ -262,5 +263,20 @@ async function handle(event: AgentEvent) {
     return;
   }
   // Enfileirada. Tenta enviar já (o cron é a rede de segurança); o ritmo por conta limita os picos.
+  // Com voz em paralelo, o texto sai primeiro (drainOutbox) enquanto a síntese ainda corre.
   await drainOutbox();
+
+  if (textFirst && speechPromise) {
+    const late = await speechPromise.catch(() => null);
+    // Se entretanto a IA foi pausada ou o cliente escreveu de novo, a nota de voz já não faz sentido.
+    if (late && !(await isPaused(event.conversationId)) && !(await hasNewerInbound(event.conversationId, mine))) {
+      const audio = await sendAudioInConversation({
+        workspaceId: event.workspaceId,
+        conversationId: event.conversationId,
+        audio: late,
+        transcript: reply,
+      });
+      if (!audio.ok) console.error("[agent] nota de voz não enviada (o texto já foi):", audio.error, event.conversationId);
+    }
+  }
 }
