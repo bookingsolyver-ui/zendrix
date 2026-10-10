@@ -34,7 +34,7 @@ export function requireEnv(name: "STRIPE_SECRET_KEY" | "STRIPE_PRICE_ID") {
 
 export interface StripeRequestOptions {
   // Agir em nome de uma conta Stripe LIGADA (Connect): o dinheiro e os objetos ficam na conta dessa empresa,
-  // nunca na da Zetrix.
+  // nunca na da Kwanza Flow.
   stripeAccount?: string;
 }
 

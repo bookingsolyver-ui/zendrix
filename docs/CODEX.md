@@ -1,4 +1,4 @@
-# ZETRIX: Codex de Arquitetura e Regras
+# KWANZA FLOW: Codex de Arquitetura e Regras
 
 Este documento é lido pelo Claude Code (via `CLAUDE.md`) e por qualquer pessoa que toque no código. Descreve as regras que se mantêm e, na última secção, onde o código **ainda não** as cumpre.
 
@@ -23,7 +23,7 @@ Este documento é lido pelo Claude Code (via `CLAUDE.md`) e por qualquer pessoa 
 - **RLS:** todas as tabelas ficam com RLS ligado e forçado, e `anon`/`authenticated` sem privilégios. Depois de cada `prisma db push` com tabelas novas, correr `supabase/migrations/20261003120000_rls_hardening.sql` com `node scripts/apply-sql.mjs`. A política opcional `..._OPTIONAL.sql` não está aplicada de propósito.
 
 ## 4. Filosofia
-- O Zetrix não é só um CRM: é um sistema operativo empresarial.
+- O Kwanza Flow não é só um CRM: é um sistema operativo empresarial.
 - Em cada funcionalidade nova, pensar primeiro em **prevenção de falhas**, **idempotência** (nunca repetir uma cobrança ou um aviso: chaves únicas e reivindicação atómica) e **proteção extrema dos dados do cliente** (RLS, isolamento por organização, privilégio mínimo).
 
 ## 5. Estado atual / dívida técnica

@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/cash/dunning";
 import { ProposalService } from "@/lib/portal/service";
 import { looksLikePortalToken } from "@/lib/portal/token";
 
-// Zetrix Portal: a página que o CLIENTE do nosso cliente abre no telemóvel. Pública (a autenticação é o token do link).
+// Kwanza Flow Portal: a página que o CLIENTE do nosso cliente abre no telemóvel. Pública (a autenticação é o token do link).
 // Sem indexação e sem enviar o endereço (que contém o token) a terceiros.
 export const metadata: Metadata = { title: "Proposta", robots: { index: false, follow: false }, referrer: "no-referrer" };
 

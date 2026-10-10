@@ -2,10 +2,10 @@
 //
 //   node scripts/backfill-organizations.mjs                      → owner_email de todas
 //   node scripts/backfill-organizations.mjs --seed-zetrix <id>  → + liga o agente da organização <id> com a
-//                                                                  ficha da Zetrix e marca a subscrição ativa
+//                                                                  ficha da Kwanza Flow e marca a subscrição ativa
 //
-// A ficha da Zetrix só deve ir para a organização que é a própria Zetrix: qualquer outra tem de
-// escrever a sua (senão o agente de um cliente falava dos produtos da Zetrix). Idempotente.
+// A ficha da Kwanza Flow só deve ir para a organização que é a própria Kwanza Flow: qualquer outra tem de
+// escrever a sua (senão o agente de um cliente falava dos produtos da Kwanza Flow). Idempotente.
 import pg from "pg";
 import { ZETRIX_KNOWLEDGE } from "../lib/agent/negocio.ts";
 

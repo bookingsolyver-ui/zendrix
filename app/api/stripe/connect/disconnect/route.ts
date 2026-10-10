@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/rbac";
 import { deauthorizeConnectAccount } from "@/lib/stripe/connect";
 
-// Desligar o Stripe: a IA deixa de poder enviar links de pagamento e a Zetrix perde o acesso à conta da empresa.
+// Desligar o Stripe: a IA deixa de poder enviar links de pagamento e a Kwanza Flow perde o acesso à conta da empresa.
 // Os links já enviados continuam a funcionar (estão na conta Stripe dela). Não depende do plano: desligar é sempre permitido.
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return NextResponse.json({ success: false, error: "forbidden_origin" }, { status: 403 });

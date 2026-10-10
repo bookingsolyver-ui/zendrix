@@ -55,7 +55,7 @@ model Workspace {
   apiKeys                ApiKey[]
   outbox                 OutboxMessage[]
   invites                TeamInvite[]
-  // Stripe Connect: a conta Stripe DA EMPRESA, onde caem os pagamentos dos clientes dela (nunca a da Zetrix).
+  // Stripe Connect: a conta Stripe DA EMPRESA, onde caem os pagamentos dos clientes dela (nunca a da Kwanza Flow).
   stripeConnectAccountId String?             @unique @map("stripe_connect_account_id")
   followUpConfig         Json?               @map("follow_up_config") // lib/followups/config.ts
   scheduleConfig         Json?               @map("schedule_config") // lib/schedule/config.ts
@@ -118,7 +118,7 @@ model User {
   locale          String?
 }
 
-// Chave de API de uma organização, para clientes externos chamarem o Zetrix (cabeçalho x-api-key).
+// Chave de API de uma organização, para clientes externos chamarem o Kwanza Flow (cabeçalho x-api-key).
 // Só se guarda o hash SHA-256: a chave completa é mostrada UMA vez, ao ser criada, e não se recupera.
 model ApiKey {
   id          String    @id @default(cuid())
@@ -461,7 +461,7 @@ model MessageTemplate {
   rejectedReason   String?   @map("rejected_reason")
   submittedAt      DateTime? @map("submitted_at")
   syncedAt         DateTime? @map("synced_at")
-  // false = tem cabeçalho/botões dinâmicos que o Zetrix ainda não preenche: não aparece no seletor da Inbox.
+  // false = tem cabeçalho/botões dinâmicos que o Kwanza Flow ainda não preenche: não aparece no seletor da Inbox.
   sendable         Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -866,7 +866,7 @@ model MergedContact {
 // ─── C-Level layer (Predictive CFO, Portal, Audit Ledger) ───
 // Sem relações para os modelos existentes (só ids em texto).
 
-// Uma proposta/orçamento enviada a um cliente por um link mágico (Zetrix Portal). O token só existe no link: aqui guarda-se
+// Uma proposta/orçamento enviada a um cliente por um link mágico (Kwanza Flow Portal). O token só existe no link: aqui guarda-se
 // o hash SHA-256 (como TeamInvite e ApiKey). O total é SEMPRE recalculado no servidor a partir das linhas.
 model Proposal {
   id                String    @id @default(cuid())
@@ -908,7 +908,7 @@ model ZetrixAuditLog {
   @@index([actorId, createdAt])
 }
 
-// ─── Mothership (Super-Admin da equipa Zetrix) ───
+// ─── Mothership (Super-Admin da equipa Kwanza Flow) ───
 // Tabelas ZetrixAdmin_*: só o servidor lhes toca (RLS fechado). Sem relações para os modelos existentes.
 
 // Um interruptor de funcionalidade por organização. Sem linha = ligado. `flag = "*"` é a «torneira»: desliga todas as

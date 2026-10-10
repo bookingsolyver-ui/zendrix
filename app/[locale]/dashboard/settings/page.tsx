@@ -90,7 +90,7 @@ export default async function SettingsPage({
     <>
       <DashboardPageHeader
         title="Configurações"
-        subtitle="Gira as definições gerais da sua conta Zetrix."
+        subtitle="Gira as definições gerais da sua conta Kwanza Flow."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

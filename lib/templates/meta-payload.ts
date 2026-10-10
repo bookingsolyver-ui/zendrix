@@ -1,4 +1,4 @@
-// Puro (sem servidor): como um modelo do Zetrix se traduz para a Graph API da Meta (criar, ler e enviar).
+// Puro (sem servidor): como um modelo do Kwanza Flow se traduz para a Graph API da Meta (criar, ler e enviar).
 import { templateVariables } from "./schema.ts";
 
 export const META_STATUSES = ["DRAFT", "PENDING", "APPROVED", "REJECTED", "PAUSED", "DISABLED"] as const;
@@ -31,7 +31,7 @@ interface MetaComponent {
   buttons?: { type?: string; url?: string }[];
 }
 
-// O texto do corpo e se o Zetrix sabe enviar o modelo (só corpo de texto; cabeçalho de texto sem variáveis; botões fixos).
+// O texto do corpo e se o Kwanza Flow sabe enviar o modelo (só corpo de texto; cabeçalho de texto sem variáveis; botões fixos).
 export function readMetaComponents(components: unknown): { body: string; sendable: boolean } {
   const list = (Array.isArray(components) ? components : []) as MetaComponent[];
   const body = list.find((c) => c.type === "BODY")?.text ?? "";

@@ -4,7 +4,7 @@ import { PaymentSyncService, paymentEventSchema } from "@/lib/integrations/payme
 import { SignedWebhookController } from "@/lib/integrations/signed-webhook";
 
 // BankSyncController: recebe de um agregador bancário (ou de um intermediário que leia o extrato) a notícia «entrou
-// um pagamento com a referência X». PLACEHOLDER pronto a ligar: o formato abaixo é o do Zetrix; para um banco concreto
+// um pagamento com a referência X». PLACEHOLDER pronto a ligar: o formato abaixo é o do Kwanza Flow; para um banco concreto
 // (BAI, BFA, Multicaixa, Open Banking...) basta um pequeno adaptador que traduza o payload do banco para este.
 //
 // Segredo: BANK_SYNC_WEBHOOK_SECRET. Endpoint: POST /api/integrations/bank-sync (app/api/integrations/bank-sync/route.ts).

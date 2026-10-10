@@ -54,7 +54,7 @@ export default async function TeamPage({
     <>
       <DashboardPageHeader
         title="Equipa e Permissões"
-        subtitle="Convide colegas por e-mail e defina o que cada um pode fazer na sua conta Zetrix."
+        subtitle="Convide colegas por e-mail e defina o que cada um pode fazer na sua conta Kwanza Flow."
       />
 
       <SeatsBanner occupied={members.length + invites.length} />

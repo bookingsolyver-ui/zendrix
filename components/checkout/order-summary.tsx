@@ -69,7 +69,7 @@ export function OrderSummary({ orderId }: { orderId: string }) {
 
       <div className="border-t border-white/5 px-6 py-4 lg:px-10 lg:py-6">
         <p className="flex items-center gap-1.5 text-xs text-white/30">
-          Powered by <span className="font-semibold text-white/50">Zetrix</span>
+          Powered by <span className="font-semibold text-white/50">Kwanza Flow</span>
         </p>
       </div>
     </aside>

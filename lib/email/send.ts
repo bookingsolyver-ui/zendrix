@@ -3,7 +3,7 @@ import "server-only";
 // Envio de e-mails transacionais (registo, recuperação de palavra-passe, convites) pela API HTTP do Resend,
 // sem SDK. Configuração (variáveis de ambiente):
 //   RESEND_API_KEY   chave da API (re_...)
-//   EMAIL_FROM       remetente de um domínio VERIFICADO no Resend, ex.: "Zetrix <no-reply@o-seu-dominio>"
+//   EMAIL_FROM       remetente de um domínio VERIFICADO no Resend, ex.: "Kwanza Flow <no-reply@o-seu-dominio>"
 //   EMAIL_REPLY_TO   opcional: para onde vão as respostas
 //   RESEND_API_URL   opcional: sobrepõe o endereço da API (testes com um servidor falso; por omissão, o do Resend)
 //

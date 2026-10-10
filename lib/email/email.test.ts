@@ -71,7 +71,7 @@ test("renovação: organização, plano, valor (se existir) e próxima data", ()
   const mail = subscriptionRenewedEmail({ orgName: "Loja", plan: "Pro", renewedUntil: new Date("2026-11-03T12:00:00Z"), priceLabel: "29 € / mês", billingUrl: URL_, lang: "pt" });
   for (const text of ["Loja", "Pro", "29 € / mês", "3 de novembro de 2026"]) assert.ok(mail.text.includes(text), text);
   const noPrice = subscriptionRenewedEmail({ orgName: "Loja", plan: null, renewedUntil: new Date("2026-11-03T12:00:00Z"), billingUrl: URL_, lang: "en" });
-  assert.ok(noPrice.text.includes("Zetrix") && !noPrice.text.includes("Amount"));
+  assert.ok(noPrice.text.includes("Kwanza Flow") && !noPrice.text.includes("Amount"));
 });
 
 test("renovação com recibo: valor cobrado e ligação ao recibo, nas três línguas", () => {
@@ -125,7 +125,7 @@ test("envio: sem configuração não envia (e não chama a rede)", async () => {
 
 test("envio: repete em 429/5xx até conseguir, com a chave de idempotência e o remetente certos", async () => {
   process.env.RESEND_API_KEY = "re_test";
-  process.env.EMAIL_FROM = "Zetrix <no-reply@exemplo.test>";
+  process.env.EMAIL_FROM = "Kwanza Flow <no-reply@exemplo.test>";
   process.env.EMAIL_REPLY_TO = "ajuda@exemplo.test";
   const seen: { headers: Record<string, string>; body: Record<string, unknown> }[] = [];
   const statuses = [429, 503, 200];
@@ -140,7 +140,7 @@ test("envio: repete em 429/5xx até conseguir, com a chave de idempotência e o 
   for (const call of seen) {
     assert.equal(call.headers["Idempotency-Key"], "k-1");
     assert.equal(call.headers.Authorization, "Bearer re_test");
-    assert.equal(call.body.from, "Zetrix <no-reply@exemplo.test>");
+    assert.equal(call.body.from, "Kwanza Flow <no-reply@exemplo.test>");
     assert.equal(call.body.reply_to, "ajuda@exemplo.test");
     assert.deepEqual(call.body.to, ["a@b.test"]);
   }

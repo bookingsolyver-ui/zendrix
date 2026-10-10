@@ -5,7 +5,7 @@ import { Copy, Loader2 } from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, CARD, INPUT } from "@/components/dashboard/settings/ui";
 import { formatMoney } from "@/lib/cash/dunning";
 
-// Zetrix Portal (lado do gestor): cria uma proposta e o link mágico para o cliente aprovar no telemóvel.
+// Kwanza Flow Portal (lado do gestor): cria uma proposta e o link mágico para o cliente aprovar no telemóvel.
 interface Row { id: string; contactId: string; title: string; amountMinor: number; currency: string; status: string; tokenExpiresAt: string }
 const WHATSAPP: Record<string, string> = { sent: "Enviado por WhatsApp.", window_closed: "Fora da janela de 24 h do WhatsApp: copie o link e envie à mão.", no_conversation: "Sem conversa com este cliente: copie o link e envie à mão.", failed: "Não foi possível enviar por WhatsApp: copie o link.", not_requested: "" };
 

@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { legalLang } from "@/lib/legal/content";
 
 // Para onde o Stripe devolve quem acabou de pagar (ou desistiu). Genérica e pública: não mostra dados de ninguém.
-export const metadata: Metadata = { title: "Payment · Zetrix", robots: { index: false } };
+export const metadata: Metadata = { title: "Payment · Kwanza Flow", robots: { index: false } };
 
 const TEXT = {
   pt: {

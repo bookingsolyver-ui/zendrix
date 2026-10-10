@@ -208,5 +208,5 @@ export const NAV_ENTRIES: NavEntry[] = ALL_NAV_ENTRIES.flatMap((entry): NavEntry
 
 export const NAV_FOOTER_ENTRIES: NavLeaf[] = ALL_NAV_FOOTER_ENTRIES.filter(enabled);
 
-// A Nave-Mãe (super-admin da equipa Zetrix): fora do menu normal; só se mostra a quem o servidor confirmar (ver o layout do painel).
+// A Nave-Mãe (super-admin da equipa Kwanza Flow): fora do menu normal; só se mostra a quem o servidor confirmar (ver o layout do painel).
 export const MOTHERSHIP_LINK: NavLeaf = { label: "Nave-Mãe (God Mode)", href: "/super-admin", icon: Rocket };

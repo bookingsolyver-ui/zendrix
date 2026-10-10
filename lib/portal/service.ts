@@ -13,13 +13,13 @@ import { isApprovable, MAX_TOTAL_MINOR, totalOf, type ProposalLine } from "@/lib
 import { generatePortalToken, hashPortalToken, PORTAL_TTL_MS } from "@/lib/portal/token";
 import { formatMoney } from "@/lib/cash/dunning";
 
-// ZETRIX PORTAL: o cliente do nosso cliente abre um link no telemóvel, vê a proposta e aprova com um toque. Sem PDFs.
+// KWANZA FLOW PORTAL: o cliente do nosso cliente abre um link no telemóvel, vê a proposta e aprova com um toque. Sem PDFs.
 //
 // Segurança: token de 256 bits, só o hash fica na base de dados; 7 dias de validade; ver é livre (os pré-visualizadores do
 // WhatsApp e os antivírus abrem links e NÃO podem consumi-lo); APROVAR é um POST explícito e só acontece uma vez (reivindicação
 // atómica). Para qualquer link inexistente, expirado ou revogado a resposta é a mesma («inválido»).
 //
-// Aprovar = o negócio passa a «Ganho» (Contact.leadStage = WON), por decisão do produto. Atenção: no resto do Zetrix o WON só
+// Aprovar = o negócio passa a «Ganho» (Contact.leadStage = WON), por decisão do produto. Atenção: no resto do Kwanza Flow o WON só
 // vinha de um pagamento confirmado; aqui vem de uma aprovação de orçamento. O Handoff (tarefas Financeiro/Logística) só arranca
 // se HANDOFF_SINCE estiver definido.
 

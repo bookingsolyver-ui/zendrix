@@ -74,7 +74,7 @@ export default async function SalesPage({
         <div className={CARD}>
           <h2 className="text-sm font-semibold text-white">Conta Stripe</h2>
           <p className="mt-1 text-sm text-white/50">
-            Os pagamentos dos seus clientes caem na <strong className="text-white/70">sua</strong> conta Stripe. A Zetrix nunca recebe esse dinheiro.
+            Os pagamentos dos seus clientes caem na <strong className="text-white/70">sua</strong> conta Stripe. A Kwanza Flow nunca recebe esse dinheiro.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-4">
             {accountId ? (

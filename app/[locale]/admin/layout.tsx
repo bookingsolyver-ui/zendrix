@@ -9,7 +9,7 @@ import { countPendingApprovals } from "@/lib/admin/queries";
 // Nunca se pré-renderiza: depende da sessão de quem pede.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Administração · Zetrix", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Administração · Kwanza Flow", robots: { index: false, follow: false } };
 
 const NAV = [
   { href: "/admin", label: "Visão geral" },

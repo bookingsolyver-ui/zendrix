@@ -3,7 +3,7 @@ name: outbox
 # De 5 em 5 minutos: reenvia a fila de saída da Meta (tentativas por fazer, mensagens que ficaram para trás) e
 # corre os seguimentos automáticos (reengajamento), as campanhas (arranque das agendadas e envio em lotes) e as
 # automações (varrimento de eventos e execução das ações) e os e-mails (avisos de fim de teste e reenvios).
-# Também corre a automação do Zetrix: de 5 em 5 minutos o auto-sync (notas de voz), o handoff (negócios ganhos) e o
+# Também corre a automação do Kwanza Flow: de 5 em 5 minutos o auto-sync (notas de voz), o handoff (negócios ganhos) e o
 # nightwatch (triagem noturna); e, uma vez por dia às 08:00 UTC, os alertas inteligentes e as cobranças; à segunda-feira,
 # a procura de duplicados. Todos são idempotentes. Um disparo manual (workflow_dispatch) corre todos.
 # Substitui o cron por minuto da Vercel, que só existe no plano Pro. O endpoint exige o CRON_SECRET.

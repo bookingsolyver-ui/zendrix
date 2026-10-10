@@ -1,5 +1,5 @@
 // Mapeamento «difuso» de colunas de ficheiros de clientes (CSV, Excel, JSON de outras ferramentas) para os campos
-// do Zetrix. Puro (sem servidor): partilhado pelo servidor e testável.
+// do Kwanza Flow. Puro (sem servidor): partilhado pelo servidor e testável.
 //
 // Três sinais, do mais forte para o mais fraco:
 //  1. sinónimos exatos / palavras-chave no cabeçalho («Nome Cliente», «Telemóvel», «Contacto», «Mobile»...);

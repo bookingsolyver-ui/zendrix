@@ -7,7 +7,7 @@ import { churnMessage, daysSince, DAY_MS, marginImpact, marginMessage, parseRate
 // SmartAlertsEngine: varre a base de dados (uma vez por dia, a partir de /api/cron/smart-alerts) e transforma riscos em
 // notificações. Só LÊ os dados do CRM e SÓ escreve em AppNotification: não altera contactos, conversas nem negócios.
 //
-// «Negócio» no Zetrix = um contacto numa fase ativa do funil (leadStage) + os links de pagamento em aberto.
+// «Negócio» no Kwanza Flow = um contacto numa fase ativa do funil (leadStage) + os links de pagamento em aberto.
 //  a) Risco de churn: contacto em fase ativa cuja ÚLTIMA mensagem é nossa (OUT) e o cliente não responde há mais de X dias.
 //  b) Margem: links de pagamento em aberto numa moeda diferente da moeda base, cujo câmbio de hoje se afastou do de referência.
 

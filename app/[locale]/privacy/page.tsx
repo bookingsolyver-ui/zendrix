@@ -5,7 +5,7 @@ import { legalDocument, legalEntityFromEnv, legalLang } from "@/lib/legal/conten
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  return { title: `${legalDocument("privacy", legalLang(locale), legalEntityFromEnv(), "").title} · Zetrix` };
+  return { title: `${legalDocument("privacy", legalLang(locale), legalEntityFromEnv(), "").title} · Kwanza Flow` };
 }
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {

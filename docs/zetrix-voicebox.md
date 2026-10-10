@@ -1,10 +1,10 @@
-# Zetrix · Voz com a Voicebox
+# Kwanza Flow · Voz com a Voicebox
 
 As respostas em nota de voz do agente são geradas pela [Voicebox](https://voicebox.sh) (código aberto, MIT), que substitui a ElevenLabs.
 
 ## O que é (e o que não é)
 - A Voicebox é um **servidor Python com modelos de IA locais** (PyTorch/MLX). Não corre na Vercel: tem de estar numa máquina tua (VPS, servidor com GPU, ou um Mac sempre ligado).
-- O Zetrix só tem um **cliente** (`lib/voicebox/`) que chama a rota compatível com a OpenAI: `POST {VOICEBOX_URL}/v1/audio/speech`, pedindo Ogg/Opus (o formato das notas de voz do WhatsApp). O ficheiro é verificado (mono) e, se não servir, passa a MP3.
+- O Kwanza Flow só tem um **cliente** (`lib/voicebox/`) que chama a rota compatível com a OpenAI: `POST {VOICEBOX_URL}/v1/audio/speech`, pedindo Ogg/Opus (o formato das notas de voz do WhatsApp). O ficheiro é verificado (mono) e, se não servir, passa a MP3.
 - A Voicebox **não tem autenticação nem chaves**. O `VOICEBOX_API_KEY` é uma chave que **tu inventas** e que o proxy à frente da Voicebox valida.
 - Se a Voicebox estiver em baixo, o agente responde só por texto (e não volta a tentar durante 1 minuto).
 

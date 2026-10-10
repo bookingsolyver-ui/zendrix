@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Zetrix — Marketing, automation and CRM for WhatsApp",
+    "title": "Kwanza Flow — Marketing, automation and CRM for WhatsApp",
     "description": "Capture contacts with popups, send segmented campaigns, automate replies and manage customers in a Kanban CRM. With sales AI and a team Inbox. 14 days free, no card."
   },
   "Landing": {
@@ -14,7 +14,7 @@
       "note": "14 days free · No card · Cancel anytime"
     },
     "mock": {
-      "window": "Zetrix dashboard",
+      "window": "Kwanza Flow dashboard",
       "sample": "Illustrative example",
       "navInbox": "Inbox",
       "navCrm": "CRM",
@@ -144,7 +144,7 @@
       "titleHighlight": "no surprises.",
       "subtitle": "Start with a 14-day free trial, no card. Then a single plan with everything included.",
       "trialBadge": "14-day free trial",
-      "planName": "Zetrix",
+      "planName": "Kwanza Flow",
       "planDescription": "Marketing, automation, CRM and AI to sell on WhatsApp.",
       "priceAtCheckout": "The price is shown before you subscribe",
       "features": [
@@ -164,7 +164,7 @@
     "faq": {
       "title": "Your questions,",
       "titleHighlight": "answered.",
-      "subtitle": "Straight answers on how Zetrix works.",
+      "subtitle": "Straight answers on how Kwanza Flow works.",
       "q1": {
         "question": "Which channels can I connect?",
         "answer": "WhatsApp (through Meta's official API), Instagram (professional account) and Messenger (Facebook page). All of them arrive in the same Inbox."
@@ -244,7 +244,7 @@
   },
   "Auth": {
     "login": {
-      "title": "Sign in to Zetrix",
+      "title": "Sign in to Kwanza Flow",
       "subtitle": "Access your company dashboard.",
       "email": "Email",
       "password": "Password",

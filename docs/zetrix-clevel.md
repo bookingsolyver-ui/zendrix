@@ -1,4 +1,4 @@
-# Camada C-Level: Predictive CFO, Zetrix Portal, Immutable Audit Ledger
+# Camada C-Level: Predictive CFO, Kwanza Flow Portal, Immutable Audit Ledger
 
 Só ficheiros novos e 2 modelos novos no fim de `prisma/schema.prisma` (`Proposal`, `ZetrixAuditLog`, sem relações). Única extensão a código anterior: dois valores novos em `NotificationKind` (`lib/alerts/notification-service.ts`).
 
@@ -20,10 +20,10 @@ const updated = await AuditLedger.wrap(ctx, { entityType: "Receivable", entityId
 - `/api/analytics/forecast` (OWNER/MANAGER): próximo mês civil (UTC), por moeda: faturas a vencer × (1 − risco) + vencidas × (1 − risco) + propostas abertas × taxa de ganho × (1 − risco). Taxa de ganho = contactos `WON` vs `LOST`, suavizada para 30% com poucos dados. Cada número vem com a razão.
 - É estatística explicável, não um modelo treinado: com poucos dados um modelo seria pior.
 
-## Zetrix Portal (`lib/portal`)
+## Kwanza Flow Portal (`lib/portal`)
 - Criar proposta (`POST /api/proposals`) gera um token de 256 bits; só o **hash** fica na base de dados (hash e não cifra: o servidor nunca precisa de o recuperar). Válido 7 dias; «Novo link» invalida o anterior.
 - Ver o link não consome nada (os pré-visualizadores do WhatsApp e os antivírus abrem links). Aprovar é um POST explícito, **uma só vez**, com verificação de origem e limite por IP; guarda IP e user-agent e regista no livro de auditoria.
-- A aprovação põe o contacto em `WON` na mesma transação (não é um webhook HTTP para si próprio: seria menos fiável). **Decisão de produto a confirmar**: no resto do Zetrix `WON` só vinha de pagamento confirmado; agora também vem de uma aprovação de orçamento. «Proposta» não existia no funil: é a entidade `Proposal`.
+- A aprovação põe o contacto em `WON` na mesma transação (não é um webhook HTTP para si próprio: seria menos fiável). **Decisão de produto a confirmar**: no resto do Kwanza Flow `WON` só vinha de pagamento confirmado; agora também vem de uma aprovação de orçamento. «Proposta» não existia no funil: é a entidade `Proposal`.
 - O link só chega ao cliente por WhatsApp dentro da janela de 24 h; fora dela devolve o motivo e o gestor copia o link.
 - A página do cliente está em pt/en/es (`TEXT` no ficheiro), noindex e sem referrer.
 

@@ -5,7 +5,7 @@ import { NotificationService } from "@/lib/alerts/notification-service";
 import { stageAfterPayment } from "@/lib/leads/lead";
 
 // PaymentSyncService: aplica um pagamento confirmado por um sistema externo (banco, faturação AGT) a um negócio do
-// Zetrix. «Negócio pago» = PaymentLink PAID + contacto como cliente (WON), exatamente o que o webhook do Stripe faz
+// Kwanza Flow. «Negócio pago» = PaymentLink PAID + contacto como cliente (WON), exatamente o que o webhook do Stripe faz
 // (lib/payments/service.ts), mas por referência. Este módulo NÃO altera esse código: reutiliza só a regra de fase.
 //
 // Segurança: o evento já vem com a assinatura HMAC verificada (lib/integrations/signed-webhook.ts). Aqui ainda se exige

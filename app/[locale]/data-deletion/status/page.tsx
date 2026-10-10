@@ -7,7 +7,7 @@ import { legalLang } from "@/lib/legal/content";
 import { prisma } from "@/lib/prisma";
 import { deletionCodeSchema } from "@/lib/validations/data-deletion";
 
-export const metadata: Metadata = { title: "Deletion request status · Zetrix", robots: { index: false } };
+export const metadata: Metadata = { title: "Deletion request status · Kwanza Flow", robots: { index: false } };
 
 const TEXT = {
   pt: {

@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
     const inviteUrl = `${appOrigin(request)}/${pickLocale(locale)}/invite/${token}`;
     const message = inviteEmail({
-      workspaceName: workspace?.name ?? "Zetrix",
+      workspaceName: workspace?.name ?? "Kwanza Flow",
       inviterName: inviter?.name ?? who.userEmail ?? "Um colega",
       role,
       url: inviteUrl,

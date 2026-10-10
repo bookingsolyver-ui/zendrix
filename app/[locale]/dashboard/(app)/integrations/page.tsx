@@ -17,7 +17,7 @@ export default async function IntegrationsPage({
           Conecte o seu ecossistema
         </h1>
         <p className="mt-1 text-sm text-white/50">
-          Ligue a Zetrix às suas plataformas de e-commerce, pagamentos e CRMs em 2 cliques.
+          Ligue a Kwanza Flow às suas plataformas de e-commerce, pagamentos e CRMs em 2 cliques.
         </p>
       </div>
 

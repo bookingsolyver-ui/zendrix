@@ -51,7 +51,7 @@ export async function submitTemplate(workspaceId: string, id: string, examples: 
 }
 
 // Traz da conta WhatsApp Business o estado de cada modelo e importa os que só existem na Meta.
-// Chave: nome + idioma. Como o Zetrix só aceita um modelo por nome, um nome repetido noutro idioma é ignorado.
+// Chave: nome + idioma. Como o Kwanza Flow só aceita um modelo por nome, um nome repetido noutro idioma é ignorado.
 export async function syncTemplates(workspaceId: string): Promise<TemplateResult<{ updated: number; imported: number; skipped: number }>> {
   const access = await whatsappAccess(workspaceId);
   if (!access) return { ok: false, error: "no_waba" };

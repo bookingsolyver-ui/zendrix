@@ -37,7 +37,7 @@ export async function generateMetadata({
       title: t("title"),
       description: t("description"),
       type: "website",
-      siteName: "Zetrix",
+      siteName: "Kwanza Flow",
       locale,
     },
   };

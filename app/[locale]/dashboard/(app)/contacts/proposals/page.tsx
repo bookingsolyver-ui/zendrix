@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { contactLabel } from "@/lib/inbox/display";
 import { prisma } from "@/lib/prisma";
 
-// Zetrix Portal (gestor): página nova (ver docs/zetrix-clevel.md para o link).
+// Kwanza Flow Portal (gestor): página nova (ver docs/zetrix-clevel.md para o link).
 export default async function ProposalsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

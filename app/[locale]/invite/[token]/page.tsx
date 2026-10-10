@@ -8,7 +8,7 @@ import { ROLE_LABEL } from "@/lib/roles";
 import { findInviteByToken } from "@/lib/team/invites";
 
 // O token vai no URL: não deve aparecer em motores de busca nem em cabeçalhos Referer.
-export const metadata: Metadata = { title: "Invitation · Zetrix", robots: { index: false }, referrer: "no-referrer" };
+export const metadata: Metadata = { title: "Invitation · Kwanza Flow", robots: { index: false }, referrer: "no-referrer" };
 
 export default async function InvitePage({ params }: { params: Promise<{ locale: string; token: string }> }) {
   const { locale, token } = await params;

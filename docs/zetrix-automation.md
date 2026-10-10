@@ -1,4 +1,4 @@
-# Automação Zetrix: Auto-Sync, Alertas Inteligentes, Magic Importer
+# Automação Kwanza Flow: Auto-Sync, Alertas Inteligentes, Magic Importer
 
 Tudo é **acrescentado**: ficheiros novos e 3 modelos novos no schema. Nenhum ficheiro existente foi alterado (para além de `package.json`/`package-lock.json`, que ganharam `papaparse` e `read-excel-file`, e de `prisma/schema.prisma`, que só ganhou modelos no fim). Para ligar, siga os passos de «Plugar».
 
@@ -11,7 +11,7 @@ Tudo é **acrescentado**: ficheiros novos e 3 modelos novos no schema. Nenhum fi
 | Alertas Inteligentes | `lib/alerts/{risk,engine,notification-service}.ts`, `app/api/cron/smart-alerts/route.ts`, `app/api/alerts/route.ts`, `components/alerts/smart-alert-toast.tsx` |
 | Magic Importer | `lib/import/{fuzzy,records,service,handler}.ts`, `app/api/import/{magic,competitor}/route.ts`, `components/dashboard/import/magic-importer.tsx`, página `contacts/import` |
 
-Adaptações ao que já existia no Zetrix (e porquê):
+Adaptações ao que já existia no Kwanza Flow (e porquê):
 - **«Negócio»** não é uma entidade aqui: é um contacto numa fase ativa (`Contact.leadStage`) mais os `PaymentLink`. «Pago» = `PaymentLink PAID` + contacto `WON`, a mesma regra do webhook do Stripe.
 - **Campos**: `client_name`/`phone` do pedido são `Contact.name`/`Contact.waId` (número só com dígitos, internacional).
 - **Áudio**: o webhook da Meta e a transcrição Whisper **já existiam** (`AUDIO_INBOUND=true`). A Meta só permite um URL de webhook por app, por isso não há um segundo webhook: o varrimento `auto-sync` transforma as transcrições em `ContactNote`.
@@ -36,5 +36,5 @@ Cabeçalhos: `x-zetrix-timestamp: <segundos unix>` e `x-zetrix-signature: sha256
 ## Placeholders (não fingem funcionar)
 
 - `AGTInvoiceService.issueInvoice` devolve `not_configured` até haver certificado e credenciais da AGT.
-- `BankSyncController` espera o formato Zetrix; um banco real precisa de um adaptador pequeno para este formato.
+- `BankSyncController` espera o formato Kwanza Flow; um banco real precisa de um adaptador pequeno para este formato.
 - O câmbio vem de variáveis de ambiente; ligar um fornecedor real em `lib/alerts/risk.ts` / `engine.ts`.

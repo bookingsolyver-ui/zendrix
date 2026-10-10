@@ -7,7 +7,7 @@ export const FEATURE_FLAGS = [
   { id: "ai_predictions", label: "Previsões (Predictive CFO)" },
   { id: "nightwatch", label: "Nightwatch (triagem noturna)" },
   { id: "cash_collector", label: "Cash-Collector (cobranças)" },
-  { id: "portal", label: "Zetrix Portal (propostas)" },
+  { id: "portal", label: "Kwanza Flow Portal (propostas)" },
   { id: "data_cleaner", label: "Data-Cleaner (duplicados)" },
   { id: "magic_importer", label: "Magic Importer" },
 ] as const;

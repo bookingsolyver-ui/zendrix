@@ -7,7 +7,7 @@ import { decideProfileAccess, PROFILE_LIMIT, PROFILE_WINDOW_MS, profileBucketKey
 import { NotificationService } from "@/lib/alerts/notification-service";
 import { ownerRecipients, queueNotification } from "@/lib/email/notify";
 
-// ZETRIX FORTRESS. Dois escudos, ambos opt-in (cada rota nova chama-os; nada existente foi alterado):
+// KWANZA FLOW FORTRESS. Dois escudos, ambos opt-in (cada rota nova chama-os; nada existente foi alterado):
 //  * Escopo (FortressScope): um vendedor (STAFF) só vê os clientes que lhe estão atribuídos (ClientAssignment).
 //  * Anti-Export (guardProfileAccess): quem abrir mais de 50 perfis num minuto leva HTTP 429, a conta fica bloqueada
 //    (UserLock), regista-se em AuditEvent e os proprietários são avisados. OWNER está isento (não haveria quem desbloqueasse).

@@ -5,7 +5,7 @@ import { requireSuperAdminPage } from "@/lib/superadmin/guard";
 
 // A Nave-Mãe: só o fundador/CTO (SUPER_ADMIN_EMAILS + administrador da plataforma). Todos os outros veem 404. Nunca indexada.
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Nave-Mãe · Zetrix", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Nave-Mãe · Kwanza Flow", robots: { index: false, follow: false } };
 
 const NAV = [
   { href: "super-admin", label: "Visão global" },

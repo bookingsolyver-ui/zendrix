@@ -11,7 +11,7 @@ import { TenantFlags } from "@/lib/superadmin/flags";
 // tom que escala (amigável → firme → último aviso) conforme `remindersSent`.
 //
 // LIMITE REAL do WhatsApp: fora da janela de 24 h desde a última mensagem do cliente, só se podem enviar modelos aprovados
-// pela Meta, e o Zetrix ainda não envia modelos. Nesses casos o lembrete NÃO sai: o dono recebe um aviso na aplicação
+// pela Meta, e o Kwanza Flow ainda não envia modelos. Nesses casos o lembrete NÃO sai: o dono recebe um aviso na aplicação
 // («cobrança vencida, contacte à mão») e o contador não avança. Quando houver envio de modelos, é aqui que se liga.
 //
 // Seguro com vários workers: o lembrete é reivindicado (remindersSent+1 com condição) ANTES de enfileirar, e desfeito se o
