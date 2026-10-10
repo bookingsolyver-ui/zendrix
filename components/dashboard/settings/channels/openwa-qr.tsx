@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Loader2, QrCode, Smartphone, Unplug } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 
@@ -27,20 +27,12 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
   const [qr, setQr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const alive = useRef(true);
-
-  useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
+  // O polling é um efeito ligado a `polling`: liga-se quando há um QR por ler e desliga-se ao ligar, desligar
+  // ou sair da página (o cleanup cancela o temporizador e ignora respostas atrasadas).
+  const [polling, setPolling] = useState(false);
 
   const apply = useCallback(
     (data: { state?: State; qr?: string | null }) => {
-      if (!alive.current) return;
       setState(data.state ?? "connecting");
       setQr(data.qr ?? null);
       if (data.state === "open") router.refresh();
@@ -48,27 +40,47 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
     [router],
   );
 
-  const poll = useCallback(async () => {
-    try {
-      const res = await fetch("/api/whatsapp-qr/status", { cache: "no-store" });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data?.success) {
-        apply(data);
-        if (data.state === "open") return; // ligado: acaba o polling
-      } else if (res.status === 404) {
-        if (alive.current) setState("none");
-        return;
+  useEffect(() => {
+    if (!polling) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    async function tick() {
+      try {
+        const res = await fetch("/api/whatsapp-qr/status", { cache: "no-store" });
+        if (stopped) return;
+        const data = await res.json().catch(() => null);
+        if (res.ok && data?.success) {
+          apply(data);
+          if (data.state === "open") return setPolling(false); // ligado: acaba o polling
+        } else if (res.status === 404) {
+          setState("none");
+          return setPolling(false);
+        }
+      } catch {
+        /* falha de rede: tenta de novo */
       }
-    } catch {
-      /* falha de rede: tenta de novo */
+      if (!stopped) timer = setTimeout(tick, POLL_MS);
     }
-    if (alive.current) timer.current = setTimeout(poll, POLL_MS);
-  }, [apply]);
+    void tick();
+
+    return () => {
+      stopped = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [polling, apply]);
 
   // Se a página abre com uma sessão a meio (QR por ler), retoma o polling.
   useEffect(() => {
-    if (!initiallyConnected) void fetch("/api/whatsapp-qr/status", { cache: "no-store" }).then((r) => r.ok && void poll());
-  }, [initiallyConnected, poll]);
+    if (initiallyConnected) return;
+    let cancelled = false;
+    void fetch("/api/whatsapp-qr/status", { cache: "no-store" }).then((res) => {
+      if (!cancelled && res.ok) setPolling(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initiallyConnected]);
 
   async function connect() {
     setBusy(true);
@@ -81,7 +93,7 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
         return;
       }
       apply(data);
-      if (data.state !== "open") timer.current = setTimeout(poll, POLL_MS);
+      setPolling(data.state !== "open");
     } catch {
       setError("Sem ligação ao servidor. Tente novamente.");
     } finally {
@@ -93,7 +105,7 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
     if (!window.confirm("Desligar este WhatsApp? Deixa de receber e responder mensagens por este número.")) return;
     setBusy(true);
     setError(null);
-    if (timer.current) clearTimeout(timer.current);
+    setPolling(false);
     try {
       const res = await fetch("/api/whatsapp-qr/disconnect", { method: "POST" });
       if (!res.ok) {

@@ -1,3 +1,4 @@
+import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 // Canal WhatsApp por QR Code (OpenWA, não oficial). O OpenWA corre NUM SERVIDOR TEU (processo permanente com

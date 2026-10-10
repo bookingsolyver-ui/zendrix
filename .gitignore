@@ -47,3 +47,7 @@ refrencia-*.html
 # Variações de grafia das referências
 refer*cia-*.html
 refr*ncia-*.html
+
+# OpenWA: dados e segredos do servidor
+/deploy/openwa/.env
+/deploy/openwa/data/

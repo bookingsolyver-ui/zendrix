@@ -1,0 +1,27 @@
+# HTTPS automático (Let's Encrypt) para o domínio do .env. O DNS (registo A) tem de apontar para este servidor.
+{
+	email {$ACME_EMAIL}
+}
+
+{$OPENWA_DOMAIN} {
+	encode zstd gzip
+
+	# Só a API é pública (a autenticação é a chave X-API-Key). O painel web, o Swagger e as métricas ficam
+	# de fora: quem precisar do painel usa um túnel SSH (ssh -L 2785:localhost:2785).
+	@api {
+		path /api/*
+		not path /api/docs* /api/metrics*
+	}
+	handle @api {
+		reverse_proxy openwa:2785
+	}
+	handle {
+		respond "Not found" 404
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		-Server
+	}
+}
