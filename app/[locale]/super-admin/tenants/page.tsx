@@ -11,7 +11,7 @@ export default async function TenantsPage({ params, searchParams }: { params: Pr
   await requireSuperAdminPage();
   const { q } = await searchParams;
   const tenants = await loadTenants(q?.trim().slice(0, 80) || undefined);
-  const overridden = new Set((await prisma.zetrixAdmin_QuotaOverride.findMany({ where: { workspaceId: { in: tenants.map((t) => t.id) }, metric: "ai_calls" }, select: { workspaceId: true } })).map((o) => o.workspaceId));
+  const overridden = new Set((await prisma.kwanzaAdmin_QuotaOverride.findMany({ where: { workspaceId: { in: tenants.map((t) => t.id) }, metric: "ai_calls" }, select: { workspaceId: true } })).map((o) => o.workspaceId));
   const catalog = FEATURE_FLAGS.map((f) => ({ id: f.id, label: f.label }));
 
   return (

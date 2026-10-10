@@ -6,7 +6,7 @@ import "server-only";
 //   - KNOWLEDGE:  O QUE o assistente sabe (a empresa, preços, regras). É a única fonte de factos e vem da
 //                 organização (Workspace.agentKnowledge). Sem ela o agente não responde.
 //
-// ZETRIX_KNOWLEDGE é a ficha da própria Kwanza Flow (organização de arranque). Nunca é usada como valor por
+// KWANZA_KNOWLEDGE é a ficha da própria Kwanza Flow (organização de arranque). Nunca é usada como valor por
 // omissão para outra organização: senão o agente de um cliente falava dos produtos da Kwanza Flow.
 
 export const BEHAVIOR = `És o assistente virtual de vendas e suporte da empresa descrita na BASE DE CONHECIMENTO abaixo. Conversas com clientes e potenciais clientes dessa empresa por WhatsApp.
@@ -39,7 +39,7 @@ LIMITES (importantes)
 - Nunca peças palavras-passe, dados de cartão nem documentos de identificação.
 - Se o cliente pedir para falar com uma pessoa, ou se o assunto for contrato ou reclamação, diz que vais pedir a um colega da equipa para dar seguimento à conversa. Quanto a pagamentos, segue a secção PAGAMENTOS mais abaixo.`;
 
-export const ZETRIX_KNOWLEDGE = `BASE DE CONHECIMENTO
+export const KWANZA_KNOWLEDGE = `BASE DE CONHECIMENTO
 
 Sobre a Kwanza Flow
 A Kwanza Flow é uma plataforma SaaS de atendimento ao cliente multicanal. Reúne as conversas dos clientes num Inbox unificado e integra o WhatsApp Business através da API oficial da Meta.
@@ -78,5 +78,5 @@ export function buildSystemPrompt(knowledge: string) {
 }
 
 // Só para a organização Kwanza Flow (e para os testes).
-export const ZETRIX_BEHAVIOR = BEHAVIOR;
-export const ZETRIX_SYSTEM_PROMPT = buildSystemPrompt(ZETRIX_KNOWLEDGE);
+export const KWANZA_BEHAVIOR = BEHAVIOR;
+export const KWANZA_SYSTEM_PROMPT = buildSystemPrompt(KWANZA_KNOWLEDGE);

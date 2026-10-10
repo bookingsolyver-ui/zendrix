@@ -5,7 +5,7 @@ import { cronAuthorized } from "@/lib/cron/auth";
 export const maxDuration = 60;
 
 // Kwanza Flow Auto-Sync: tarefas de entrada automática de dados (hoje: transcrições de notas de voz -> notas do cliente).
-// Mesmo esquema dos outros workers (CRON_SECRET); idempotente. Como ligar: docs/zetrix-automation.md.
+// Mesmo esquema dos outros workers (CRON_SECRET); idempotente. Como ligar: docs/kwanza-automation.md.
 export async function GET(request: Request) {
   const ok = cronAuthorized(request);
   if (ok === null) {

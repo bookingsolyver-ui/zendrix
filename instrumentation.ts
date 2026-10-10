@@ -1,7 +1,7 @@
 import type { Instrumentation } from "next";
 
 // Rede de segurança GLOBAL da Nave-Mãe: o Next chama onRequestError para qualquer erro não tratado de uma rota, ação ou página,
-// sem ser preciso alterar nenhum ficheiro existente. Regista em ZetrixAdmin_Event e avisa a equipa (ALERT_WEBHOOK_URL).
+// sem ser preciso alterar nenhum ficheiro existente. Regista em KwanzaAdmin_Event e avisa a equipa (ALERT_WEBHOOK_URL).
 // A organização só se identifica quando o pedido traz uma chave de API (x-api-key); nas sessões por cookie fica em branco aqui
 // (use withErrorCapture nas rotas críticas para ter sempre o tenant). Nunca guarda cabeçalhos nem o corpo do pedido.
 export const onRequestError: Instrumentation.onRequestError = async (err, request, context) => {

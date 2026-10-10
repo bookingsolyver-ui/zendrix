@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { DuplicatesPanel } from "@/components/dashboard/import/duplicates-panel";
 
-// Data-Cleaner: página nova (ver docs/zetrix-expansion.md para o link).
+// Data-Cleaner: página nova (ver docs/kwanza-expansion.md para o link).
 export default async function DuplicatesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

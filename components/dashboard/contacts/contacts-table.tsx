@@ -93,7 +93,7 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = "contactos-zetrix.csv";
+    link.download = "contactos-kwanza-flow.csv";
     link.click();
     URL.revokeObjectURL(url);
   }

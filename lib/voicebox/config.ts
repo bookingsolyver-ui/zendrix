@@ -3,7 +3,7 @@
 // A Voicebox é um servidor Python com modelos de IA locais (não corre na Vercel). O Kwanza Flow fala com uma
 // instância alojada por si, pela rota compatível com a OpenAI: POST {VOICEBOX_URL}/v1/audio/speech.
 // A Voicebox NÃO tem autenticação própria: a chave (VOICEBOX_API_KEY) é validada pelo proxy que a protege
-// (ver docs/zetrix-voicebox.md), e o Kwanza Flow envia-a em "Authorization: Bearer".
+// (ver docs/kwanza-voicebox.md), e o Kwanza Flow envia-a em "Authorization: Bearer".
 
 export interface VoiceboxConfig {
   baseUrl: string;

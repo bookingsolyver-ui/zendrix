@@ -7,7 +7,7 @@ import { redact } from "@/lib/audit/redact";
 import { Fortress } from "@/lib/fortress/service";
 import { getClientIp } from "@/lib/rate-limit";
 
-// IMMUTABLE AUDIT LEDGER (ZetrixAuditLog). Singleton `AuditLedger`: envolve qualquer mutação e regista antes/depois sem
+// IMMUTABLE AUDIT LEDGER (KwanzaAuditLog). Singleton `AuditLedger`: envolve qualquer mutação e regista antes/depois sem
 // atrasar a resposta. Só acrescenta (trigger SQL: supabase/migrations/20261007120000_audit_ledger_immutable.sql).
 //
 // Uso:
@@ -46,7 +46,7 @@ export async function auditContext(request: Request, who: Principal): Promise<Au
 
 class AuditLedgerImpl {
   private async write(ctx: AuditContext, meta: AuditMeta, previous: unknown, next: unknown) {
-    await prisma.zetrixAuditLog.create({
+    await prisma.kwanzaAuditLog.create({
       data: {
         workspaceId: ctx.workspaceId ?? null,
         entityType: meta.entityType,
@@ -85,7 +85,7 @@ class AuditLedgerImpl {
   }
 
   async list(workspaceId: string, filter: { entityType?: string; entityId?: string; actorId?: string; before?: Date; limit?: number } = {}) {
-    return prisma.zetrixAuditLog.findMany({
+    return prisma.kwanzaAuditLog.findMany({
       where: { workspaceId, ...(filter.entityType ? { entityType: filter.entityType } : {}), ...(filter.entityId ? { entityId: filter.entityId } : {}), ...(filter.actorId ? { actorId: filter.actorId } : {}), ...(filter.before ? { createdAt: { lt: filter.before } } : {}) },
       orderBy: { createdAt: "desc" },
       take: Math.min(filter.limit ?? 100, 200),

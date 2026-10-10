@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Clock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
-const DISMISS_KEY = "zetrix_trial_banner_dismissed";
+const DISMISS_KEY = "kwanza_trial_banner_dismissed";
 
 export function TrialBanner({
   subStatus,

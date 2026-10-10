@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { contactLabel } from "@/lib/inbox/display";
 import { prisma } from "@/lib/prisma";
 
-// Cash-Collector: página nova (ver docs/zetrix-expansion.md para o link).
+// Cash-Collector: página nova (ver docs/kwanza-expansion.md para o link).
 export default async function ReceivablesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

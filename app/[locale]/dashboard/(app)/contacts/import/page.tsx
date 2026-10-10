@@ -3,7 +3,7 @@ import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { MagicImporter } from "@/components/dashboard/import/magic-importer";
 import { defaultDialCode } from "@/lib/import/service";
 
-// Magic Importer: página nova, ligada a partir dos Contactos (ver docs/zetrix-automation.md para o link).
+// Magic Importer: página nova, ligada a partir dos Contactos (ver docs/kwanza-automation.md para o link).
 export default async function ImportContactsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

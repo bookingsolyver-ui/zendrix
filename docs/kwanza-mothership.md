@@ -1,6 +1,6 @@
 # Nave-Mãe (Super-Admin): God-Mode, Error Catcher, Quota de IA
 
-Só ficheiros novos, 4 tabelas `ZetrixAdmin_*` no fim de `prisma/schema.prisma` e `instrumentation.ts` (ficheiro novo na raiz). Já existia um painel `/admin` (MRR, subscrições, diagnóstico, suspensão): a Nave-Mãe **reutiliza-o** (`getPlatformAdmin`, `loadOverview`) e acrescenta o que faltava.
+Só ficheiros novos, 4 tabelas `KwanzaAdmin_*` no fim de `prisma/schema.prisma` e `instrumentation.ts` (ficheiro novo na raiz). Já existia um painel `/admin` (MRR, subscrições, diagnóstico, suspensão): a Nave-Mãe **reutiliza-o** (`getPlatformAdmin`, `loadOverview`) e acrescenta o que faltava.
 
 ## Ligar (por esta ordem)
 1. `npx prisma db push` e voltar a correr `supabase/migrations/20261003120000_rls_hardening.sql` (as tabelas novas ficam fechadas).
@@ -24,13 +24,13 @@ O `proxy.ts` existente não se tocou (e exclui `/api`). O controlo vive em `lib/
 - **LIMITE IMPORTANTE**: as rotas **anteriores a este pacote** (envio de WhatsApp, agente, inbox) não chamam `requireFeature`, logo `whatsapp_integration` e `ai_agent` ainda não cortam nada nelas. Para fechar: uma linha em `authenticateRequest` (`lib/api-auth.ts`) e uma em `lib/meta/handler.ts` / no início do agente: `if (!(await TenantFlags.isEnabled(workspaceId, "ai_agent"))) return;`. Para cortar **tudo** (incluindo o login) a suspensão do Admin clássico (`blockedAt`) já funciona hoje, em todas as rotas.
 
 ## 2. Error Catcher
-- `SaaSErrorLogger` regista em `ZetrixAdmin_Event` e avisa o Discord/Slack: «🚨 CRITICAL: Tenant [ID] (nome) experienciou Erro 500 na Rota X. Detalhe: …».
+- `SaaSErrorLogger` regista em `KwanzaAdmin_Event` e avisa o Discord/Slack: «🚨 CRITICAL: Tenant [ID] (nome) experienciou Erro 500 na Rota X. Detalhe: …».
 - Cobertura: global via `instrumentation.ts` (erros não tratados; o tenant só se identifica com `x-api-key`), e `withErrorCapture("rota", handler)` nas rotas críticas (apanha exceções e respostas 5xx; descobre o tenant só no caminho de erro). Já aplicado ao `portal/approve`, aos crons novos e aos webhooks assinados (um 401 numa integração = alarme).
 - Classifica timeout (Meta/OpenAI), base de dados, upstream, 401, 500. **Anti-inundação**: o mesmo erro avisa 1 vez por 10 min, máx. 30 avisos/h; o resto fica na tabela.
 - **Nunca** guarda o corpo dos pedidos, cabeçalhos nem a query do URL; segredos em mensagens são redigidos.
 - «Auto-healing»: o que está implementado é **deteção + alerta**. Não há retry automático de handlers (não são idempotentes e repetir um pagamento seria pior que o erro). As filas (outbox, crons) já repetem sozinhas.
 
 ## 3. Quota de IA
-- `withAiQuota(workspaceId, () => chamarIA(), () => textoFixo)`: contador atómico por organização/dia em `ZetrixAdmin_Usage` (Postgres, sem Redis: um contador por organização/dia é barato e evita nova infraestrutura). Passado o limite devolve o texto fixo, sem tocar no modelo, e envia **um** aviso por organização e dia com a sugestão de upsell. Para rotas sem texto de recurso: `quotaExceededResponse()` (429).
-- Limite próprio por organização no painel (`ZetrixAdmin_QuotaOverride`). Já aplicado ao Nightwatch.
+- `withAiQuota(workspaceId, () => chamarIA(), () => textoFixo)`: contador atómico por organização/dia em `KwanzaAdmin_Usage` (Postgres, sem Redis: um contador por organização/dia é barato e evita nova infraestrutura). Passado o limite devolve o texto fixo, sem tocar no modelo, e envia **um** aviso por organização e dia com a sugestão de upsell. Para rotas sem texto de recurso: `quotaExceededResponse()` (429).
+- Limite próprio por organização no painel (`KwanzaAdmin_QuotaOverride`). Já aplicado ao Nightwatch.
 - **LIMITE IMPORTANTE**: o agente principal (`chamarModelo` em `lib/agent/cerebro.ts`, o maior consumidor) **não** passa por aqui. Para o proteger, envolva a chamada no sítio onde o agente gera a resposta: `withAiQuota(workspaceId, () => chamarModelo(...), () => "Texto fixo")`.

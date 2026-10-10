@@ -10,7 +10,7 @@ name: outbox
 #
 # Configurar em GitHub → Settings → Secrets and variables → Actions:
 #   CRON_SECRET  o mesmo valor que está na Vercel
-#   APP_URL      o endereço público, sem barra no fim (ex.: https://zetrix.app)
+#   APP_URL      o endereço público, sem barra no fim (ex.: https://kwanzaflow.com)
 on:
   schedule:
     - cron: "*/5 * * * *"

@@ -5,7 +5,7 @@ import { SaaSErrorLogger } from "@/lib/superadmin/events";
 import { dailyLimit, dayKey, isOverQuota, upsellText } from "@/lib/superadmin/quota-rules";
 
 // TenantQuotaService: protege o nosso orçamento de IA. Cada organização tem N chamadas por dia (AI_CALLS_PER_DAY, 500 por omissão;
-// limite próprio em ZetrixAdmin_QuotaOverride). O contador vive numa tabela leve, com incremento ATÓMICO (uma instrução SQL: dois
+// limite próprio em KwanzaAdmin_QuotaOverride). O contador vive numa tabela leve, com incremento ATÓMICO (uma instrução SQL: dois
 // pedidos simultâneos nunca leem o mesmo valor). Sem Redis: um contador por organização/dia é barato em Postgres e não obriga a
 // nova infraestrutura; se o volume crescer, só `consume` muda.
 //
@@ -28,7 +28,7 @@ export const TenantQuotaService = {
           VALUES (${crypto.randomUUID()}::text, ${workspaceId}::text, ${day}::text, ${metric}::text, 1, now())
           ON CONFLICT ("workspaceId", "day", "metric") DO UPDATE SET "count" = "ZetrixAdmin_Usage"."count" + 1, "updatedAt" = now()
           RETURNING "count"`,
-        prisma.zetrixAdmin_QuotaOverride.findUnique({ where: { workspaceId_metric: { workspaceId, metric } }, select: { dailyLimit: true } }),
+        prisma.kwanzaAdmin_QuotaOverride.findUnique({ where: { workspaceId_metric: { workspaceId, metric } }, select: { dailyLimit: true } }),
       ]);
       const used = Number(rows[0]?.count ?? 1);
       const limit = dailyLimit(override?.dailyLimit, process.env.AI_CALLS_PER_DAY);

@@ -15,7 +15,7 @@ Este documento é lido pelo Claude Code (via `CLAUDE.md`) e por qualquer pessoa 
 - Exceção só quando é pedida de forma explícita e limitada (por exemplo, a navegação e o CI/CD, ligados na entrega «Ligar os Fios»).
 
 ## 3. Segurança e infraestrutura
-- **Auditoria:** as modificações críticas (UPDATE/DELETE) passam pelo `AuditLedger` (`lib/audit/ledger.ts`). A tabela `ZetrixAuditLog` é imutável por trigger SQL, tal como `AuditEvent`. Em dinheiro e permissões, use o modo `sync`.
+- **Auditoria:** as modificações críticas (UPDATE/DELETE) passam pelo `AuditLedger` (`lib/audit/ledger.ts`). A tabela `KwanzaAuditLog` (no Postgres: `ZetrixAuditLog`, nome histórico mantido por @@map) é imutável por trigger SQL, tal como `AuditEvent`. Em dinheiro e permissões, use o modo `sync`.
 - **Nave-Mãe (God Mode):** a administração global vive só em `/super-admin` e em `/api/super-admin/*`. Acesso = administrador da plataforma **e** e-mail em `SUPER_ADMIN_EMAILS`. Quem falha recebe 404.
 - **Erros:** as rotas críticas usam o `SaaSErrorLogger` (`withErrorCapture`, e o `instrumentation.ts` como rede global) para registar e avisar os erros graves no Discord/Slack (`ALERT_WEBHOOK_URL`).
 - **Quota de IA:** as chamadas de IA passam por `withAiQuota` (`lib/superadmin/quota.ts`): limite diário por organização em Postgres, com texto fixo de recurso e aviso de upsell.
@@ -43,7 +43,7 @@ As regras acima valem para todo o código **novo**. Há três exceções conheci
 ### 5.3 As rotas antigas não passam pelo `AuditLedger`
 - **O que é:** as rotas anteriores às camadas de automação (contactos, campanhas, definições, equipa, chaves de API, etc.) não registam o antes/depois no livro de auditoria. O interceptor só audita o que o chama (hoje: propostas, alterações de flags e quotas). O Fortress (escopo por vendedor e anti-exportação) também só protege as rotas que o chamam.
 - **Risco:** não há rastreabilidade completa (RGPD) das alterações feitas pelas rotas antigas, e um vendedor continua a ver todos os contactos nas páginas existentes.
-- **Para fechar:** envolver as mutações com `AuditLedger.wrap(...)` (exemplo em `docs/zetrix-clevel.md`), e usar `Fortress.contactWhere` nas consultas de contactos e `Fortress.isLocked` em `authenticateRequest`. Um registo do que já foi feito: nada do passado se reconstrói; o livro começa quando cada rota é envolvida.
+- **Para fechar:** envolver as mutações com `AuditLedger.wrap(...)` (exemplo em `docs/kwanza-clevel.md`), e usar `Fortress.contactWhere` nas consultas de contactos e `Fortress.isLocked` em `authenticateRequest`. Um registo do que já foi feito: nada do passado se reconstrói; o livro começa quando cada rota é envolvida.
 
 ### 5.4 Outros limites registados
-Detalhados nos guias `docs/zetrix-automation.md`, `-expansion.md`, `-clevel.md` e `-mothership.md`: o WhatsApp só deixa escrever dentro da janela de 24 h (sem envio de modelos); `Contact` não tem `deletedAt` (os duplicados fundidos continuam visíveis na lista); a aprovação de uma proposta passa o negócio a `WON` sem pagamento; o câmbio dos alertas de margem é simulado; a emissão de faturas AGT e o adaptador bancário são placeholders.
+Detalhados nos guias `docs/kwanza-automation.md`, `-expansion.md`, `-clevel.md` e `-mothership.md`: o WhatsApp só deixa escrever dentro da janela de 24 h (sem envio de modelos); `Contact` não tem `deletedAt` (os duplicados fundidos continuam visíveis na lista); a aprovação de uma proposta passa o negócio a `WON` sem pagamento; o câmbio dos alertas de margem é simulado; a emissão de faturas AGT e o adaptador bancário são placeholders.

@@ -1,6 +1,6 @@
 # Camada C-Level: Predictive CFO, Kwanza Flow Portal, Immutable Audit Ledger
 
-Só ficheiros novos e 2 modelos novos no fim de `prisma/schema.prisma` (`Proposal`, `ZetrixAuditLog`, sem relações). Única extensão a código anterior: dois valores novos em `NotificationKind` (`lib/alerts/notification-service.ts`).
+Só ficheiros novos e 2 modelos novos no fim de `prisma/schema.prisma` (`Proposal`, `KwanzaAuditLog`, sem relações). Única extensão a código anterior: dois valores novos em `NotificationKind` (`lib/alerts/notification-service.ts`).
 
 ## Plugar
 1. `npx prisma db push` → `supabase/migrations/20261007120000_audit_ledger_immutable.sql` (trigger que recusa UPDATE/DELETE) → voltar a correr o `rls_hardening`.
@@ -28,7 +28,7 @@ const updated = await AuditLedger.wrap(ctx, { entityType: "Receivable", entityId
 - A página do cliente está em pt/en/es (`TEXT` no ficheiro), noindex e sem referrer.
 
 ## Immutable Audit Ledger (`lib/audit`)
-- `ZetrixAuditLog` (campos `entity_id`, `action`, `previous_payload`, `new_payload`, `actor_id`, `ip_address`), imutável por trigger. Coexiste com o `AuditEvent` do pacote anterior (eventos de sistema); podem unificar-se mais tarde.
+- `KwanzaAuditLog` (campos `entity_id`, `action`, `previous_payload`, `new_payload`, `actor_id`, `ip_address`), imutável por trigger. Coexiste com o `AuditEvent` do pacote anterior (eventos de sistema); podem unificar-se mais tarde.
 - `AuditLedger` (singleton): `wrap` / `record` / `recordExport` / `list`. Modo `async` grava depois da resposta (`after`), sem a atrasar, mas uma linha pode perder-se se o processo morrer nesse instante; `sync` grava antes de responder. Segredos (`password`, `token`, `apiKey`...) são redigidos à entrada.
 - Já usado nas propostas (criação, novo link, aprovação). **Nenhuma rota existente foi envolvida**: o interceptor audita o que o chamar.
 - `GET /api/audit-ledger` (só OWNER). RGPD: o livro não se reescreve; trate pedidos de eliminação pseudonimizando na origem, e defina a política com o seu DPO.

@@ -23,8 +23,8 @@ export async function loadMothership(now = new Date()) {
     loadOverview(),
     lastLoginByWorkspace(),
     prisma.workspace.findMany({ where: { approvalStatus: "APPROVED", subStatus: { in: ["active", "trialing"] } }, select: { id: true, name: true, ownerEmail: true, subStatus: true, createdAt: true, blockedAt: true } }),
-    prisma.zetrixAdmin_Usage.findMany({ where: { day: dayKey(now), metric: "ai_calls" }, orderBy: { count: "desc" }, take: 10 }),
-    prisma.zetrixAdmin_Event.groupBy({ by: ["severity"], where: { createdAt: { gt: new Date(now.getTime() - 86_400_000) } }, _count: { _all: true } }),
+    prisma.kwanzaAdmin_Usage.findMany({ where: { day: dayKey(now), metric: "ai_calls" }, orderBy: { count: "desc" }, take: 10 }),
+    prisma.kwanzaAdmin_Event.groupBy({ by: ["severity"], where: { createdAt: { gt: new Date(now.getTime() - 86_400_000) } }, _count: { _all: true } }),
   ]);
 
   const atRisk = workspaces
@@ -59,9 +59,9 @@ export async function loadTenants(q: string | undefined, now = new Date()) {
   });
   const ids = workspaces.map((w) => w.id);
   const [flags, usage, overrides, logins] = await Promise.all([
-    prisma.zetrixAdmin_FeatureFlag.findMany({ where: { workspaceId: { in: ids } }, select: { workspaceId: true, flag: true, enabled: true } }),
-    prisma.zetrixAdmin_Usage.findMany({ where: { workspaceId: { in: ids }, day: dayKey(now), metric: "ai_calls" }, select: { workspaceId: true, count: true } }),
-    prisma.zetrixAdmin_QuotaOverride.findMany({ where: { workspaceId: { in: ids }, metric: "ai_calls" }, select: { workspaceId: true, dailyLimit: true } }),
+    prisma.kwanzaAdmin_FeatureFlag.findMany({ where: { workspaceId: { in: ids } }, select: { workspaceId: true, flag: true, enabled: true } }),
+    prisma.kwanzaAdmin_Usage.findMany({ where: { workspaceId: { in: ids }, day: dayKey(now), metric: "ai_calls" }, select: { workspaceId: true, count: true } }),
+    prisma.kwanzaAdmin_QuotaOverride.findMany({ where: { workspaceId: { in: ids }, metric: "ai_calls" }, select: { workspaceId: true, dailyLimit: true } }),
     lastLoginByWorkspace(),
   ]);
   return workspaces.map((w) => ({
@@ -75,5 +75,5 @@ export async function loadTenants(q: string | undefined, now = new Date()) {
 }
 
 export async function loadEvents(limit = 100) {
-  return prisma.zetrixAdmin_Event.findMany({ orderBy: { createdAt: "desc" }, take: limit });
+  return prisma.kwanzaAdmin_Event.findMany({ orderBy: { createdAt: "desc" }, take: limit });
 }

@@ -5,7 +5,7 @@ import { authenticateRequest } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { alertText, classifyError, fingerprint, safeRoute, scrubMessage, webhookBody, type EventKind, type Severity } from "@/lib/superadmin/classify";
 
-// SaaSErrorLogger: o apanha-erros da Nave-Mãe. Regista o evento (tabela ZetrixAdmin_Event) e, se for grave, avisa a equipa
+// SaaSErrorLogger: o apanha-erros da Nave-Mãe. Regista o evento (tabela KwanzaAdmin_Event) e, se for grave, avisa a equipa
 // no Discord/Slack (ALERT_WEBHOOK_URL) na hora. Nunca lança e nunca atrasa nem parte o pedido do utilizador.
 //
 // O que NUNCA entra: o corpo dos pedidos, cabeçalhos, a query do URL, mensagens de clientes. Só: rota, método, estado, tipo
@@ -58,8 +58,8 @@ async function captureNow(input: CaptureInput): Promise<void> {
     if (wantsAlert) {
       const since = new Date(Date.now() - (input.dedupeMs ?? THROTTLE_MS));
       const [similar, lastHour] = await Promise.all([
-        prisma.zetrixAdmin_Event.count({ where: { fingerprint: print, alerted: true, createdAt: { gt: since } } }),
-        prisma.zetrixAdmin_Event.count({ where: { alerted: true, createdAt: { gt: new Date(Date.now() - 3_600_000) } } }),
+        prisma.kwanzaAdmin_Event.count({ where: { fingerprint: print, alerted: true, createdAt: { gt: since } } }),
+        prisma.kwanzaAdmin_Event.count({ where: { alerted: true, createdAt: { gt: new Date(Date.now() - 3_600_000) } } }),
       ]);
       if (similar === 0 && lastHour < HOURLY_CAP) {
         const name = input.workspaceId ? (await prisma.workspace.findUnique({ where: { id: input.workspaceId }, select: { name: true } }))?.name : null;
@@ -67,9 +67,9 @@ async function captureNow(input: CaptureInput): Promise<void> {
       }
     }
 
-    if (severity !== "critical" && (await prisma.zetrixAdmin_Event.count({ where: { fingerprint: print, createdAt: { gt: new Date(Date.now() - THROTTLE_MS) } } })) > 0) return; // avisos repetidos: só um por janela
+    if (severity !== "critical" && (await prisma.kwanzaAdmin_Event.count({ where: { fingerprint: print, createdAt: { gt: new Date(Date.now() - THROTTLE_MS) } } })) > 0) return; // avisos repetidos: só um por janela
 
-    await prisma.zetrixAdmin_Event.create({
+    await prisma.kwanzaAdmin_Event.create({
       data: { severity, kind, workspaceId: input.workspaceId ?? null, route, message, fingerprint: print, alerted, details: { method: input.method, status: input.status, ...(input.details ?? {}) } as Prisma.InputJsonValue },
     });
   } catch (err) {

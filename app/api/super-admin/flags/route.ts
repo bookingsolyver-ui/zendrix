@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     if (!body.success || !isKnownFlag(body.data.flag)) return fail("invalid_input", 400);
     const { workspaceId, flag, enabled, reason } = body.data;
     if (!(await prisma.workspace.count({ where: { id: workspaceId } }))) return fail("not_found", 404);
-    const previous = await prisma.zetrixAdmin_FeatureFlag.findUnique({ where: { workspaceId_flag: { workspaceId, flag } }, select: { enabled: true } });
+    const previous = await prisma.kwanzaAdmin_FeatureFlag.findUnique({ where: { workspaceId_flag: { workspaceId, flag } }, select: { enabled: true } });
     await TenantFlags.set(workspaceId, flag, enabled, admin.email, reason);
     await AuditLedger.record({ workspaceId, actorId: admin.userId, ip: getClientIp(request) }, { entityType: "FeatureFlag", entityId: flag, action: previous ? "UPDATE" : "CREATE" }, { previous: previous ?? { enabled: true }, next: { enabled, reason: reason ?? null, by: admin.email } }, "sync");
     return ok();

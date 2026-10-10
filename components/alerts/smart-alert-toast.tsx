@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle2, TrendingDown, X } from "lucide-react";
 
 // <SmartAlertToast />: mostra, no canto superior direito, os alertas por ler da organização (risco de churn, margem,
 // pagamentos...). Pergunta a /api/alerts de minuto a minuto (e quando o separador volta a ficar visível). Fechar um
-// aviso marca-o como lido: não volta a aparecer. Montagem: ver docs/zetrix-automation.md (uma linha no layout do painel).
+// aviso marca-o como lido: não volta a aparecer. Montagem: ver docs/kwanza-automation.md (uma linha no layout do painel).
 
 interface Alert {
   id: string;

@@ -4,12 +4,12 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 // Verificação de webhooks assinados (banco, AGT...). Puro (sem base de dados): testável.
 //
 // Contrato (o fornecedor assina assim):
-//   x-zetrix-timestamp: <segundos unix>
-//   x-zetrix-signature: sha256=<hex de HMAC-SHA256(segredo, `${timestamp}.${corpo em bruto}`)>
+//   x-kwanza-timestamp: <segundos unix>
+//   x-kwanza-signature: sha256=<hex de HMAC-SHA256(segredo, `${timestamp}.${corpo em bruto}`)>
 // O timestamp entra na assinatura e é limitado a uma janela curta: um pedido capturado não se repete mais tarde.
 
-export const SIGNATURE_HEADER = "x-zetrix-signature";
-export const TIMESTAMP_HEADER = "x-zetrix-timestamp";
+export const SIGNATURE_HEADER = "x-kwanza-signature";
+export const TIMESTAMP_HEADER = "x-kwanza-timestamp";
 export const MAX_SKEW_SECONDS = 5 * 60;
 
 export type SignatureFailure = "missing_signature" | "missing_timestamp" | "stale_timestamp" | "bad_signature";

@@ -16,14 +16,14 @@ import {
 } from "../lib/email/templates.ts";
 
 const PORT = Number(process.env.PORT) || 3030;
-const BASE = "https://app.zetrix.test";
+const BASE = "https://app.kwanzaflow.test";
 const days = (n) => new Date(Date.now() + n * 86_400_000);
 
 // Os exemplos de cada modelo. `group` separa os e-mails de notificação dos de autenticação.
 const SAMPLES = [
   { id: "pending", group: "Notificações", label: "1 · Conta em análise", build: (lang) => pendingReviewEmail({ name: "Ana Silva", lang }) },
   { id: "approved", group: "Notificações", label: "2 · Conta aprovada", build: (lang) => accountApprovedEmail({ name: "Ana Silva", loginUrl: `${BASE}/${lang}/login`, lang }) },
-  { id: "rejected", group: "Notificações", label: "3 · Conta não aprovada", build: (lang) => accountRejectedEmail({ name: "Ana Silva", reason: "Não conseguimos confirmar a empresa.\nIndique o NIF e a página do negócio.", supportEmail: "ajuda@zetrix.test", lang }) },
+  { id: "rejected", group: "Notificações", label: "3 · Conta não aprovada", build: (lang) => accountRejectedEmail({ name: "Ana Silva", reason: "Não conseguimos confirmar a empresa.\nIndique o NIF e a página do negócio.", supportEmail: "ajuda@kwanzaflow.test", lang }) },
   { id: "ending-trial", group: "Notificações", label: "4a · Fim do teste (5 dias)", build: (lang) => endingSoonEmail({ name: "Ana Silva", orgName: "Loja da Ana", kind: "trial", daysLeft: 5, endsAt: days(5), billingUrl: `${BASE}/${lang}/dashboard/settings/billing`, lang }) },
   { id: "ending-sub", group: "Notificações", label: "4b · Fim da subscrição (5 dias)", build: (lang) => endingSoonEmail({ name: "Ana Silva", orgName: "Loja da Ana", kind: "subscription", daysLeft: 5, endsAt: days(5), billingUrl: `${BASE}/${lang}/dashboard/settings/billing`, lang }) },
   { id: "renewed", group: "Notificações", label: "5a · Subscrição renovada (com recibo)", build: (lang) => subscriptionRenewedEmail({ name: "Ana Silva", orgName: "Loja da Ana", plan: "Kwanza Flow Pro", renewedUntil: days(30), amountLabel: "29,90 €", receiptUrl: "https://invoice.stripe.com/i/acct_demo/test_123", billingUrl: `${BASE}/${lang}/dashboard/settings/billing`, lang }) },

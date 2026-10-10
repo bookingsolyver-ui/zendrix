@@ -8,12 +8,12 @@ import { resolveFlag, type FlagRow } from "@/lib/superadmin/catalog";
 // o erro fica nos registos.
 export const TenantFlags = {
   async rows(workspaceId: string): Promise<FlagRow[]> {
-    return prisma.zetrixAdmin_FeatureFlag.findMany({ where: { workspaceId }, select: { flag: true, enabled: true } });
+    return prisma.kwanzaAdmin_FeatureFlag.findMany({ where: { workspaceId }, select: { flag: true, enabled: true } });
   },
 
   async isEnabled(workspaceId: string, flag: string): Promise<boolean> {
     try {
-      return resolveFlag(await prisma.zetrixAdmin_FeatureFlag.findMany({ where: { workspaceId, flag: { in: [flag, "*"] } }, select: { flag: true, enabled: true } }), flag);
+      return resolveFlag(await prisma.kwanzaAdmin_FeatureFlag.findMany({ where: { workspaceId, flag: { in: [flag, "*"] } }, select: { flag: true, enabled: true } }), flag);
     } catch (err) {
       console.error("[flags] falhou, a deixar passar", err instanceof Error ? err.message : err);
       return true;
@@ -21,7 +21,7 @@ export const TenantFlags = {
   },
 
   async set(workspaceId: string, flag: string, enabled: boolean, updatedBy: string, reason?: string) {
-    return prisma.zetrixAdmin_FeatureFlag.upsert({ where: { workspaceId_flag: { workspaceId, flag } }, create: { workspaceId, flag, enabled, updatedBy, reason }, update: { enabled, updatedBy, reason } });
+    return prisma.kwanzaAdmin_FeatureFlag.upsert({ where: { workspaceId_flag: { workspaceId, flag } }, create: { workspaceId, flag, enabled, updatedBy, reason }, update: { enabled, updatedBy, reason } });
   },
 };
 

@@ -7,6 +7,9 @@ import { markIntegrationExpired } from "@/lib/meta/integration-health";
 import { sendTextToMeta, type MetaSendResult } from "@/lib/meta/send";
 import { sendTemplateToMeta } from "@/lib/meta/templates-api";
 import { rateLimit } from "@/lib/rate-limit";
+import { isQrAccount } from "@/lib/openwa/config";
+import { sendWindows } from "@/lib/openwa/humanize";
+import { sendQrText } from "@/lib/openwa/transport";
 import type { PlatformName } from "@/lib/outbox/split-text";
 import { outboxPayloadSchema, type OutboxPayload } from "@/lib/validations/outbox";
 
@@ -58,6 +61,7 @@ interface Credentials {
   accessToken: string;
   accountId: string;
   pageId: string | null;
+  connectedAt?: Date; // só nas integrações por QR (aquecimento do número)
 }
 
 const perSecond = () => Number(process.env.OUTBOX_PER_SECOND) || DEFAULT_PER_SECOND;
@@ -125,7 +129,7 @@ async function credentialsFor(cache: Map<string, Credentials | null>, row: Claim
   const integration = await prisma.socialIntegration.findFirst({
     where: { workspaceId: row.workspaceId, platform: row.platform, status: "ACTIVE", providerAccountId: { not: null } },
     orderBy: { createdAt: "desc" },
-    select: { id: true, accessToken: true, providerAccountId: true, pageId: true },
+    select: { id: true, accessToken: true, providerAccountId: true, pageId: true, createdAt: true },
   });
   let credentials: Credentials | null = null;
   if (integration?.providerAccountId) {
@@ -135,6 +139,7 @@ async function credentialsFor(cache: Map<string, Credentials | null>, row: Claim
         accessToken: decryptSecret(integration.accessToken),
         accountId: integration.providerAccountId,
         pageId: integration.pageId,
+        connectedAt: integration.createdAt,
       };
     } catch {
       credentials = null; // token ilegível: falha permanente, registada abaixo
@@ -188,6 +193,21 @@ async function prepare(
   const credentials = await credentialsFor(cache, row);
   if (!credentials) return markFailed(row, payload, "no_integration");
 
+  // Número ligado por QR (não oficial): limites próprios, mais apertados, por minuto/hora/dia (anti-ban).
+  if (isQrAccount(credentials.accountId)) {
+    for (const w of sendWindows(credentials.connectedAt ?? null)) {
+      const pace = await rateLimit(`outbox-qr:${credentials.accountId}:${w.name}`, { limit: w.limit, windowMs: w.windowMs });
+      if (!pace.ok) {
+        await prisma.outboxMessage.update({
+          where: { id: row.id },
+          data: { status: "PENDING", nextAttemptAt: new Date(Date.now() + 1000 * Math.max(1, pace.retryAfterSeconds)) },
+        });
+        return "deferred";
+      }
+    }
+    return { payload, credentials };
+  }
+
   // Teto de envios por segundo para esta conta da Meta, partilhado por todos os workers.
   const pace = await rateLimit(`outbox:${row.platform}:${credentials.accountId}`, {
     limit: perSecond(),
@@ -210,8 +230,11 @@ async function deliver(
   cache: Map<string, Credentials | null>,
 ): Promise<Outcome> {
   // Modelo aprovado (WhatsApp): mesmo caminho de resultado que o texto, só muda o pedido à Meta.
-  const result =
-    payload.kind === "template"
+  const result: MetaSendResult = isQrAccount(credentials.accountId)
+    ? payload.kind === "template"
+      ? { ok: false, failure: { kind: "permanent", reason: "qr_no_templates" }, detail: "modelos só existem na API oficial" }
+      : await sendQrText(credentials.accountId, payload.to, payload.text)
+    : payload.kind === "template"
       ? await sendTemplateResult(credentials, payload)
       : await sendTextToMeta(row.platform, credentials, payload.to, payload.text);
 

@@ -31,7 +31,7 @@ Adaptações ao que já existia no Kwanza Flow (e porquê):
 
 ## Assinar os webhooks (banco e AGT)
 
-Cabeçalhos: `x-zetrix-timestamp: <segundos unix>` e `x-zetrix-signature: sha256=<hex>`, com `HMAC-SHA256(segredo, "<timestamp>.<corpo em bruto>")`. Janela de 5 minutos. Corpo do banco: `{ eventId, workspaceId, reference, amountMinor, currency }` onde `reference` é o id do `PaymentLink`. Um evento com valor ou moeda diferentes do negócio **não** o marca como pago: avisa o dono.
+Cabeçalhos: `x-kwanza-timestamp: <segundos unix>` e `x-kwanza-signature: sha256=<hex>`, com `HMAC-SHA256(segredo, "<timestamp>.<corpo em bruto>")`. Janela de 5 minutos. Corpo do banco: `{ eventId, workspaceId, reference, amountMinor, currency }` onde `reference` é o id do `PaymentLink`. Um evento com valor ou moeda diferentes do negócio **não** o marca como pago: avisa o dono.
 
 ## Placeholders (não fingem funcionar)
 

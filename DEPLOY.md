@@ -29,7 +29,7 @@ Marque **apenas o ambiente Production**: os *Preview deployments* apontariam à 
 | `WHATSAPP_VERIFY_TOKEN`, `META_APP_SECRET` | webhook da Meta |
 | `AGENT_ENABLED`, `OPENROUTER_API_KEY`, `MODELO`, `FUSO` | agente de IA |
 | `AUDIO_INBOUND`, `GROQ_API_KEY`, `WHISPER_LANGUAGE` | ouvir notas de voz |
-| `AGENT_VOICE`, `AGENT_VOICE_MODE`, `AGENT_VOICE_DELIVERY`, `AGENT_VOICE_MAX_CHARS`, `TTS_PROVIDER`, `VOICEBOX_URL`, `VOICEBOX_API_KEY`, `VOICEBOX_VOICE` (ver `docs/zetrix-voicebox.md`) | responder por voz |
+| `AGENT_VOICE`, `AGENT_VOICE_MODE`, `AGENT_VOICE_DELIVERY`, `AGENT_VOICE_MAX_CHARS`, `TTS_PROVIDER`, `VOICEBOX_URL`, `VOICEBOX_API_KEY`, `VOICEBOX_VOICE` (ver `docs/kwanza-voicebox.md`) | responder por voz |
 
 **Não são precisas em produção:** `DIRECT_URL` (só o CLI do Prisma), `META_WA_TOKEN` e `META_PHONE_ID` (obsoletas: o token da Meta vive cifrado na base de dados).
 

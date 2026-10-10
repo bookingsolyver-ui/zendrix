@@ -127,6 +127,13 @@ export default async function ChannelsPage({
           />
         </div>
 
+        {canManage && planActive && (
+          <Link href="/dashboard/settings/whatsapp-qr" className="inline-flex items-center gap-1 text-sm text-emerald-300 hover:text-emerald-200">
+            Ou ligar o WhatsApp por QR Code (sem API oficial)
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        )}
+
         <p className="text-xs text-white/40">
           A ligação usa o Login do Facebook: escolhe as páginas e contas que quer partilhar, e pode retirar o acesso
           quando quiser nas definições do Facebook. Guardamos as credenciais cifradas.

@@ -12,8 +12,8 @@ export async function POST(request: Request) {
     if (!body.success) return fail("invalid_input", 400);
     const { workspaceId, dailyLimit } = body.data;
     if (!(await prisma.workspace.count({ where: { id: workspaceId } }))) return fail("not_found", 404);
-    if (dailyLimit === null) await prisma.zetrixAdmin_QuotaOverride.deleteMany({ where: { workspaceId, metric: "ai_calls" } });
-    else await prisma.zetrixAdmin_QuotaOverride.upsert({ where: { workspaceId_metric: { workspaceId, metric: "ai_calls" } }, create: { workspaceId, metric: "ai_calls", dailyLimit, updatedBy: admin.email }, update: { dailyLimit, updatedBy: admin.email } });
+    if (dailyLimit === null) await prisma.kwanzaAdmin_QuotaOverride.deleteMany({ where: { workspaceId, metric: "ai_calls" } });
+    else await prisma.kwanzaAdmin_QuotaOverride.upsert({ where: { workspaceId_metric: { workspaceId, metric: "ai_calls" } }, create: { workspaceId, metric: "ai_calls", dailyLimit, updatedBy: admin.email }, update: { dailyLimit, updatedBy: admin.email } });
     await AuditLedger.record({ workspaceId, actorId: admin.userId, ip: getClientIp(request) }, { entityType: "QuotaOverride", entityId: "ai_calls", action: "UPDATE" }, { next: { dailyLimit, by: admin.email } }, "sync");
     return ok();
   });

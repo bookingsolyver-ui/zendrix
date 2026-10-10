@@ -744,7 +744,7 @@ model IntegrationEvent {
 }
 
 // ─── Ecosystem Expansion Pack (Fortress, Handoff, Nightwatch, Cash-Collector, Data-Cleaner) ───
-// Tudo isolado e sem relações para os modelos existentes (ids em texto). Ver docs/zetrix-expansion.md.
+// Tudo isolado e sem relações para os modelos existentes (ids em texto). Ver docs/kwanza-expansion.md.
 
 // Quem é o responsável por um cliente (o «assigned_to»). Tabela à parte: Contact não muda. O papel de vendedor é STAFF.
 model ClientAssignment {
@@ -891,7 +891,7 @@ model Proposal {
 
 // O livro de auditoria de conformidade (RGPD): quem fez o quê, com o antes e o depois. Só se acrescenta (trigger SQL).
 // Sem relações, de propósito: nunca bloqueia consultas nem a eliminação de uma organização, e sobrevive-lhe.
-model ZetrixAuditLog {
+model KwanzaAuditLog {
   id              String   @id @default(cuid())
   workspaceId     String?
   entityType      String   @map("entity_type")
@@ -906,14 +906,15 @@ model ZetrixAuditLog {
   @@index([workspaceId, createdAt])
   @@index([entityType, entityId, createdAt])
   @@index([actorId, createdAt])
+  @@map("ZetrixAuditLog")
 }
 
 // ─── Mothership (Super-Admin da equipa Kwanza Flow) ───
-// Tabelas ZetrixAdmin_*: só o servidor lhes toca (RLS fechado). Sem relações para os modelos existentes.
+// Tabelas KwanzaAdmin_*: só o servidor lhes toca (RLS fechado). Sem relações para os modelos existentes.
 
 // Um interruptor de funcionalidade por organização. Sem linha = ligado. `flag = "*"` é a «torneira»: desliga todas as
 // funcionalidades premium da organização de uma vez.
-model ZetrixAdmin_FeatureFlag {
+model KwanzaAdmin_FeatureFlag {
   id          String   @id @default(cuid())
   workspaceId String
   flag        String
@@ -924,10 +925,11 @@ model ZetrixAdmin_FeatureFlag {
 
   @@unique([workspaceId, flag])
   @@index([flag])
+  @@map("ZetrixAdmin_FeatureFlag")
 }
 
 // Erros, alertas de quota e outros eventos operacionais. `fingerprint` agrupa o mesmo erro (e limita os alertas).
-model ZetrixAdmin_Event {
+model KwanzaAdmin_Event {
   id          String   @id @default(cuid())
   severity    String // info | warning | critical
   kind        String // server_error | unauthorized | upstream_timeout | db_error | quota_exceeded | ...
@@ -942,10 +944,11 @@ model ZetrixAdmin_Event {
   @@index([createdAt])
   @@index([fingerprint, createdAt])
   @@index([workspaceId, createdAt])
+  @@map("ZetrixAdmin_Event")
 }
 
 // Consumo diário por organização e métrica (ex.: ai_calls). Incremento atómico (INSERT ... ON CONFLICT).
-model ZetrixAdmin_Usage {
+model KwanzaAdmin_Usage {
   id          String   @id @default(cuid())
   workspaceId String
   day         String // AAAA-MM-DD (UTC)
@@ -955,10 +958,11 @@ model ZetrixAdmin_Usage {
 
   @@unique([workspaceId, day, metric])
   @@index([day, metric])
+  @@map("ZetrixAdmin_Usage")
 }
 
 // Limite diário próprio de uma organização (acordos comerciais, planos superiores). Sem linha = o limite global.
-model ZetrixAdmin_QuotaOverride {
+model KwanzaAdmin_QuotaOverride {
   id          String   @id @default(cuid())
   workspaceId String
   metric      String
@@ -967,4 +971,5 @@ model ZetrixAdmin_QuotaOverride {
   updatedAt   DateTime @updatedAt
 
   @@unique([workspaceId, metric])
+  @@map("ZetrixAdmin_QuotaOverride")
 }

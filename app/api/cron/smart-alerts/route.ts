@@ -6,7 +6,7 @@ export const maxDuration = 60;
 
 // Job diário dos Alertas Inteligentes (risco de churn e margens). Mesmo esquema dos outros workers: CRON_SECRET no
 // cabeçalho Authorization. É idempotente (cada aviso tem chave única), por isso correr mais vezes do que o necessário
-// não duplica nada. Como ligar: ver docs/zetrix-automation.md.
+// não duplica nada. Como ligar: ver docs/kwanza-automation.md.
 export async function GET(request: Request) {
   const ok = cronAuthorized(request);
   if (ok === null) {

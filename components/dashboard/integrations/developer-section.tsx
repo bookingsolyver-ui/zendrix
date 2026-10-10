@@ -5,7 +5,7 @@ import { Check, Code2, Copy } from "lucide-react";
 
 function generateWebhookUrl() {
   const id = Math.random().toString(36).slice(2, 10);
-  return `https://hooks.zetrix.com/wh_${id}`;
+  return `https://hooks.kwanzaflow.com/wh_${id}`;
 }
 
 export function DeveloperSection() {
@@ -68,7 +68,7 @@ export function DeveloperSection() {
         <pre className="overflow-x-auto rounded-xl border border-white/10 bg-black/60 p-4 text-xs leading-relaxed sm:text-[13px]">
           <code>
             <span className="text-primary-2">curl</span> <span className="text-blue-400">-X POST</span>{" "}
-            <span className="text-emerald-400">https://api.zetrix.com/v1/webhooks</span> \{"\n"}
+            <span className="text-emerald-400">https://api.kwanzaflow.com/v1/webhooks</span> \{"\n"}
             {"  "}
             <span className="text-blue-400">-H</span>{" "}
             <span className="text-amber-300">&quot;Authorization: Bearer sk_live_...&quot;</span> \{"\n"}

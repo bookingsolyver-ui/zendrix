@@ -5,6 +5,8 @@ import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
 import { markIntegrationExpired } from "@/lib/meta/integration-health";
 import { getAccess } from "@/lib/billing/access";
 import { enqueueText } from "@/lib/outbox/enqueue";
+import { isQrAccount } from "@/lib/openwa/config";
+import { sendQrVoice } from "@/lib/openwa/transport";
 
 export type SendResult = { ok: true } | { ok: false; error: string };
 
@@ -71,6 +73,23 @@ export async function sendAudioInConversation(input: {
     accessToken = decryptSecret(integration.accessToken);
   } catch {
     return { ok: false, error: "integration_unreadable" };
+  }
+
+  // Canal por QR (Evolution): mesmo contrato, outro transporte. Sem passar pela Media API da Meta.
+  if (isQrAccount(integration.providerAccountId)) {
+    const sent = await sendQrVoice(integration.providerAccountId, conversation.contact.waId, audio, transcript);
+    if (!sent.ok) return { ok: false, error: sent.failure.reason };
+    const at = new Date();
+    await prisma.$transaction(async (tx) => {
+      await tx.message.create({
+        data: { workspaceId, conversationId, direction: "OUT", type: "audio", body: transcript, status: "SENT", waMessageId: sent.externalId, createdAt: at },
+      });
+      await tx.conversation.update({
+        where: { id: conversationId },
+        data: { lastMessageAt: at, lastMessagePreview: `🔊 ${transcript}`.slice(0, 120) },
+      });
+    });
+    return { ok: true };
   }
 
   const graph = `https://graph.facebook.com/v17.0/${integration.providerAccountId}`;
