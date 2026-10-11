@@ -109,7 +109,7 @@ export function TemplatePicker({ conversationId, contact, onClose, onSent }: { c
           <button type="button" onClick={() => setSelectedId(null)} className="text-xs text-muted hover:text-foreground">← Escolher outro modelo</button>
           {autoFilled > 0 && (
             <p className="text-xs text-neon-green">
-              {autoFilled === 1 ? "1 campo preenchido" : `${autoFilled} campos preenchidos`} com os dados do contacto. Pode editar antes de enviar.
+              {autoFilled === 1 ? "1 campo preenchido" : `${autoFilled} campos preenchidos`} com os dados do contacto e da sua organização. Pode editar antes de enviar.
             </p>
           )}
           {selected.variables.map((variable, index) => (

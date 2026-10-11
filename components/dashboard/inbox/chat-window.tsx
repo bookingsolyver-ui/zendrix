@@ -6,6 +6,7 @@ import { contactTitle } from "@/lib/inbox/display";
 import { channelOf, CHANNEL_LABEL } from "@/lib/inbox/channels";
 import { LEAD_STAGE_LABEL } from "@/lib/leads/lead";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
+import { useCurrentUser } from "@/components/dashboard/current-user-context";
 import { TemplatePicker } from "@/components/dashboard/inbox/template-picker";
 import { REPLY_WINDOW_MS, type ChatMessage, type ConversationSummary } from "@/lib/inbox/types";
 
@@ -56,6 +57,7 @@ export function ChatWindow({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const currentUser = useCurrentUser(); // o nome da organização preenche as variáveis institucionais dos modelos
   // Canal de WhatsApp ativo ("meta" | "qr" | null): decide se vale a janela de 24 h da Meta.
   const [waKind, setWaKind] = useState<"meta" | "qr" | null>(null);
 
@@ -356,7 +358,7 @@ export function ChatWindow({
       {pickerOpen && (
         <TemplatePicker
           conversationId={id}
-          contact={{ name: conversation.contactName, waId: conversation.waId, email: conversation.email, painPoint: conversation.painPoint }}
+          contact={{ name: conversation.contactName, waId: conversation.waId, email: conversation.email, painPoint: conversation.painPoint, organizationName: currentUser?.workspace?.name ?? null }}
           onClose={() => setPickerOpen(false)}
           onSent={(message) => {
             setMessages((previous) => [...previous, message]);
