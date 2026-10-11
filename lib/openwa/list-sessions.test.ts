@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { extractSessionArray } from "./client.ts";
+import { extractSessionArray } from "./parse-sessions.ts";
 
 test("extractSessionArray: array direto e formatos embrulhados", () => {
   const rows = [{ id: "a", name: "zx-1" }];

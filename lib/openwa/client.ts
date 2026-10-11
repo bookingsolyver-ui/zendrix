@@ -1,5 +1,6 @@
 import "server-only";
 import type { OpenWaConfig } from "./config";
+import { extractSessionArray } from "./parse-sessions";
 
 // Cliente HTTP do OpenWA (autenticação: cabeçalho X-API-Key). Caminhos conferidos com o openapi.json do OpenWA
 // 0.24. Nunca regista corpos de resposta (podem trazer QR Codes ou números).
@@ -235,33 +236,6 @@ export interface OpenWaSessionInfo {
   name: string;
   status: string | null;
   createdAt: string | null;
-}
-
-// Chaves sob as quais um servidor/proxy pode embrulhar a lista de sessões.
-const LIST_WRAPPERS = [
-  "data",
-  "sessions",
-  "response",
-  "items",
-  "results",
-  "rows",
-  "result",
-];
-
-// Extrai o array de sessões de um corpo JSON de forma defensiva: array direto, ou embrulhado (até 2 níveis).
-export function extractSessionArray(
-  json: unknown,
-  depth = 0,
-): unknown[] | null {
-  if (Array.isArray(json)) return json;
-  if (!isRecord(json) || depth > 2) return null;
-  for (const key of LIST_WRAPPERS) {
-    const found = extractSessionArray(json[key], depth + 1);
-    if (found) return found;
-  }
-  // último recurso: a única propriedade que seja um array
-  const arrays = Object.values(json).filter(Array.isArray);
-  return arrays.length === 1 ? (arrays[0] as unknown[]) : null;
 }
 
 // Todas as sessões do servidor, com o formato da resposta auto-detetado. NUNCA lança: em qualquer falha
