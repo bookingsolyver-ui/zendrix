@@ -1,4 +1,5 @@
 import { handleNameStep } from "@/lib/agent/name-step";
+import { dropNameExchange } from "@/lib/leads/name-capture";
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -148,17 +149,17 @@ async function handle(event: AgentEvent) {
     return;
   }
 
-  // Contacto sem nome: a primeira resposta pergunta-o e a seguinte guarda-o (lib/agent/name-step.ts).
-  if (
-    await handleNameStep({
-      workspaceId: event.workspaceId,
-      conversationId: event.conversationId,
-      contactId: mine.conversation.contact.id,
-      inboundText: event.unintelligible || mine.type !== "text" && event.type !== "audio" ? null : mine.body,
-    })
-  ) {
-    return;
-  }
+  // Contacto sem nome: prioridade à recolha do nome (lib/agent/name-step.ts). Pede-se o nome SEM responder à dúvida; quando
+  // ele chega, saúda-se e continua-se abaixo para responder ao pedido original (ou pára-se, se só tinha dito «Olá»).
+  const nameStep = await handleNameStep({
+    workspaceId: event.workspaceId,
+    conversationId: event.conversationId,
+    contactId: mine.conversation.contact.id,
+    inboundText: event.unintelligible || (mine.type !== "text" && event.type !== "audio") ? null : mine.body,
+  });
+  if (nameStep.kind === "handled") return;
+  if (nameStep.kind === "captured" && nameStep.pendingRequest === null) return;
+  const nameAck = nameStep.kind === "captured" ? nameStep.ack : null;
 
   // O que esta organização consegue fazer (agenda, pagamentos) decide as ferramentas e as regras do prompt.
   // Sem endereço público configurado não se enviam links de pagamento (o Stripe não saberia para onde devolver).
@@ -204,12 +205,15 @@ async function handle(event: AgentEvent) {
     // Sem transcrição não há nada para o modelo ler: resposta fixa, sem gastar uma chamada.
     reply = UNINTELLIGIBLE_REPLY;
   } else {
-    const historico = rows.reverse().map((r) => ({
+    const completo = rows.reverse().map((r) => ({
       direction: r.direction === "OUT" ? ("OUT" as const) : ("IN" as const),
       type: r.type,
       body: r.body,
       createdAt: r.createdAt,
     }));
+    // Logo depois de guardar o nome: o modelo lê o histórico SEM a troca do nome, e a última coisa que o cliente disse é
+    // o pedido original, a que responde agora.
+    const historico = nameAck ? dropNameExchange(completo, nameAck) : completo;
 
     try {
       reply = await gerarResposta(
