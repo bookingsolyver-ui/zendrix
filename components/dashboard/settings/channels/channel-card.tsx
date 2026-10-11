@@ -22,6 +22,7 @@ export function ChannelCard({
   connected,
   action,
   canManage,
+  comingSoon = false,
 }: {
   platform: ChannelPlatform;
   title: string;
@@ -29,8 +30,27 @@ export function ChannelCard({
   connected: ConnectedChannel[];
   action: ChannelAction;
   canManage: boolean;
+  // Integração ainda não disponível: cartão informativo, sem botões, com o selo «Brevemente».
+  comingSoon?: boolean;
 }) {
   const hasAccounts = connected.length > 0;
+  if (comingSoon) {
+    return (
+      <div aria-disabled="true" className="flex flex-col rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="opacity-50 grayscale">
+            <ChannelBadge platform={platform} size="lg" />
+          </div>
+          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold tracking-wide text-amber-300">
+            Brevemente
+          </span>
+        </div>
+        <h3 className="mt-4 text-base font-semibold text-white/70">{title}</h3>
+        <p className="mt-1.5 text-sm text-white/40">{description}</p>
+        <p className="mt-auto pt-6 text-xs text-white/40">Estará disponível numa fase posterior.</p>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6">
       <div className="flex items-start justify-between gap-3">
