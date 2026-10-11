@@ -7,6 +7,7 @@ import { syncStatus } from "@/lib/openwa/service";
 import { drainOutbox } from "@/lib/outbox/process";
 import { prisma } from "@/lib/prisma";
 import { saveInboundMessage } from "@/lib/whatsapp/inbox-store";
+import { processQrAudio } from "@/lib/openwa/inbound-audio";
 
 export const maxDuration = 120; // as respostas humanizadas esperam alguns segundos entre mensagens
 
@@ -47,13 +48,26 @@ export async function POST(request: Request) {
   try {
     const saved = await saveInboundMessage(event.message);
     if (!saved) return NextResponse.json({ success: true }); // repetição ou sessão desconhecida
-    // Notas de voz por QR ainda não são transcritas: o agente pede ao cliente que escreva.
-    const agentEvent: AgentEvent = {
-      ...saved,
-      waMessageId: event.message.waMessageId,
-      type: event.message.type,
-      ...(event.message.type === "audio" ? { unintelligible: true } : {}),
-    };
+    if (event.message.type === "audio") {
+      // Nota de voz: descarrega, transcreve e SÓ DEPOIS corre o agente, com o texto transcrito (ou o pedido de «escreva»,
+      // se não foi possível transcrever). Tudo depois de a resposta ao OpenWA sair.
+      const job = {
+        workspaceId: saved.workspaceId,
+        conversationId: saved.conversationId,
+        sessionId: event.sessionId,
+        waId: event.message.waId,
+        waMessageId: event.message.waMessageId,
+        mimeHint: event.media?.mimetype ?? event.message.mimeType,
+        inlineBase64: event.media?.base64 ?? null,
+      };
+      after(async () => {
+        const agentEvent = await processQrAudio(job); // nunca lança
+        if (agentEvent) await runAgentSafely([agentEvent]);
+        await drainOutbox(60_000);
+      });
+      return NextResponse.json({ success: true });
+    }
+    const agentEvent: AgentEvent = { ...saved, waMessageId: event.message.waMessageId, type: event.message.type };
     after(async () => {
       await runAgentSafely([agentEvent]);
       await drainOutbox(60_000);

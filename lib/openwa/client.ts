@@ -116,3 +116,36 @@ export async function sendVoice(
   });
   return isRecord(json) ? str(json.messageId) : null;
 }
+
+// Descarrega os bytes de uma mensagem com média (nota de voz...). O OpenWA guarda o média das mensagens recebidas; pode
+// demorar um instante a estar disponível depois do webhook, por isso um 404 repete-se (3 tentativas, ~1,5 s entre elas).
+const MAX_MEDIA_BYTES = 25 * 1024 * 1024; // o limite do Whisper
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function downloadMessageMedia(
+  cfg: OpenWaConfig,
+  sessionId: string,
+  chatId: string,
+  messageId: string,
+): Promise<{ buffer: Buffer; mime: string | null }> {
+  const path = `/sessions/${encodeURIComponent(sessionId)}/messages/${encodeURIComponent(chatId)}/${encodeURIComponent(messageId)}/media`;
+  for (let attempt = 1; ; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(`${cfg.baseUrl}/api${path}`, { headers: { "X-API-Key": cfg.apiKey }, signal: AbortSignal.timeout(30_000) });
+    } catch {
+      throw new OpenWaError(0, "openwa_unreachable");
+    }
+    if (res.status === 404 && attempt < 3) {
+      await sleep(1_500);
+      continue;
+    }
+    if (!res.ok) throw new OpenWaError(res.status, `openwa_${res.status}`);
+    const declared = Number(res.headers.get("content-length"));
+    if (declared > MAX_MEDIA_BYTES) throw new OpenWaError(413, "media_too_large");
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.length === 0 || buffer.length > MAX_MEDIA_BYTES) throw new OpenWaError(413, "media_invalid");
+    const type = res.headers.get("content-type")?.split(";")[0].trim().toLowerCase() ?? null;
+    return { buffer, mime: type && type !== "application/octet-stream" ? type : null };
+  }
+}

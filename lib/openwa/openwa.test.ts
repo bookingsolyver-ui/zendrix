@@ -85,3 +85,19 @@ test("modo de teste: sem lista deixa tudo; com lista só os números indicados",
   assert.equal(isNumberAllowed("244923000111", list), true);
   assert.equal(isNumberAllowed("244900000000", list), false);
 });
+
+test("parse: nota de voz traz o tipo de ficheiro e, se vier inline, os bytes; senão só o id para descarregar", () => {
+  const base = { event: "message.received", sessionId: "s1" };
+  const inline = parseOpenWaWebhook({ ...base, data: { id: "A1", chatId: "1@c.us", type: "voice", body: "", media: { mimetype: "audio/ogg; codecs=opus", data: "T2dnUw==" } } });
+  assert.equal(inline.kind, "message");
+  if (inline.kind === "message") {
+    assert.equal(inline.media?.base64, "T2dnUw==");
+    assert.equal(inline.media?.mimetype, "audio/ogg; codecs=opus");
+    assert.equal(inline.message.type, "audio");
+    assert.equal(inline.message.mediaId, "A1");
+  }
+  const omitted = parseOpenWaWebhook({ ...base, data: { id: "A2", chatId: "1@c.us", type: "audio", body: "", media: { mimetype: "audio/ogg", omitted: true, sizeBytes: 3000000 } } });
+  assert.equal(omitted.kind === "message" && omitted.media?.base64, null);
+  const text = parseOpenWaWebhook({ ...base, data: { id: "A3", chatId: "1@c.us", type: "text", body: "olá" } });
+  assert.equal(text.kind === "message" && text.media, undefined);
+});

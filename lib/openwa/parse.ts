@@ -6,7 +6,8 @@ import { QR_PREFIX } from "./config.ts";
 
 export type OpenWaEvent =
   | { kind: "status"; sessionId: string; status: string }
-  | { kind: "message"; sessionId: string; message: InboundMessage }
+  // `media`: só nas notas de voz. O webhook pode trazer os bytes em base64 (até ~1 MiB); acima disso vem só o tipo.
+  | { kind: "message"; sessionId: string; message: InboundMessage; media?: { mimetype: string | null; base64: string | null } }
   | { kind: "ignored" };
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
@@ -49,10 +50,19 @@ export function parseOpenWaWebhook(payload: unknown): OpenWaEvent {
   const body = type === "text" ? text : (PLACEHOLDER[type] ?? text);
   if (!body) return { kind: "ignored" };
 
+  // Nota de voz: o webhook pode trazer o média inline (data.media ou data.metadata.media).
+  let media: { mimetype: string | null; base64: string | null } | undefined;
+  if (type === "audio" || type === "voice") {
+    const holder = isRecord(data.media) ? data.media : isRecord(data.metadata) && isRecord(data.metadata.media) ? data.metadata.media : null;
+    const base64 = holder && typeof holder.data === "string" && holder.data.length > 0 && holder.omitted !== true ? holder.data : null;
+    media = { mimetype: (holder && str(holder.mimetype)) ?? str(data.mimetype), base64 };
+  }
+
   const seconds = Number(data.timestamp);
   return {
     kind: "message",
     sessionId,
+    ...(media ? { media } : {}),
     message: {
       platform: "WHATSAPP",
       accountId: `${QR_PREFIX}${sessionId}`,
@@ -62,8 +72,8 @@ export function parseOpenWaWebhook(payload: unknown): OpenWaEvent {
       type: type === "voice" ? "audio" : type,
       body,
       timestamp: Number.isFinite(seconds) && seconds > 0 ? new Date(seconds * 1000) : new Date(),
-      mediaId: null,
-      mimeType: null,
+      mediaId: media ? id : null, // o id da mensagem: é com ele que se descarrega o ficheiro
+      mimeType: media?.mimetype ?? null,
     },
   };
 }
