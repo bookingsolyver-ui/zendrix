@@ -19,6 +19,7 @@
     "email:preview": "node --experimental-strip-types --no-warnings scripts/email-preview.mjs"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@supabase/ssr": "^0.12.7",

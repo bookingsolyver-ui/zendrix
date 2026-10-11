@@ -2,7 +2,7 @@ import "server-only";
 import { voiceboxConfig } from "./config.ts";
 
 // Teste de saúde do Voicebox: nunca lança e nunca demora mais de 4 s. «Acessível» = o servidor respondeu com qualquer
-// código abaixo de 500 (um 404/401 na raiz é normal: o proxy só deixa passar a rota de síntese). 5xx, rede e timeout =
+// código abaixo de 500 (um 404 é normal em versões sem /health; 401 = chave recusada, mas o servidor está de pé). 5xx, rede e timeout =
 // inacessível. Não gasta síntese nem envia texto nenhum.
 export interface VoiceboxHealth {
   configured: boolean;
@@ -18,7 +18,7 @@ export async function voiceboxHealth(fetchImpl: typeof fetch = fetch, env: Recor
   if (!config) return { configured: false, reachable: false, ms: null, detail: "VOICEBOX_URL não definido" };
   const started = Date.now();
   try {
-    const res = await fetchImpl(config.baseUrl, { method: "GET", signal: AbortSignal.timeout(TIMEOUT_MS), redirect: "manual" });
+    const res = await fetchImpl(`${config.baseUrl}/health`, { method: "GET", headers: config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}, signal: AbortSignal.timeout(TIMEOUT_MS), redirect: "manual" });
     const ms = Date.now() - started;
     return res.status < 500
       ? { configured: true, reachable: true, ms, detail: null }

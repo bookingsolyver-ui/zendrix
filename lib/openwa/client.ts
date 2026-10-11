@@ -102,17 +102,19 @@ export async function sendText(cfg: OpenWaConfig, id: string, input: { number: s
   return isRecord(json) ? str(json.messageId) : null;
 }
 
-// Nota de voz (ptt = bolha de microfone). O áudio deve ser Ogg/Opus.
+// Nota de voz. Ogg/Opus mono vai como PTT (bolha de microfone com forma de onda); qualquer outro formato (MP3 de
+// recurso) vai como ficheiro de áudio normal, porque o WhatsApp recusa PTT que não seja Opus.
 export async function sendVoice(
   cfg: OpenWaConfig,
   id: string,
   input: { number: string; base64: string; mimetype: string },
 ): Promise<string | null> {
+  const ogg = input.mimetype.toLowerCase().startsWith("audio/ogg");
   const json = await call(cfg, "POST", `/sessions/${encodeURIComponent(id)}/messages/send-audio`, {
     chatId: chatId(input.number),
     base64: input.base64,
-    mimetype: input.mimetype,
-    ptt: true,
+    mimetype: ogg ? "audio/ogg; codecs=opus" : input.mimetype,
+    ptt: ogg,
   });
   return isRecord(json) ? str(json.messageId) : null;
 }

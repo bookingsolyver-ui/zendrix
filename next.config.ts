@@ -14,6 +14,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // O ffmpeg (conversão das notas de voz) é um binário: fica fora do bundle e vai junto das funções que respondem a mensagens.
+  serverExternalPackages: ["@ffmpeg-installer/ffmpeg"],
+  outputFileTracingIncludes: {
+    "/api/openwa/webhook": ["./node_modules/@ffmpeg-installer/linux-x64/**"],
+    "/api/meta/webhook": ["./node_modules/@ffmpeg-installer/linux-x64/**"],
+    "/api/webhooks/whatsapp": ["./node_modules/@ffmpeg-installer/linux-x64/**"],
+    "/api/cron/**": ["./node_modules/@ffmpeg-installer/linux-x64/**"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
