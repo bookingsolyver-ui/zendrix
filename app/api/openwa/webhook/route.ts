@@ -1,6 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { runAgentSafely, type AgentEvent } from "@/lib/agent";
-import { isValidSignature, QR_PREFIX, webhookSecret } from "@/lib/openwa/config";
+import { allowedNumbers, isNumberAllowed, isValidSignature, QR_PREFIX, webhookSecret } from "@/lib/openwa/config";
 import { parseOpenWaWebhook } from "@/lib/openwa/parse";
 import { mapStatus } from "@/lib/openwa/client";
 import { syncStatus } from "@/lib/openwa/service";
@@ -40,6 +40,9 @@ export async function POST(request: Request) {
     if (integration) await syncStatus(integration.id, integration.status, mapStatus(event.status));
     return NextResponse.json({ success: true });
   }
+
+  // Modo de teste (OPENWA_ALLOWED_NUMBERS): mensagens de outros números não são guardadas nem respondidas.
+  if (!isNumberAllowed(event.message.waId, allowedNumbers())) return NextResponse.json({ success: true });
 
   try {
     const saved = await saveInboundMessage(event.message);

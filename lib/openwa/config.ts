@@ -54,3 +54,20 @@ export function isValidSignature(rawBody: string, header: string | null, secret:
   const given = header.slice("sha256=".length);
   return given.length === expected.length && timingSafeEqual(Buffer.from(given), Buffer.from(expected));
 }
+
+// MODO DE TESTE SEGURO. Com OPENWA_ALLOWED_NUMBERS definido (números só com dígitos, indicativo incluído,
+// separados por vírgulas), o canal QR SÓ fala com esses números: não envia a mais ninguém e ignora o que
+// chega de outros (o agente nem corre). Serve para testar com um número dedicado sem arriscar clientes reais.
+// Vazio = sem restrição (produção).
+export function allowedNumbers(env: Record<string, string | undefined> = process.env): string[] | null {
+  const list = (env.OPENWA_ALLOWED_NUMBERS ?? "")
+    .split(",")
+    .map((n) => n.replace(/\D/g, ""))
+    .filter(Boolean);
+  return list.length > 0 ? list : null;
+}
+
+export function isNumberAllowed(number: string, allowed: string[] | null): boolean {
+  if (!allowed) return true;
+  return allowed.includes(number.replace(/\D/g, ""));
+}

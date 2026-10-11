@@ -68,3 +68,9 @@ Webhook recebido: `{ "event":"message.received", "sessionId":"…", "data":{ "id
 - Nada foi testado contra um OpenWA real: os caminhos foram conferidos com o `openapi.json` da v0.24. Se a tua versão divergir, o único ficheiro a ajustar é `lib/openwa/client.ts`.
 - Contactos com endereço `@lid` (sem número visível) são ignorados.
 - Modelos (templates) da Meta não existem neste canal; campanhas em massa por aqui são desaconselhadas (risco de banimento).
+
+## Testar em segurança (número dedicado)
+1. Use um **chip/número dedicado a testes**, nunca o de um cliente nem o seu pessoal.
+2. Defina na Vercel `OPENWA_ALLOWED_NUMBERS=2449XXXXXXXX,3519XXXXXXXX` (só os números de quem vai testar, com indicativo). Com isto o canal **só envia e só responde** a esses números: tudo o resto é ignorado e nada é guardado. Remova a variável quando passar a produção.
+3. Mantenha o ritmo humano: poucas mensagens por hora no número novo (os limites de aquecimento já o impõem), conversas iniciadas pelo cliente, sem mensagens idênticas repetidas e sem campanhas em massa.
+4. Se o número for restringido, pare de enviar e não ligue outro de imediato: reveja o que enviou.

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { betweenMessagesMs, recordingMs, sendWindows, typingMs } from "./humanize.ts";
 import { createHmac } from "node:crypto";
-import { isQrAccount, isValidSignature, parseBaseUrl, sessionNameFor, webhookSecret } from "./config.ts";
+import { allowedNumbers, isNumberAllowed, isQrAccount, isValidSignature, parseBaseUrl, sessionNameFor, webhookSecret } from "./config.ts";
 import { parseOpenWaWebhook } from "./parse.ts";
 
 test("typingMs cresce com o texto e fica entre 1 e 5,5 s", () => {
@@ -75,4 +75,13 @@ test("parse: estado da sessão", () => {
     sessionId: "s1",
     status: "ready",
   });
+});
+
+test("modo de teste: sem lista deixa tudo; com lista só os números indicados", () => {
+  assert.equal(allowedNumbers({}), null);
+  assert.equal(isNumberAllowed("244923000111", null), true);
+  const list = allowedNumbers({ OPENWA_ALLOWED_NUMBERS: " +244 923 000 111, 351912345678 ," });
+  assert.deepEqual(list, ["244923000111", "351912345678"]);
+  assert.equal(isNumberAllowed("244923000111", list), true);
+  assert.equal(isNumberAllowed("244900000000", list), false);
 });

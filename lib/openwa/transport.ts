@@ -1,6 +1,6 @@
 import "server-only";
 import type { MetaFailure } from "@/lib/meta/errors";
-import { openWaConfig, sessionOf } from "./config";
+import { allowedNumbers, isNumberAllowed, openWaConfig, sessionOf } from "./config";
 import { OpenWaError, sendText, sendVoice, setPresence } from "./client";
 import { betweenMessagesMs, recordingMs, typingMs } from "./humanize";
 
@@ -35,11 +35,18 @@ function toFailure(err: unknown): QrSendResult {
   return { ok: false, failure: { kind: "transient", reason: "network" }, detail: "unknown" };
 }
 
+const notAllowed: QrSendResult = {
+  ok: false,
+  failure: { kind: "permanent", reason: "test_mode_blocked" },
+  detail: "OPENWA_ALLOWED_NUMBERS: número fora da lista de teste",
+};
+
 const notConfigured: QrSendResult = { ok: false, failure: { kind: "permanent", reason: "qr_not_configured" }, detail: "OPENWA_*" };
 
 export async function sendQrText(accountId: string, to: string, text: string): Promise<QrSendResult> {
   const cfg = openWaConfig();
   if (!cfg) return notConfigured;
+  if (!isNumberAllowed(to, allowedNumbers())) return notAllowed;
   const session = sessionOf(accountId);
   try {
     await pauseIfFollowUp(`${accountId}|${to}`);
@@ -62,6 +69,7 @@ export async function sendQrVoice(
 ): Promise<QrSendResult> {
   const cfg = openWaConfig();
   if (!cfg) return notConfigured;
+  if (!isNumberAllowed(to, allowedNumbers())) return notAllowed;
   const session = sessionOf(accountId);
   try {
     await pauseIfFollowUp(`${accountId}|${to}`);
