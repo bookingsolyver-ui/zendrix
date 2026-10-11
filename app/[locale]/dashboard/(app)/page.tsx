@@ -9,6 +9,7 @@ import { requireActivePlanForPage } from "@/lib/billing/access";
 import { SetupChecklist } from "@/components/dashboard/onboarding/setup-checklist";
 import { getSetupProgress } from "@/lib/onboarding/progress";
 import { getWhatsAppStatus } from "@/lib/whatsapp/status";
+import { LiveRefresh } from "@/components/dashboard/live-refresh";
 
 export default async function DashboardPage({
   params,
@@ -38,6 +39,7 @@ export default async function DashboardPage({
           msLeft={msUntil(user.workspace.trialEndsAt)}
         />
       )}
+      <LiveRefresh />
       {setup && <SetupChecklist progress={setup} />}
       <h1 className="mb-6 text-2xl font-semibold tracking-tight text-white">Dashboard</h1>
       <WhatsappGate connected={whatsapp.connected} />

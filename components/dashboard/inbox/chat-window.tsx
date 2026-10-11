@@ -56,6 +56,21 @@ export function ChatWindow({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Canal de WhatsApp ativo ("meta" | "qr" | null): decide se vale a janela de 24 h da Meta.
+  const [waKind, setWaKind] = useState<"meta" | "qr" | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/whatsapp/channel", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && (data?.kind === "qr" || data?.kind === "meta")) setWaKind(data.kind);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   // Optimistic value while the pause request is in flight; the list poll is the source of truth after.
   const [pendingPause, setPendingPause] = useState<boolean | null>(null);
   const [pauseError, setPauseError] = useState(false);
@@ -124,9 +139,10 @@ export function ChatWindow({
   }
 
   const lastInbound = [...messages].reverse().find((message) => message.direction === "IN");
-  const canReply = Boolean(
-    lastInbound && now - new Date(lastInbound.createdAt).getTime() <= REPLY_WINDOW_MS
-  );
+  // A janela de 24 h é da API oficial da Meta; no canal por QR Code (OpenWA) pode-se responder sempre.
+  const canReply =
+    (conversation.platform === "WHATSAPP" && waKind === "qr") ||
+    Boolean(lastInbound && now - new Date(lastInbound.createdAt).getTime() <= REPLY_WINDOW_MS);
 
   async function send() {
     const body = text.trim();
@@ -311,7 +327,7 @@ export function ChatWindow({
         )}
         <div className="flex items-end gap-2">
           {conversation.platform === "WHATSAPP" && (
-            <button type="button" onClick={() => setPickerOpen(true)} aria-label="Enviar template" title="Enviar um template aprovado pela Meta" className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-surface-2">
+            <button type="button" onClick={() => setPickerOpen(true)} aria-label="Enviar template" title="Enviar um template" className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-border text-foreground hover:bg-surface-2">
               <FileText className="h-4 w-4" />
             </button>
           )}

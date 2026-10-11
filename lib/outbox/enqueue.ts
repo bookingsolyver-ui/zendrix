@@ -3,6 +3,7 @@ import { getAccess } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
 import { splitText, TEXT_LIMITS } from "@/lib/outbox/split-text";
+import { activeWhatsAppKind } from "@/lib/whatsapp/channel-kind";
 import type { OutboxPayload } from "@/lib/validations/outbox";
 
 export type EnqueueError = "not_found" | "window_closed" | "no_integration" | "subscription_required";
@@ -34,13 +35,17 @@ export async function enqueueText(input: {
   });
   if (!conversation) return { ok: false, error: "not_found" };
 
-  const lastInbound = await prisma.message.findFirst({
-    where: { conversationId, direction: "IN" },
-    orderBy: { createdAt: "desc" },
-    select: { createdAt: true },
-  });
-  if (!lastInbound || Date.now() - lastInbound.createdAt.getTime() > REPLY_WINDOW_MS) {
-    return { ok: false, error: "window_closed" };
+  // A janela de 24 h é uma regra da API oficial da Meta. No canal por QR Code (OpenWA) não existe.
+  const isQr = conversation.platform === "WHATSAPP" && (await activeWhatsAppKind(workspaceId)) === "qr";
+  if (!isQr) {
+    const lastInbound = await prisma.message.findFirst({
+      where: { conversationId, direction: "IN" },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    if (!lastInbound || Date.now() - lastInbound.createdAt.getTime() > REPLY_WINDOW_MS) {
+      return { ok: false, error: "window_closed" };
+    }
   }
 
   const integration = await prisma.socialIntegration.findFirst({

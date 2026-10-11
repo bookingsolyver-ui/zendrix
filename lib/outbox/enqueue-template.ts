@@ -1,7 +1,7 @@
 import "server-only";
 import { getAccess } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
-import { QR_PREFIX } from "@/lib/openwa/config";
+import { activeWhatsAppKind } from "@/lib/whatsapp/channel-kind";
 import type { EnqueueError } from "@/lib/outbox/enqueue";
 import { checkParams, renderTemplate } from "@/lib/templates/meta-payload";
 import type { OutboxPayload } from "@/lib/validations/outbox";
@@ -12,7 +12,8 @@ export type EnqueueTemplateResult =
   | { ok: true; message: { id: string; type: string; body: string; status: string; createdAt: Date } }
   | { ok: false; error: EnqueueTemplateError };
 
-// Como enqueueText, mas para um modelo APROVADO pela Meta: NÃO exige a janela de 24 h (é para isso que existe).
+// Como enqueueText, mas para um modelo: na API oficial tem de estar APROVADO pela Meta e não exige a janela de 24 h;
+// no QR Code (OpenWA) sai como texto preenchido, sem janela.
 // Grava a Message (QUEUED, com o texto já preenchido, para a equipa ver o que saiu) e a OutboxMessage na mesma transação.
 export async function enqueueTemplate(input: {
   workspaceId: string;
@@ -32,16 +33,17 @@ export async function enqueueTemplate(input: {
 
   const template = await prisma.messageTemplate.findFirst({ where: { id: templateId, workspaceId } });
   if (!template) return { ok: false, error: "template_not_found" };
-  if (template.metaStatus !== "APPROVED") return { ok: false, error: "template_not_approved" };
-  if (!template.sendable) return { ok: false, error: "template_unsupported" };
+
+  // O canal ativo decide: a API oficial exige um modelo APROVADO pela Meta; o QR Code (OpenWA) não tem esse conceito,
+  // por isso qualquer modelo da organização serve e sai como texto já preenchido.
+  const kind = await activeWhatsAppKind(workspaceId);
+  if (!kind) return { ok: false, error: "no_integration" };
+  if (kind === "meta") {
+    if (template.metaStatus !== "APPROVED") return { ok: false, error: "template_not_approved" };
+    if (!template.sendable) return { ok: false, error: "template_unsupported" };
+  }
   const params = checkParams(template.body, input.params);
   if (!params) return { ok: false, error: "invalid_params" };
-
-  const integration = await prisma.socialIntegration.findFirst({
-    where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE", providerAccountId: { not: null }, NOT: { providerAccountId: { startsWith: QR_PREFIX } } }, // modelos só existem na API oficial
-    select: { id: true },
-  });
-  if (!integration) return { ok: false, error: "no_integration" };
 
   const text = renderTemplate(template.body, params);
   const createdAt = new Date();
@@ -50,15 +52,18 @@ export async function enqueueTemplate(input: {
       data: { workspaceId, conversationId, platform: "WHATSAPP", direction: "OUT", type: "template", body: text, status: "QUEUED", createdAt },
       select: { id: true, type: true, body: true, status: true, createdAt: true },
     });
-    const payload: OutboxPayload = {
-      kind: "template",
-      to: conversation.contact.waId,
-      templateName: template.name,
-      language: template.language,
-      params,
-      conversationId,
-      messageId: created.id,
-    };
+    const payload: OutboxPayload =
+      kind === "qr"
+        ? { kind: "text", to: conversation.contact.waId, text, conversationId, messageId: created.id }
+        : {
+            kind: "template",
+            to: conversation.contact.waId,
+            templateName: template.name,
+            language: template.language,
+            params,
+            conversationId,
+            messageId: created.id,
+          };
     await tx.outboxMessage.create({ data: { workspaceId, platform: "WHATSAPP", payload, createdAt } });
     await tx.conversation.update({ where: { id: conversationId }, data: { lastMessageAt: createdAt, lastMessagePreview: `📋 ${text}`.slice(0, 120) } });
     return created;
