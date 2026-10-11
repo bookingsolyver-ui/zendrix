@@ -4,7 +4,7 @@ import { adminActionSchema, extendedTrialEnd } from "@/lib/admin/schema";
 import { appOrigin } from "@/lib/http/origin";
 import { notify, ownerRecipients } from "@/lib/email/notify";
 import { prisma } from "@/lib/prisma";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { confirmAuthEmails } from "@/lib/auth/confirm-email";
 import { stripeGet } from "@/lib/stripe/client";
 import { idSchema } from "@/lib/validations/team";
 
@@ -63,6 +63,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           data: { approvalStatus: "APPROVED", approvalDecidedAt: new Date(), approvalDecidedBy: admin.userId, approvalNote: null, ...(before.subStatus === "trialing" ? { trialEndsAt: extendedTrialEnd(null, 14) } : {}) },
         });
         extra = { notified: false };
+        // Aprovar É a verificação humana da conta: confirma-se já o e-mail dos proprietários no Supabase, para o login
+        // nunca depender de um e-mail de confirmação que pode não chegar. Não faz a aprovação falhar.
+        {
+          const owners = await prisma.user.findMany({ where: { workspaceId: id.data, role: "OWNER" }, select: { authId: true } });
+          const confirmed = await confirmAuthEmails(owners.flatMap((owner) => (owner.authId ? [owner.authId] : [])));
+          extra = { notified: false, emailConfirmed: confirmed };
+        }
         // E-mail «conta aprovada» (opcional), com o link direto para entrar. Regista-se e envia-se depois da resposta;
         // se o envio falhar, o cron repete. Nunca faz a aprovação falhar.
         if (data.notify) {
@@ -75,23 +82,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
               await notify({ kind: "account_approved", dedupeKey: `approved:${workspaceId}:${decidedKey}`, to: recipient.email, locale: recipient.locale, workspaceId, payload: { name: recipient.name, loginUrl: `${origin}/${lang}/login` } });
             }
           });
-          extra = { notified: true };
+          extra = { ...extra, notified: true };
         }
         break;
       }
       case "confirm_email": {
         // O administrador confirma o e-mail por quem não recebeu a mensagem. Só os proprietários da organização.
-        const admin_ = supabaseAdmin();
-        if (!admin_) return fail("service_role_missing", 503);
         const owners = await prisma.user.findMany({ where: { workspaceId: id.data, role: "OWNER" }, select: { authId: true } });
         const authIds = owners.flatMap((owner) => (owner.authId ? [owner.authId] : []));
         if (authIds.length === 0) return fail("not_found", 404);
-        let confirmed = 0;
-        for (const authId of authIds) {
-          const { error } = await admin_.auth.admin.updateUserById(authId, { email_confirm: true });
-          if (error) console.error("[admin/confirm_email] falhou", error.status, error.code);
-          else confirmed++;
-        }
+        const confirmed = await confirmAuthEmails(authIds);
         if (confirmed === 0) return fail("confirm_failed", 502);
         extra = { confirmed };
         break;

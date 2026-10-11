@@ -60,10 +60,18 @@ export function LoginForm({ next, callbackError }: { next?: string; callbackErro
     try {
       const supabase = createClient();
       const email = String(form.get("email") ?? "").trim();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: String(form.get("password") ?? ""),
-      });
+      const password = String(form.get("password") ?? "");
+      let { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      // Conta já aprovada pela administração mas com o e-mail por confirmar (o e-mail pode nunca ter chegado): o
+      // servidor confirma-o e tenta-se de novo. Contas por aprovar não são confirmadas por este caminho.
+      if (signInError?.code === "email_not_confirmed") {
+        await fetch("/api/auth/confirm-approved", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }).catch(() => null);
+        ({ error: signInError } = await supabase.auth.signInWithPassword({ email, password }));
+      }
       if (signInError) {
         if (signInError.code === "email_not_confirmed") {
           setUnconfirmedEmail(email);
