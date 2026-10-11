@@ -1,12 +1,12 @@
 "use client";
 
 import type { ConversationSummary } from "@/lib/inbox/types";
-import { contactLabel, visibleName } from "@/lib/inbox/display";
+import { contactChoiceLabel, visibleName } from "@/lib/inbox/display";
 import { channelOf } from "@/lib/inbox/channels";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
 
 function displayName(conversation: ConversationSummary) {
-  return contactLabel(conversation.contactName, conversation.waId, channelOf(conversation.platform));
+  return contactChoiceLabel(conversation.contactName, conversation.waId, channelOf(conversation.platform));
 }
 
 function initials(conversation: ConversationSummary) {

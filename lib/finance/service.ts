@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { contactLabel } from "@/lib/inbox/display";
+import { contactChoiceLabel } from "@/lib/inbox/display";
 import { expectedProposal, expectedReceivable, nextMonthRange, riskScore, winRate, type InvoiceOutcome, type RiskScore } from "@/lib/finance/risk";
 
 // PredictiveFinanceService: risco de atraso por cliente e previsão de receita do próximo mês. Só LÊ (cobranças, propostas,
@@ -89,7 +89,7 @@ export const PredictiveFinanceService = {
 
     const ranked = [...history.keys()].map((id) => ({ id, ...scoreOf(id) })).sort((a, b) => b.score - a.score).slice(0, 5);
     const contacts = await prisma.contact.findMany({ where: { workspaceId, id: { in: ranked.map((r) => r.id) } }, select: { id: true, name: true, waId: true, platform: true } });
-    const nameOf = new Map(contacts.map((c) => [c.id, contactLabel(c.name, c.waId, c.platform)]));
+    const nameOf = new Map(contacts.map((c) => [c.id, contactChoiceLabel(c.name, c.waId, c.platform)]));
 
     const notes = ["Valores esperados = valor × probabilidade; moedas diferentes nunca se somam.", "Propostas: valor × taxa de ganho histórica × (1 − risco do cliente)."];
     if (win.closed < 10) notes.push(`Poucos negócios fechados (${win.closed}): a taxa de ganho está suavizada para um valor prudente.`);

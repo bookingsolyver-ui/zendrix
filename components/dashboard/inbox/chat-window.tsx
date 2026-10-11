@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Bot, Clock, FileText, Loader2, Pause, Send } from "lucide-react";
-import { contactLabel } from "@/lib/inbox/display";
+import { contactTitle } from "@/lib/inbox/display";
 import { channelOf, CHANNEL_LABEL } from "@/lib/inbox/channels";
 import { LEAD_STAGE_LABEL } from "@/lib/leads/lead";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
@@ -186,7 +186,7 @@ export function ChatWindow({
   }
 
   const platform = channelOf(conversation.platform);
-  const title = contactLabel(conversation.contactName, conversation.waId, platform);
+  const title = contactTitle(conversation.contactName, conversation.waId, platform);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background/40">

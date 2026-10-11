@@ -7,7 +7,7 @@ import {
 } from "@/components/dashboard/ai/overview/recent-conversations";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
-import { contactLabel } from "@/lib/inbox/display";
+import { contactChoiceLabel } from "@/lib/inbox/display";
 
 export default async function AiOverviewPage({
   params,
@@ -47,7 +47,7 @@ export default async function AiOverviewPage({
 
   const conversations: RecentConversation[] = rows.map((row) => ({
     id: row.id,
-    customer: contactLabel(row.contact.name, row.contact.waId),
+    customer: contactChoiceLabel(row.contact.name, row.contact.waId),
     summary: row.lastMessagePreview ?? "Sem mensagens.",
     transcript: [...row.messages]
       .reverse()

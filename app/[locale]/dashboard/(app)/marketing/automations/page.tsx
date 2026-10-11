@@ -1,3 +1,4 @@
+import { contactChoiceLabel } from "@/lib/inbox/display";
 import { setRequestLocale } from "next-intl/server";
 import { Clock, History, ShieldCheck, Workflow } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
@@ -55,7 +56,7 @@ export default async function MarketingAutomationsPage({ params }: { params: Pro
     return {
       id: run.id,
       automationName: run.automation.name,
-      contact: contact?.name?.trim() || (contact ? `+${contact.waId}` : "Contacto removido"),
+      contact: contact ? contactChoiceLabel(contact.name, contact.waId) : "Contacto removido",
       whenLabel: dateFormat.format(run.createdAt),
       status: !run.completedAt ? "Em curso" : statuses.includes("FAILED") ? "Falhou" : statuses.every((status) => status === "SKIPPED") ? "Ignorada" : "Concluída",
       steps: run.steps.filter((step): step is typeof step & { type: ActionType } => (ACTION_TYPES as readonly string[]).includes(step.type)).map((step) => ({ type: step.type, status: step.status, reason: step.reason })),

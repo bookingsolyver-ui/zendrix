@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Modal } from "@/components/ui/modal";
 import { BTN_GHOST, BTN_PRIMARY, INPUT } from "@/components/dashboard/settings/ui";
 import { callApi, errorMessage } from "@/lib/client/api";
-import { visibleName } from "@/lib/inbox/display";
+import { NO_NAME, visibleName } from "@/lib/inbox/display";
 import { LEAD_STAGE_LABEL, type LeadStageName } from "@/lib/leads/lead";
 
 export type ContactRow = {
@@ -29,7 +29,7 @@ const STAGE_STYLE: Record<LeadStageName, string> = {
 };
 
 function displayName(contact: ContactRow) {
-  return visibleName(contact.name) ?? contact.phone;
+  return visibleName(contact.name) ?? NO_NAME; // o número vive só na coluna «Telemóvel»
 }
 
 function initials(contact: ContactRow) {
@@ -150,7 +150,7 @@ export function ContactsTable({ contacts }: { contacts: ContactRow[] }) {
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-semibold text-foreground">
                       {initials(contact)}
                     </span>
-                    <span className="font-medium text-foreground">{displayName(contact)}</span>
+                    <span className={visibleName(contact.name) ? "font-medium text-foreground" : "italic text-muted"}>{displayName(contact)}</span>
                   </div>
                 </td>
                 <td className="px-5 py-4 text-muted">{contact.phone}</td>

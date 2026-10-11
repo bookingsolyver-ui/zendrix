@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { DashboardPageHeader } from "@/components/dashboard/page-header";
 import { ReceivablesPanel } from "@/components/dashboard/import/receivables-panel";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { contactLabel } from "@/lib/inbox/display";
+import { contactChoiceLabel } from "@/lib/inbox/display";
 import { prisma } from "@/lib/prisma";
 
 // Cash-Collector: página nova (ver docs/kwanza-expansion.md para o link).
@@ -14,7 +14,7 @@ export default async function ReceivablesPage({ params }: { params: Promise<{ lo
   return (
     <div>
       <DashboardPageHeader title="Cobranças" subtitle="Faturas por receber. Depois do vencimento, lembramos o cliente por WhatsApp com um tom que escala." />
-      <ReceivablesPanel contacts={contacts.map((c) => ({ id: c.id, label: contactLabel(c.name, c.waId, c.platform) }))} />
+      <ReceivablesPanel contacts={contacts.map((c) => ({ id: c.id, label: contactChoiceLabel(c.name, c.waId, c.platform) }))} />
     </div>
   );
 }
