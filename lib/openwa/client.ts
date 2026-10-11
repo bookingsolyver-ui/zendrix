@@ -1,6 +1,6 @@
 import "server-only";
 import type { OpenWaConfig } from "./config";
-import { extractSessionArray } from "./parse-sessions";
+import { extractSessionArray, isTunnelOffline } from "./parse-sessions";
 
 // Cliente HTTP do OpenWA (autenticação: cabeçalho X-API-Key). Caminhos conferidos com o openapi.json do OpenWA
 // 0.24. Nunca regista corpos de resposta (podem trazer QR Codes ou números).
@@ -42,7 +42,17 @@ async function call(
   } catch {
     throw new OpenWaError(0, "openwa_unreachable");
   }
-  const json: unknown = await res.json().catch(() => null);
+  const text = await res.text().catch(() => "");
+  // Túnel ngrok em baixo: o ngrok responde ele próprio (HTML, 404) e o pedido nunca chega ao OpenWA. Conta como
+  // servidor inacessível (status 0), não como recusa.
+  if (!res.ok && isTunnelOffline(text))
+    throw new OpenWaError(0, "openwa_unreachable");
+  let json: unknown = null;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    json = null;
+  }
   if (!res.ok) throw new OpenWaError(res.status, `openwa_${res.status}`);
   return json;
 }
@@ -207,6 +217,17 @@ export async function downloadMessageMedia(
     } catch {
       throw new OpenWaError(0, "openwa_unreachable");
     }
+    if (
+      !res.ok &&
+      isTunnelOffline(
+        await res
+          .clone()
+          .text()
+          .catch(() => ""),
+      )
+    ) {
+      throw new OpenWaError(0, "openwa_unreachable");
+    }
     if (res.status === 404 && attempt < 3) {
       await sleep(1_500);
       continue;
@@ -260,6 +281,7 @@ export async function listSessions(
     if (status !== 200) {
       console.error("[openwa/list-sessions-error]", {
         status,
+        ...(isTunnelOffline(raw) ? { reason: "tunnel_offline" } : {}),
         bodyRaw: raw.slice(0, 250),
       });
       return null;

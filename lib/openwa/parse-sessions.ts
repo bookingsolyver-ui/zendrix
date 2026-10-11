@@ -28,3 +28,9 @@ export function extractSessionArray(
   const arrays = Object.values(json).filter(Array.isArray);
   return arrays.length === 1 ? (arrays[0] as unknown[]) : null;
 }
+
+// O corpo de erro é de um túnel ngrok em baixo (ERR_NGROK_3200 "endpoint is offline", etc.)? Nesse caso o OpenWA
+// nem chegou a ser contactado, seja qual for o código HTTP (o ngrok responde 404).
+export function isTunnelOffline(body: string | null | undefined): boolean {
+  return typeof body === "string" && /ERR_NGROK_|ngrok/i.test(body);
+}
