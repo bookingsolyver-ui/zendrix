@@ -27,7 +27,7 @@ async function patch(id: string, body: unknown) {
   }
 }
 
-const ERRORS: Record<string, string> = { no_stripe_subscription: "Esta organização não tem subscrição no Stripe.", stripe_unavailable: "Não foi possível falar com o Stripe.", already_approved: "Já estava aprovada.", not_pending: "Só se rejeitam contas por aprovar.", not_trialing: "Só se prolonga o teste de organizações em teste.", invalid_input: "Verifique os campos.", not_found: "Organização não encontrada." };
+const ERRORS: Record<string, string> = { no_stripe_subscription: "Esta organização não tem subscrição no Stripe.", stripe_unavailable: "Não foi possível falar com o Stripe.", already_approved: "Já estava aprovada.", not_pending: "Só se rejeitam contas por aprovar.", not_trialing: "Só se prolonga o teste de organizações em teste.", invalid_input: "Verifique os campos.", not_found: "Organização não encontrada.", service_role_missing: "Falta a SUPABASE_SERVICE_ROLE_KEY no servidor.", confirm_failed: "Não foi possível confirmar o e-mail no Supabase." };
 
 // Bloquear/desbloquear, alterar o plano à mão e prolongar o teste. Só recebe texto e booleanos (nunca funções).
 export function OrgActions(props: OrgActionsProps) {
@@ -78,6 +78,15 @@ export function OrgActions(props: OrgActionsProps) {
           </div>
         </div>
       )}
+
+      <div className={CARD}>
+        <h2 className="text-sm font-semibold text-white">E-mail do proprietário</h2>
+        <p className="mt-1 text-sm text-white/50">Se o e-mail de confirmação não chegou, confirme-o aqui para a pessoa poder entrar.</p>
+        <button type="button" disabled={busy !== null} onClick={() => void run("confirm", { action: "confirm_email" }, `Confirmar o e-mail do proprietário de «${props.name}»?`)} className={`${BTN_GHOST} mt-3`}>
+          {busy === "confirm" && <Loader2 className="h-4 w-4 animate-spin" />}
+          Confirmar e-mail
+        </button>
+      </div>
 
       <div className={CARD}>
         <h2 className="text-sm font-semibold text-white">Acesso</h2>

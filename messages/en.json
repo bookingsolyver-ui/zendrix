@@ -255,7 +255,12 @@
       "invalid": "Incorrect email or password.",
       "callbackError": "We could not confirm your access. Please try signing in again.",
       "generic": "Could not sign in. Please try again.",
-      "forgot": "Forgot your password?"
+      "forgot": "Forgot your password?",
+      "unconfirmed": "Your email isn't confirmed yet. Open the email we sent you (check spam too) or request another.",
+      "resend": "Resend confirmation email",
+      "resendWait": "Resend email in {seconds}s",
+      "resendSent": "We sent a new email. Check your spam folder too.",
+      "rateLimited": "Too many attempts. Wait a minute and try again."
     },
     "register": {
       "title": "Create account",

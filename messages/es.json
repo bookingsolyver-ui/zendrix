@@ -255,7 +255,12 @@
       "invalid": "Correo o contraseña incorrectos.",
       "callbackError": "No se pudo confirmar su acceso. Inténtelo de nuevo.",
       "generic": "No se pudo iniciar sesión. Inténtelo de nuevo.",
-      "forgot": "¿Olvidaste tu contraseña?"
+      "forgot": "¿Olvidaste tu contraseña?",
+      "unconfirmed": "Tu correo aún no está confirmado. Abre el correo que te enviamos (revisa también el spam) o pide otro.",
+      "resend": "Reenviar correo de confirmación",
+      "resendWait": "Reenviar correo en {seconds}s",
+      "resendSent": "Enviamos un nuevo correo. Revisa también el spam.",
+      "rateLimited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo."
     },
     "register": {
       "title": "Crear cuenta",

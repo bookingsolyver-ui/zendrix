@@ -4,6 +4,7 @@ import { adminActionSchema, extendedTrialEnd } from "@/lib/admin/schema";
 import { appOrigin } from "@/lib/http/origin";
 import { notify, ownerRecipients } from "@/lib/email/notify";
 import { prisma } from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripeGet } from "@/lib/stripe/client";
 import { idSchema } from "@/lib/validations/team";
 
@@ -76,6 +77,23 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           });
           extra = { notified: true };
         }
+        break;
+      }
+      case "confirm_email": {
+        // O administrador confirma o e-mail por quem não recebeu a mensagem. Só os proprietários da organização.
+        const admin_ = supabaseAdmin();
+        if (!admin_) return fail("service_role_missing", 503);
+        const owners = await prisma.user.findMany({ where: { workspaceId: id.data, role: "OWNER" }, select: { authId: true } });
+        const authIds = owners.flatMap((owner) => (owner.authId ? [owner.authId] : []));
+        if (authIds.length === 0) return fail("not_found", 404);
+        let confirmed = 0;
+        for (const authId of authIds) {
+          const { error } = await admin_.auth.admin.updateUserById(authId, { email_confirm: true });
+          if (error) console.error("[admin/confirm_email] falhou", error.status, error.code);
+          else confirmed++;
+        }
+        if (confirmed === 0) return fail("confirm_failed", 502);
+        extra = { confirmed };
         break;
       }
       case "reject":

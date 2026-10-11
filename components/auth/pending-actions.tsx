@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 
@@ -8,6 +8,15 @@ import { useRouter } from "@/i18n/navigation";
 export function PendingActions({ checkLabel, logoutLabel }: { checkLabel: string; logoutLabel: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState<"check" | "logout" | null>(null);
+
+  // Verifica sozinha de 15 em 15 s (só com o separador visível): assim que o administrador aprova, a página leva ao
+  // painel sem a pessoa ter de carregar em nada. O estado é lido da base de dados a cada pedido.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 15_000);
+    return () => clearInterval(timer);
+  }, [router]);
 
   async function logout() {
     setBusy("logout");

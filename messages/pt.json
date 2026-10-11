@@ -255,7 +255,12 @@
       "invalid": "E-mail ou palavra-passe incorretos.",
       "callbackError": "Não foi possível confirmar o seu acesso. Tente entrar novamente.",
       "generic": "Não foi possível entrar. Tente novamente.",
-      "forgot": "Esqueceu a palavra-passe?"
+      "forgot": "Esqueceu a palavra-passe?",
+      "unconfirmed": "O seu e-mail ainda não foi confirmado. Abra o e-mail que lhe enviámos (veja também o spam) ou peça outro.",
+      "resend": "Reenviar e-mail de confirmação",
+      "resendWait": "Reenviar e-mail em {seconds}s",
+      "resendSent": "Enviámos um novo e-mail. Veja também a pasta de spam.",
+      "rateLimited": "Demasiadas tentativas. Aguarde um minuto e tente novamente."
     },
     "register": {
       "title": "Criar conta",
