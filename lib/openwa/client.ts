@@ -20,14 +20,14 @@ export class OpenWaError extends Error {
 
 const TIMEOUT_MS = 25_000;
 
-async function call(cfg: OpenWaConfig, method: string, path: string, body?: unknown): Promise<unknown> {
+async function call(cfg: OpenWaConfig, method: string, path: string, body?: unknown, timeoutMs = TIMEOUT_MS): Promise<unknown> {
   let res: Response;
   try {
     res = await fetch(`${cfg.baseUrl}/api${path}`, {
       method,
       headers: { "X-API-Key": cfg.apiKey, ...(body !== undefined ? { "Content-Type": "application/json" } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
     throw new OpenWaError(0, "openwa_unreachable");
@@ -58,8 +58,8 @@ export async function createSession(cfg: OpenWaConfig, name: string): Promise<{ 
 export const startSession = (cfg: OpenWaConfig, id: string) =>
   call(cfg, "POST", `/sessions/${encodeURIComponent(id)}/start`);
 
-export async function sessionState(cfg: OpenWaConfig, id: string): Promise<ConnState> {
-  const json = await call(cfg, "GET", `/sessions/${encodeURIComponent(id)}`);
+export async function sessionState(cfg: OpenWaConfig, id: string, timeoutMs = TIMEOUT_MS): Promise<ConnState> {
+  const json = await call(cfg, "GET", `/sessions/${encodeURIComponent(id)}`, undefined, timeoutMs);
   return mapStatus(isRecord(json) ? str(json.status) : null);
 }
 

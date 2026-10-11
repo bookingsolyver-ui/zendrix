@@ -126,3 +126,47 @@ export async function disconnectQr(workspaceId: string): Promise<boolean> {
   await prisma.socialIntegration.delete({ where: { id: integration.id } });
   return true;
 }
+
+// Estado do canal QR da organização para o aviso do painel. Nunca lança e responde em poucos segundos. Em cache
+// durante 30 s por organização (o painel é pedido a cada navegação). «unreachable» NÃO marca a ligação como perdida:
+// um servidor OpenWA em baixo não quer dizer que o telemóvel se desligou.
+export type QrChannelHealth = "none" | "open" | "connecting" | "lost" | "unreachable";
+
+const healthCache = new Map<string, { at: number; value: QrChannelHealth }>();
+const HEALTH_TTL_MS = 30_000;
+
+export async function qrChannelHealth(workspaceId: string): Promise<QrChannelHealth> {
+  const cached = healthCache.get(workspaceId);
+  if (cached && Date.now() - cached.at < HEALTH_TTL_MS) return cached.value;
+
+  let value: QrChannelHealth = "none";
+  try {
+    const integration = await qrIntegration(workspaceId);
+    const cfg = openWaConfig();
+    if (integration?.providerAccountId) {
+      if (!cfg) {
+        value = "unreachable";
+      } else {
+        try {
+          const state = await sessionState(cfg, integration.providerAccountId.slice(QR_PREFIX.length), 4_000);
+          await syncStatus(integration.id, integration.status, state);
+          value = state === "open" ? "open" : state === "connecting" ? "connecting" : "lost";
+        } catch (err) {
+          // 404 = a sessão já não existe no servidor (apagada): perdida. Qualquer outra falha = servidor inacessível.
+          value = err instanceof OpenWaError && err.status === 404 ? "lost" : "unreachable";
+          if (value === "lost") {
+            await prisma.socialIntegration.updateMany({ where: { id: integration.id, status: "ACTIVE" }, data: { status: "DISCONNECTED" } });
+          }
+        }
+        if (value === "unreachable") console.warn("[openwa] servidor inacessível ao verificar o canal de", workspaceId);
+        if (value === "lost") console.error("[openwa] a ligação do WhatsApp por QR foi perdida:", workspaceId);
+      }
+    }
+  } catch (err) {
+    console.error("[openwa] verificação do canal falhou:", err instanceof Error ? err.name : "unknown");
+    value = "unreachable";
+  }
+  healthCache.set(workspaceId, { at: Date.now(), value });
+  if (healthCache.size > 200) healthCache.clear();
+  return value;
+}
