@@ -5,6 +5,7 @@ import { Loader2, Send } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { BTN_PRIMARY, INPUT } from "@/components/dashboard/settings/ui";
 import { renderTemplate } from "@/lib/templates/meta-payload";
+import { suggestValues, type ContactFacts } from "@/lib/templates/autofill";
 import type { ChatMessage } from "@/lib/inbox/types";
 
 interface ApprovedTemplate {
@@ -27,11 +28,13 @@ const ERRORS: Record<string, string> = {
 };
 
 // Escolher um modelo aprovado, preencher as variáveis e enviar. Funciona fora da janela de 24 h.
-export function TemplatePicker({ conversationId, onClose, onSent }: { conversationId: string; onClose: () => void; onSent: (message: ChatMessage) => void }) {
+export function TemplatePicker({ conversationId, contact, onClose, onSent }: { conversationId: string; contact: ContactFacts; onClose: () => void; onSent: (message: ChatMessage) => void }) {
   const [templates, setTemplates] = useState<ApprovedTemplate[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [values, setValues] = useState<string[]>([]);
+  // Quantas variáveis foram preenchidas com os dados do contacto (para avisar o operador de que pode editar).
+  const [autoFilled, setAutoFilled] = useState(0);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,7 +88,14 @@ export function TemplatePicker({ conversationId, onClose, onSent }: { conversati
         <ul className="space-y-2">
           {templates.map((template) => (
             <li key={template.id}>
-              <button type="button" onClick={() => { setSelectedId(template.id); setValues([]); setError(null); }} className="w-full rounded-xl border border-border bg-surface-2 p-3 text-left transition-colors hover:border-primary">
+              <button type="button" onClick={() => {
+                // Já abre preenchido com o que o CRM sabe do contacto (nome, e-mail, telemóvel…); o operador só edita se quiser.
+                const suggested = suggestValues(template.body, template.variables, contact);
+                setSelectedId(template.id);
+                setValues(suggested);
+                setAutoFilled(suggested.filter((value) => value.trim().length > 0).length);
+                setError(null);
+              }} className="w-full rounded-xl border border-border bg-surface-2 p-3 text-left transition-colors hover:border-primary">
                 <p className="font-mono text-sm font-medium text-foreground">{template.name}</p>
                 <p className="mt-1 line-clamp-2 text-xs text-muted">{template.body}</p>
               </button>
@@ -97,6 +107,11 @@ export function TemplatePicker({ conversationId, onClose, onSent }: { conversati
       {selected && (
         <div className="space-y-3">
           <button type="button" onClick={() => setSelectedId(null)} className="text-xs text-muted hover:text-foreground">← Escolher outro modelo</button>
+          {autoFilled > 0 && (
+            <p className="text-xs text-neon-green">
+              {autoFilled === 1 ? "1 campo preenchido" : `${autoFilled} campos preenchidos`} com os dados do contacto. Pode editar antes de enviar.
+            </p>
+          )}
           {selected.variables.map((variable, index) => (
             <input key={variable} value={values[index] ?? ""} onChange={(event) => setValues((prev) => { const next = [...prev]; next[index] = event.target.value; return next; })} maxLength={200} placeholder={`Valor para {{${variable}}}`} aria-label={`Variável ${variable}`} className={`${INPUT} w-full`} />
           ))}

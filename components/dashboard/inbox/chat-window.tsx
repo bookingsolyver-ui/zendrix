@@ -356,6 +356,7 @@ export function ChatWindow({
       {pickerOpen && (
         <TemplatePicker
           conversationId={id}
+          contact={{ name: conversation.contactName, waId: conversation.waId, email: conversation.email, painPoint: conversation.painPoint }}
           onClose={() => setPickerOpen(false)}
           onSent={(message) => {
             setMessages((previous) => [...previous, message]);
