@@ -2,11 +2,8 @@ import "server-only";
 import { runAgentSafely } from "@/lib/agent";
 import { drainOutbox } from "@/lib/outbox/process";
 import { prisma } from "@/lib/prisma";
-import {
-  mediaPathFor,
-  storageConfigured,
-  uploadMedia,
-} from "@/lib/storage/media";
+import { visibleName } from "@/lib/inbox/display";
+import { saveAttachment } from "@/lib/storage/attachments";
 import { toDataUrl, visionEligible } from "./vision-format";
 
 // Imagem ou documento que NÃO é um comprovativo (o comprovativo tem o seu caminho em lib/payments/proofs.ts):
@@ -24,20 +21,35 @@ export async function handleVisualMessage(job: {
   try {
     const media = await job.getMedia();
     if (media && media.buffer.length > 0) {
-      if (storageConfigured()) {
-        const path = mediaPathFor(
-          job.workspaceId,
-          job.conversationId,
-          job.waMessageId,
-          media.mime,
-        );
-        if (await uploadMedia(path, media.buffer, media.mime)) {
+      // Pasta anexos_gerais/ (um comprovativo já foi guardado em comprovativos/ por captureProof).
+      const message = await prisma.message.findUnique({
+        where: { waMessageId: job.waMessageId },
+        select: {
+          workspaceId: true,
+          createdAt: true,
+          conversation: {
+            select: { contact: { select: { name: true, waId: true } } },
+          },
+        },
+      });
+      if (message && message.workspaceId === job.workspaceId) {
+        const saved = await saveAttachment({
+          workspaceId: job.workspaceId,
+          isPaymentProof: false,
+          customerName:
+            visibleName(message.conversation.contact.name) ??
+            message.conversation.contact.waId,
+          at: message.createdAt,
+          waMessageId: job.waMessageId,
+          media,
+        });
+        if (saved.storagePath) {
           await prisma.message.updateMany({
             where: {
               waMessageId: job.waMessageId,
               workspaceId: job.workspaceId,
             },
-            data: { mediaPath: path },
+            data: { mediaPath: saved.storagePath },
           });
         }
       }

@@ -32,3 +32,16 @@ Fluxo: o agente envia os dados bancários → o cliente paga e envia o comprovat
 - O prompt do agente tem regras para: fecho de venda (envia os dados bancários logo que há intenção clara de compra), dúvidas visuais (cruza com a base de conhecimento, sem inventar stock nem preços) e comprovativos (agradece, «em análise», nunca confirma o pagamento).
 - O IBAN **não** é injetado no prompt, de propósito: só a ferramenta `enviar_dados_bancarios` o envia, lendo os dados da organização, para o modelo nunca o poder alterar nem inventar.
 - Limite: o canal oficial da Meta ainda não usa este caminho (imagens que não são comprovativos continuam sem resposta do agente).
+
+## Onde ficam os ficheiros (pastas no Storage)
+
+Os anexos recebidos por WhatsApp ficam no bucket privado do Supabase Storage (o disco da Vercel é efémero), organizados por «pastas» dentro do prefixo da organização:
+
+```
+<workspaceId>/comprovativos/Joao_Silva_1697034500_C123XYZ.pdf   comprovativo (depois de enviados os dados bancários)
+<workspaceId>/anexos_gerais/Ana_Costa_1697034777_A98B21.jpg     foto de peça, documento, outros
+```
+
+- Nome = cliente (sem acentos nem símbolos; o número se ainda não tem nome) + timestamp da mensagem + fim do id (evita colisões no mesmo segundo).
+- O caminho fica em `message.mediaPath` (sem migração). A Inbox gera um URL assinado de curta duração a cada pedido; não se guarda um URL na base de dados porque expiraria.
+- Eliminar a organização apaga todas as pastas (`deleteWorkspaceMedia`).
