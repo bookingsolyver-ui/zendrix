@@ -32,6 +32,15 @@ export const metaMessageSchema = z.object({
     .object({ id: z.string().min(1), mime_type: z.string().optional().catch(undefined) })
     .optional()
     .catch(undefined),
+  // Imagem ou documento (um possível comprovativo de pagamento): só o que é preciso para o descarregar.
+  image: z
+    .object({ id: z.string().min(1), mime_type: z.string().optional().catch(undefined) })
+    .optional()
+    .catch(undefined),
+  document: z
+    .object({ id: z.string().min(1), mime_type: z.string().optional().catch(undefined) })
+    .optional()
+    .catch(undefined),
 });
 export type MetaMessage = z.infer<typeof metaMessageSchema>;
 

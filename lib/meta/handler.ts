@@ -7,6 +7,9 @@ import { drainOutbox } from "@/lib/outbox/process";
 import { META_OBJECTS, metaWebhookSchema } from "@/lib/validations/meta-whatsapp";
 import { applyStatusUpdate, saveInboundMessage } from "@/lib/whatsapp/inbox-store";
 import { processInboundAudio, type AudioJob } from "@/lib/whatsapp/inbound-audio";
+import { captureProof } from "@/lib/payments/proofs";
+import { isProofMessageType } from "@/lib/payments/bank-format";
+import { downloadMedia, getWhatsAppToken } from "@/lib/whatsapp/media";
 import {
   extractEvents,
   extractMessagingEvents,
@@ -93,6 +96,8 @@ export async function handleMetaPost(request: Request) {
 
   const freshEvents: AgentEvent[] = [];
   const audioJobs: AudioJob[] = [];
+  // Imagens e documentos que podem ser comprovativos de pagamento (só contam se já enviámos os dados bancários).
+  const proofJobs: { workspaceId: string; conversationId: string; waMessageId: string; type: string; mediaId: string | null; mime: string | null }[] = [];
 
   try {
     for (const message of messages) {
@@ -101,6 +106,8 @@ export async function handleMetaPost(request: Request) {
       if (message.type === "audio" && message.mediaId) {
         // Descarregar + transcrever demora: fica para depois do 200. O agente só corre quando houver texto.
         audioJobs.push({ ...saved, waMessageId: message.waMessageId, mediaId: message.mediaId });
+      } else if (isProofMessageType(message.type) && message.platform === "WHATSAPP") {
+        proofJobs.push({ ...saved, waMessageId: message.waMessageId, type: message.type, mediaId: message.mediaId, mime: message.mimeType });
       } else {
         freshEvents.push({ ...saved, waMessageId: message.waMessageId, type: message.type });
       }
@@ -129,6 +136,23 @@ export async function handleMetaPost(request: Request) {
         }),
       ),
     ]);
+    // Comprovativos: guarda o ficheiro, regista-o, pausa a IA e responde ao cliente (lib/payments/proofs.ts). Nunca lança.
+    await Promise.all(
+      proofJobs.map((job) =>
+        captureProof({
+          workspaceId: job.workspaceId,
+          conversationId: job.conversationId,
+          waMessageId: job.waMessageId,
+          type: job.type,
+          getMedia: async () => {
+            if (!job.mediaId) return null;
+            const token = await getWhatsAppToken(job.workspaceId);
+            if (!token) return null;
+            return downloadMedia(job.mediaId, token);
+          },
+        }).catch((err) => console.error("[meta/proof] falhou:", err instanceof Error ? err.message : err)),
+      ),
+    );
     // Qualquer evento da Meta aproveita para reenviar o que ficou na fila (tentativas por fazer, etc.): num
     // plano sem cron por minuto, é o tráfego real que mantém a fila a andar.
     await drainOutbox(8_000);

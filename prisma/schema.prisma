@@ -973,3 +973,39 @@ model KwanzaAdmin_QuotaOverride {
   @@unique([workspaceId, metric])
   @@map("ZetrixAdmin_QuotaOverride")
 }
+
+// ─── Pagamento por transferência bancária ───
+// Isolado (ids em texto, sem relações para os modelos existentes): nunca bloqueia consultas. Ver docs/kwanza-bank-transfer.md.
+
+// As coordenadas bancárias que o agente envia ao cliente. Uma linha por organização.
+model BankDetails {
+  id           String   @id @default(cuid())
+  workspaceId  String   @unique
+  bankName     String
+  holderName   String
+  iban         String
+  nib          String?
+  instructions String? // texto livre acrescentado à mensagem (ex.: «Use o seu nome como referência»)
+  updatedAt    DateTime @updatedAt
+}
+
+// Um comprovativo de pagamento enviado pelo cliente (imagem ou documento) à espera de validação.
+model PaymentProof {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  conversationId String
+  contactId      String
+  messageId      String    @unique // a mensagem com o ficheiro: um comprovativo nunca se regista duas vezes
+  mediaPath      String? // no Storage (ver lib/storage/media.ts)
+  mimeType       String?
+  itemName       String? // o que está a ser pago, quando se sabe
+  amountLabel    String? // «25 000 Kz», quando se sabe
+  status         String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  note           String? // motivo da rejeição
+  decidedBy      String? // id do utilizador que decidiu
+  decidedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([workspaceId, status, createdAt])
+  @@index([conversationId])
+}

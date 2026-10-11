@@ -64,6 +64,15 @@ const ALL_NAV_ENTRIES: NavEntry[] = [
   { type: "link", label: "Inbox", href: "/dashboard/inbox", icon: Inbox },
   {
     type: "group",
+    label: "Pagamentos",
+    icon: CreditCard,
+    items: [
+      { label: "Comprovativos", href: "/dashboard/payments", icon: Receipt },
+      { label: "Dados bancários", href: "/dashboard/settings/payments", icon: DollarSign, managersOnly: true },
+    ],
+  },
+  {
+    type: "group",
     label: "CRM",
     icon: KanbanSquare,
     feature: "crm",

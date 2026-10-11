@@ -92,7 +92,7 @@ export function promptDeSistema(
   contexto: ContextoDoAgente,
   agora = new Date(),
 ) {
-  const { schedule, payments } = contexto.capabilities;
+  const { schedule, payments, bank } = contexto.capabilities;
 
   const qualificacao = `QUALIFICAÇÃO DO CLIENTE (ferramenta atualizar_lead)
 - Quando o cliente disser o nome, o e-mail ou o que precisa, guarda-o com atualizar_lead. Pergunta uma coisa de cada vez e só quando fizer sentido na conversa; nunca faças um interrogatório.
@@ -110,6 +110,13 @@ ${catalogForPrompt(payments)}
 - Se pedirem outra forma de pagar, um reembolso ou algo que não está aqui, diz que a equipa dá seguimento.`
       : `PAGAMENTOS
 - Não consegues cobrar nem enviar links de pagamento. Se o cliente quiser pagar, diz que a equipa lhe envia o pagamento.`;
+
+  const transferencia = bank
+    ? `TRANSFERÊNCIA BANCÁRIA (ferramenta enviar_dados_bancarios)
+- Quando o cliente confirmar que quer comprar, ou pedir os dados para pagar ou transferir, chama enviar_dados_bancarios (com o item_id do catálogo, se houver). Os dados seguem numa mensagem à parte, exatos.
+- NUNCA escrevas tu um IBAN, NIB ou nome de banco: só a ferramenta os envia. Depois diz numa frase curta que, depois de pagar, deve enviar o comprovativo por aqui.
+- Nunca digas que o pagamento foi recebido: quem valida o comprovativo é a equipa.`
+    : "";
 
   const agenda = schedule
     ? `AGENDA (tens acesso direto à Agenda: marcas tu, sem passar pela equipa)
@@ -138,7 +145,7 @@ ${qualificacao}
 
 ${pagamentos}
 
-${postura}
+${transferencia ? `${transferencia}\n\n` : ""}${postura}
 
 ${agenda}
 

@@ -6,7 +6,7 @@ import { QR_PREFIX } from "./config.ts";
 
 export type OpenWaEvent =
   | { kind: "status"; sessionId: string; status: string }
-  // `media`: só nas notas de voz. O webhook pode trazer os bytes em base64 (até ~1 MiB); acima disso vem só o tipo.
+  // `media`: nas notas de voz, imagens e documentos. O webhook pode trazer os bytes em base64 (até ~1 MiB); acima disso vem só o tipo.
   | { kind: "message"; sessionId: string; message: InboundMessage; media?: { mimetype: string | null; base64: string | null } }
   | { kind: "ignored" };
 
@@ -50,9 +50,10 @@ export function parseOpenWaWebhook(payload: unknown): OpenWaEvent {
   const body = type === "text" ? text : (PLACEHOLDER[type] ?? text);
   if (!body) return { kind: "ignored" };
 
-  // Nota de voz: o webhook pode trazer o média inline (data.media ou data.metadata.media).
+  // Nota de voz, imagem ou documento (um possível comprovativo): o webhook pode trazer o média inline
+  // (data.media ou data.metadata.media); se vier só o marcador, descarrega-se pelo id da mensagem.
   let media: { mimetype: string | null; base64: string | null } | undefined;
-  if (type === "audio" || type === "voice") {
+  if (type === "audio" || type === "voice" || type === "image" || type === "document") {
     const holder = isRecord(data.media) ? data.media : isRecord(data.metadata) && isRecord(data.metadata.media) ? data.metadata.media : null;
     const base64 = holder && typeof holder.data === "string" && holder.data.length > 0 && holder.omitted !== true ? holder.data : null;
     media = { mimetype: (holder && str(holder.mimetype)) ?? str(data.mimetype), base64 };

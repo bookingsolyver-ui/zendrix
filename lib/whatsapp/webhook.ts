@@ -86,6 +86,7 @@ export function extractEvents(payload: unknown) {
     for (const msg of change.messages) {
       // Only text is rendered for now; other types keep a readable placeholder.
       const audio = msg.type === "audio" ? msg.audio : undefined;
+      const attachment = msg.type === "image" ? msg.image : msg.type === "document" ? msg.document : undefined;
       const body =
         msg.type === "text" && msg.text
           ? msg.text.body
@@ -101,8 +102,8 @@ export function extractEvents(payload: unknown) {
         type: msg.type,
         body,
         timestamp: msg.timestamp > 0 ? new Date(msg.timestamp * 1000) : new Date(),
-        mediaId: audio?.id ?? null,
-        mimeType: audio?.mime_type ?? null,
+        mediaId: audio?.id ?? attachment?.id ?? null,
+        mimeType: audio?.mime_type ?? attachment?.mime_type ?? null,
       });
     }
 

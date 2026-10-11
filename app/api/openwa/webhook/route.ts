@@ -8,6 +8,10 @@ import { drainOutbox } from "@/lib/outbox/process";
 import { prisma } from "@/lib/prisma";
 import { saveInboundMessage } from "@/lib/whatsapp/inbox-store";
 import { processQrAudio } from "@/lib/openwa/inbound-audio";
+import { downloadMessageMedia } from "@/lib/openwa/client";
+import { openWaConfig } from "@/lib/openwa/config";
+import { captureProof } from "@/lib/payments/proofs";
+import { isProofMessageType } from "@/lib/payments/bank-format";
 
 export const maxDuration = 120; // as respostas humanizadas esperam alguns segundos entre mensagens
 
@@ -64,6 +68,26 @@ export async function POST(request: Request) {
         const agentEvent = await processQrAudio(job); // nunca lança
         if (agentEvent) await runAgentSafely([agentEvent]);
         await drainOutbox(60_000);
+      });
+      return NextResponse.json({ success: true });
+    }
+    // Imagem ou documento: pode ser um comprovativo de pagamento (só conta se já enviámos os dados bancários).
+    if (isProofMessageType(event.message.type)) {
+      const proof = {
+        workspaceId: saved.workspaceId,
+        conversationId: saved.conversationId,
+        waMessageId: event.message.waMessageId,
+        type: event.message.type,
+        getMedia: async () => {
+          if (event.media?.base64) return { buffer: Buffer.from(event.media.base64, "base64"), mime: event.media.mimetype ?? "image/jpeg" };
+          const cfg = openWaConfig();
+          if (!cfg) return null;
+          const media = await downloadMessageMedia(cfg, event.sessionId, `${event.message.waId}@c.us`, event.message.waMessageId);
+          return { buffer: media.buffer, mime: media.mime ?? event.media?.mimetype ?? "image/jpeg" };
+        },
+      };
+      after(async () => {
+        await captureProof(proof).catch((err) => console.error("[openwa/proof] falhou:", err instanceof Error ? err.message : err));
       });
       return NextResponse.json({ success: true });
     }

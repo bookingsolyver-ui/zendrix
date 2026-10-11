@@ -3,6 +3,9 @@ import { applyLeadUpdate } from "@/lib/leads/service";
 import { nextStage, sanitizeLeadUpdate, type LeadStageName } from "@/lib/leads/lead";
 import { createPaymentLink, loadPaymentCapability, type PaymentCapability } from "@/lib/payments/service";
 import { formatMoney } from "@/lib/payments/catalog";
+import { loadBankDetails, bankDetailsSentSince } from "@/lib/payments/bank";
+import { formatBankMessage } from "@/lib/payments/bank-format";
+import { enqueueText } from "@/lib/outbox/enqueue";
 import { prisma } from "@/lib/prisma";
 import type { ScheduleConfig } from "@/lib/schedule/config";
 import { bookAppointment, freeSlotsFor, loadScheduleConfig } from "@/lib/schedule/service";
@@ -16,11 +19,17 @@ import { addDaysISO, formatSlotHuman, isValidDateISO, todayISO, weekdayOf } from
 export interface AgentCapabilities {
   schedule: ScheduleConfig | null;
   payments: PaymentCapability;
+  // A organização configurou dados bancários: o agente pode enviá-los (ferramenta enviar_dados_bancarios).
+  bank: boolean;
 }
 
 export async function loadAgentCapabilities(workspaceId: string): Promise<AgentCapabilities> {
-  const [schedule, payments] = await Promise.all([loadScheduleConfig(workspaceId), loadPaymentCapability(workspaceId)]);
-  return { schedule, payments };
+  const [schedule, payments, bank] = await Promise.all([
+    loadScheduleConfig(workspaceId),
+    loadPaymentCapability(workspaceId),
+    prisma.bankDetails.count({ where: { workspaceId } }),
+  ]);
+  return { schedule, payments, bank: bank > 0 };
 }
 
 export interface ToolContext {
@@ -120,6 +129,25 @@ export function buildTools(capabilities: AgentCapabilities): ToolDefinition[] {
             item_id: { type: "string", enum: capabilities.payments.items.map((item) => item.id), description: "O id exato do item do catálogo." },
           },
           required: ["item_id"],
+        },
+      },
+    });
+  }
+  if (capabilities.bank) {
+    tools.push({
+      type: "function",
+      function: {
+        name: "enviar_dados_bancarios",
+        description:
+          "Envia ao cliente, numa mensagem à parte, os dados bancários da empresa (banco, titular, IBAN, NIB) para pagar por transferência. Usa-a quando o cliente confirmar que quer comprar ou pedir os dados para pagar. Os dados vão exatamente como estão configurados: não os escrevas tu.",
+        parameters: {
+          type: "object",
+          properties: {
+            ...(capabilities.payments.items.length > 0
+              ? { item_id: { type: "string", enum: capabilities.payments.items.map((item) => item.id), description: "O id exato do item do catálogo que ele quer pagar (traz o valor certo)." } }
+              : {}),
+            produto: { type: "string", description: "O que o cliente quer comprar, em poucas palavras (ex.: «Plano Pro»). Só o que ele disse." },
+          },
         },
       },
     });
@@ -271,6 +299,22 @@ export async function executeTool(context: ToolContext, name: string, args: Args
       }
       // `url` é lido por quem chama (cerebro.ts) para garantir que o link vai mesmo na resposta.
       return { ok: true, url: result.url, item: result.itemName, valor: result.amountLabel };
+    }
+
+    case "enviar_dados_bancarios": {
+      const bank = await loadBankDetails(context.workspaceId);
+      if (!bank) return { erro: "Esta organização não tem dados bancários configurados. Diz que a equipa envia os dados para pagar." };
+      // Não repete o envio se os dados acabaram de ir (o cliente insiste, ou o modelo chama duas vezes).
+      if (await bankDetailsSentSince(context.conversationId, new Date(Date.now() - 10 * 60 * 1000))) {
+        return { ok: true, jaEnviado: true, instrucao: "Os dados bancários já foram enviados há instantes. Diz só que os enviaste acima e pede o comprovativo." };
+      }
+      // O valor só vem do catálogo (nunca de texto livre do modelo): a IA não inventa preços.
+      const item = context.capabilities.payments.items.find((entry) => entry.id === text(args.item_id));
+      const itemName = item?.name ?? (text(args.produto).trim().slice(0, 80) || null);
+      const amountLabel = item ? formatMoney(item.amountMinor, item.currency) : null;
+      const sent = await enqueueText({ workspaceId: context.workspaceId, conversationId: context.conversationId, text: formatBankMessage(bank, { itemName, amountLabel }) });
+      if (!sent.ok) return { erro: "Não foi possível enviar os dados agora. Diz que a equipa os envia em instantes." };
+      return { ok: true, enviado: true, instrucao: "Os dados bancários já seguiram numa mensagem à parte. Responde só com UMA frase curta a pedir o comprovativo depois de pagar. NÃO escrevas IBAN nem dados bancários." };
     }
 
     default:

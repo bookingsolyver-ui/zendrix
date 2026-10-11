@@ -7,6 +7,7 @@ import { channelOf, CHANNEL_LABEL } from "@/lib/inbox/channels";
 import { LEAD_STAGE_LABEL } from "@/lib/leads/lead";
 import { ChannelBadge } from "@/components/dashboard/inbox/channel-badge";
 import { useCurrentUser } from "@/components/dashboard/current-user-context";
+import { ProofCard, type ProofView } from "@/components/dashboard/payments/proof-card";
 import { TemplatePicker } from "@/components/dashboard/inbox/template-picker";
 import { REPLY_WINDOW_MS, type ChatMessage, type ConversationSummary } from "@/lib/inbox/types";
 
@@ -60,6 +61,33 @@ export function ChatWindow({
   const currentUser = useCurrentUser(); // o nome da organização preenche as variáveis institucionais dos modelos
   // Canal de WhatsApp ativo ("meta" | "qr" | null): decide se vale a janela de 24 h da Meta.
   const [waKind, setWaKind] = useState<"meta" | "qr" | null>(null);
+  // Comprovativos de pagamento por validar nesta conversa (aprovação rápida sem sair da Inbox).
+  const [proofs, setProofs] = useState<ProofView[]>([]);
+  const [canDecideProofs, setCanDecideProofs] = useState(false);
+
+  const loadProofs = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/payments/proofs?conversationId=${encodeURIComponent(conversation.id)}&status=PENDING`, { cache: "no-store" });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
+        setProofs(data.proofs);
+        setCanDecideProofs(Boolean(data.canDecide));
+      }
+    } catch {
+      /* sem comprovativos à vista: a Inbox funciona na mesma */
+    }
+  }, [conversation.id]);
+
+  useEffect(() => {
+    const kickoff = setTimeout(() => void loadProofs(), 0);
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") void loadProofs();
+    }, 6_000);
+    return () => {
+      clearTimeout(kickoff);
+      clearInterval(timer);
+    };
+  }, [loadProofs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -260,7 +288,19 @@ export function ChatWindow({
                   : "self-start rounded-bl-sm bg-surface-2 text-foreground"
               }`}
             >
-              {message.mediaUrl && (
+              {message.mediaUrl && message.type === "image" && (
+                <a href={message.mediaUrl} target="_blank" rel="noreferrer" className="mb-1.5 block">
+                  {/* URL temporário do Storage: não passa pelo otimizador de imagens. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={message.mediaUrl} alt="Imagem recebida" className="max-h-60 max-w-[260px] rounded-lg object-cover" />
+                </a>
+              )}
+              {message.mediaUrl && message.type === "document" && (
+                <a href={message.mediaUrl} target="_blank" rel="noreferrer" className="mb-1.5 block text-xs underline">
+                  Abrir documento
+                </a>
+              )}
+              {message.mediaUrl && message.type === "audio" && (
                 // preload="none": não descarrega nada até alguém carregar em play. O URL é estável entre
                 // atualizações da lista, por isso a reprodução não reinicia.
                 <audio
@@ -305,6 +345,13 @@ export function ChatWindow({
         <div ref={bottomRef} />
       </div>
 
+      {proofs.length > 0 && (
+        <div className="space-y-2 border-t border-border bg-amber-400/5 p-3">
+          {proofs.map((proof) => (
+            <ProofCard key={proof.id} proof={proof} canDecide={canDecideProofs} compact onDone={() => { void loadProofs(); void onActivity(); }} />
+          ))}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="border-t border-border p-3">
         {isPaused && (
           <p className="mb-2 text-xs text-amber-300">
