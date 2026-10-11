@@ -25,6 +25,11 @@ export interface AgentEvent {
   type: string;
   // Nota de voz que não se conseguiu ouvir/transcrever: o agente pede ao cliente que escreva.
   unintelligible?: boolean;
+  // Imagem ou documento que NÃO é um comprovativo (ver lib/agent/vision.ts): o agente responde-lhe. Só os canais que
+  // trazem esta marca acordam o agente para tipos que não são texto.
+  visual?: boolean;
+  // A imagem em data URL, quando o modelo a pode ver.
+  imageDataUrl?: string;
 }
 
 const UNINTELLIGIBLE_REPLY =
@@ -87,7 +92,8 @@ async function isPaused(conversationId: string) {
 }
 
 async function handle(event: AgentEvent) {
-  if (event.type !== "text" && event.type !== "audio") return; // texto e notas de voz (já transcritas)
+  // texto e notas de voz (já transcritas); imagens/documentos só quando o canal os marcou (event.visual)
+  if (event.type !== "text" && event.type !== "audio" && !event.visual) return;
 
   // A organização a quem pertence esta conversa decide TUDO o que é específico do cliente: se o agente
   // está ligado, se a subscrição está em dia e qual é a ficha do negócio. AGENT_ENABLED continua a ser
@@ -128,7 +134,9 @@ async function handle(event: AgentEvent) {
       createdAt: true,
       type: true,
       body: true,
-      conversation: { select: { contact: { select: { id: true, waId: true } } } },
+      conversation: {
+        select: { contact: { select: { id: true, waId: true } } },
+      },
     },
   });
   if (!mine) return;
@@ -155,7 +163,10 @@ async function handle(event: AgentEvent) {
     workspaceId: event.workspaceId,
     conversationId: event.conversationId,
     contactId: mine.conversation.contact.id,
-    inboundText: event.unintelligible || (mine.type !== "text" && event.type !== "audio") ? null : mine.body,
+    inboundText:
+      event.unintelligible || (mine.type !== "text" && event.type !== "audio")
+        ? null
+        : mine.body,
   });
   if (nameStep.kind === "handled") return;
   if (nameStep.kind === "captured" && nameStep.pendingRequest === null) return;
@@ -220,6 +231,7 @@ async function handle(event: AgentEvent) {
         historico,
         mine.conversation.contact.waId,
         contexto,
+        event.imageDataUrl,
       );
     } catch (err) {
       console.error(
@@ -245,7 +257,9 @@ async function handle(event: AgentEvent) {
   // do envio; a nota de voz segue quando estiver pronta. (voice_only: só a voz, o texto só se ela falhar.)
   const textFirst = wantsVoice && voiceDelivery() === "text_then_voice";
   const speechPromise = wantsVoice ? synthesizeSpeech(reply) : null;
-  const speech = textFirst ? null : ((await speechPromise?.catch(() => null)) ?? null);
+  const speech = textFirst
+    ? null
+    : ((await speechPromise?.catch(() => null)) ?? null);
 
   // O modelo demora segundos: se um humano pausou a IA entretanto, a resposta é descartada.
   if (await isPaused(event.conversationId)) return;
@@ -286,14 +300,23 @@ async function handle(event: AgentEvent) {
   if (textFirst && speechPromise) {
     const late = await speechPromise.catch(() => null);
     // Se entretanto a IA foi pausada ou o cliente escreveu de novo, a nota de voz já não faz sentido.
-    if (late && !(await isPaused(event.conversationId)) && !(await hasNewerInbound(event.conversationId, mine))) {
+    if (
+      late &&
+      !(await isPaused(event.conversationId)) &&
+      !(await hasNewerInbound(event.conversationId, mine))
+    ) {
       const audio = await sendAudioInConversation({
         workspaceId: event.workspaceId,
         conversationId: event.conversationId,
         audio: late,
         transcript: reply,
       });
-      if (!audio.ok) console.error("[agent] nota de voz não enviada (o texto já foi):", audio.error, event.conversationId);
+      if (!audio.ok)
+        console.error(
+          "[agent] nota de voz não enviada (o texto já foi):",
+          audio.error,
+          event.conversationId,
+        );
     }
   }
 }

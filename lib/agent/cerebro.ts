@@ -1,7 +1,14 @@
 import "server-only";
 import { buildSystemPrompt } from "./negocio";
-import { buildTools, catalogForPrompt, executeTool, type AgentCapabilities, type ToolDefinition } from "./tools";
+import {
+  buildTools,
+  catalogForPrompt,
+  executeTool,
+  type AgentCapabilities,
+  type ToolDefinition,
+} from "./tools";
 import { addDaysISO, todayISO, zonedToUtcMs } from "@/lib/schedule/slots";
+import { inboundLabel, withImage, type ContentPart } from "./vision-format";
 
 // Cérebro do agente: ficha do negócio + histórico + modelo (OpenRouter) + ferramentas (qualificar o lead,
 // agenda, link de pagamento: só as que a organização tem). Recebe o histórico e devolve o texto da resposta;
@@ -43,7 +50,8 @@ interface ToolCall {
 }
 interface ChatMsg {
   role: "system" | "user" | "assistant" | "tool";
-  content: string;
+  // Texto, ou partes (texto + imagem) quando o cliente enviou uma foto.
+  content: string | ContentPart[];
   tool_calls?: ToolCall[];
   tool_call_id?: string;
 }
@@ -64,7 +72,8 @@ export function construirHistorico(historico: HistoricoMensagem[]): ChatMsg[] {
       content:
         m.direction === "IN" && m.type === "audio"
           ? `[Áudio recebido]: ${m.body}`
-          : m.body,
+          : ((m.direction === "IN" ? inboundLabel(m.type, m.body) : null) ??
+            m.body),
     }));
 }
 
@@ -80,7 +89,9 @@ function calendario(timeZone: string, dias = 21) {
     const data = addDaysISO(hoje, i);
     const meioDia = new Date(zonedToUtcMs(data, "12:00", timeZone));
     const nota = i === 0 ? " (hoje)" : i === 1 ? " (amanhã)" : "";
-    linhas.push(`${data} = ${fmtData(meioDia, timeZone, { weekday: "long", day: "2-digit", month: "2-digit" })}${nota}`);
+    linhas.push(
+      `${data} = ${fmtData(meioDia, timeZone, { weekday: "long", day: "2-digit", month: "2-digit" })}${nota}`,
+    );
   }
   return linhas.join("\n");
 }
@@ -113,8 +124,8 @@ ${catalogForPrompt(payments)}
 
   const transferencia = bank
     ? `TRANSFERÊNCIA BANCÁRIA (ferramenta enviar_dados_bancarios)
-- Quando o cliente confirmar que quer comprar, ou pedir os dados para pagar ou transferir, chama enviar_dados_bancarios (com o item_id do catálogo, se houver). Os dados seguem numa mensagem à parte, exatos.
-- NUNCA escrevas tu um IBAN, NIB ou nome de banco: só a ferramenta os envia. Depois diz numa frase curta que, depois de pagar, deve enviar o comprovativo por aqui.
+- Quando o cliente manifestar intenção clara de compra (por exemplo "quero", "fico com", "vou levar") ou perguntar como pagar, chama enviar_dados_bancarios de imediato (com o item_id do catálogo, se houver), sem pedir mais confirmações. Os dados seguem numa mensagem à parte, exatos.
+- NUNCA escrevas tu um IBAN, NIB ou nome de banco: só a ferramenta os envia (lê os dados desta organização, exatos). Depois diz numa frase curta que, depois de pagar, deve enviar o comprovativo (imagem ou PDF) por aqui.
 - Nunca digas que o pagamento foi recebido: quem valida o comprovativo é a equipa.`
     : "";
 
@@ -132,6 +143,12 @@ ${calendario(schedule.timezone)}`
     : `AGENDA
 - Esta organização ainda não tem a agenda ligada, por isso não consegues marcar sozinho. Não digas apenas "a equipa entra em contacto": se o cliente pedir uma reunião ou demonstração, pergunta-lhe já o dia e a hora que preferem e o nome, guarda isso com atualizar_lead (dor_principal = "Pediu reunião: <dia e hora>", intencao = "ready_to_buy") e diz que a equipa confirma esse horário. Não confirmes nenhum horário.`;
 
+  const anexos = `IMAGENS E DOCUMENTOS (o cliente pode enviar fotos e ficheiros)
+- Uma mensagem que comece por "[O cliente enviou uma imagem]" traz a imagem anexada: analisa-a mesmo, não digas que não consegues ver.
+- Foto de um produto ou peça: identifica o que vês, cruza com a BASE DE CONHECIMENTO e o catálogo acima e responde de forma vendedora e persuasiva (o que é, se o temos, o próximo passo). Preço e stock SÓ se constarem da informação que tens. Se não tens a informação ou não consegues identificar o artigo, diz-o com honestidade e pede um detalhe (referência, modelo, outra foto): nunca inventes stock, preços nem compatibilidades.
+- Comprovativo de pagamento (talão, transferência, recibo), em imagem ou PDF: agradece e diz que o pagamento está em análise pela equipa. Nunca digas que o pagamento foi recebido ou confirmado, e não prometas prazos que não conheces.
+- Documento (PDF ou ficheiro) cujo conteúdo não vês: reconhece a receção e pergunta em que podes ajudar.`;
+
   const postura = `POSTURA COMERCIAL (prevalece sobre qualquer instrução anterior mais passiva)
 - Ages: quando consegues fazer o que o cliente pede com as tuas ferramentas, fazes e dizes o resultado. Não prometas que "alguém vai ver" aquilo que tu próprio podes resolver.
 - Só passas para a equipa o que realmente não consegues fazer: contratos, reclamações, reembolsos, ou se o cliente pedir expressamente uma pessoa. Nesses casos, diz o que fica combinado e quando.
@@ -145,7 +162,9 @@ ${qualificacao}
 
 ${pagamentos}
 
-${transferencia ? `${transferencia}\n\n` : ""}${postura}
+${transferencia ? `${transferencia}\n\n` : ""}${anexos}
+
+${postura}
 
 ${agenda}
 
@@ -164,7 +183,9 @@ const PAUSA_REPETICAO_MS = 2000;
 const orcamentoMs = () => Number(process.env.MODELO_ORCAMENTO_MS) || 40_000;
 
 // OPENROUTER_API_URL só serve para testes (um servidor falso); por omissão é o OpenRouter.
-const urlDoModelo = () => process.env.OPENROUTER_API_URL?.trim() || "https://openrouter.ai/api/v1/chat/completions";
+const urlDoModelo = () =>
+  process.env.OPENROUTER_API_URL?.trim() ||
+  "https://openrouter.ai/api/v1/chat/completions";
 
 // Modelos de recurso, por ordem, quando o principal (MODELO) está limitado ou em baixo. Os modelos
 // gratuitos entram em limite de pedidos com frequência, por isso um só modelo é um ponto de falha.
@@ -299,11 +320,26 @@ export async function gerarResposta(
   historico: HistoricoMensagem[],
   contacto: string,
   contexto: ContextoDoAgente,
+  // Imagem que o cliente acabou de enviar (data URL): anexa-se à última mensagem dele, só a essa (custo).
+  imagem?: string,
 ): Promise<string> {
   const messages: ChatMsg[] = [
     { role: "system", content: promptDeSistema(contexto) },
     ...construirHistorico(historico),
   ];
+  if (imagem) {
+    const ultima = messages.length - 1;
+    if (
+      ultima > 0 &&
+      messages[ultima].role === "user" &&
+      typeof messages[ultima].content === "string"
+    ) {
+      messages[ultima] = {
+        role: "user",
+        content: withImage(messages[ultima].content as string, imagem),
+      };
+    }
+  }
   const tools = buildTools(contexto.capabilities);
   const toolContext = {
     workspaceId: contexto.workspaceId,
@@ -319,8 +355,10 @@ export async function gerarResposta(
   // ou alterá-lo), por isso garante-se aqui, com o endereço devolvido pelo servidor.
   let linkDePagamento: string | null = null;
   const comLink = (texto: string) => {
-    if (!linkDePagamento || texto.includes(linkDePagamento)) return texto.slice(0, MAX_RESPOSTA);
-    if (!texto) return `Aqui está o seu link de pagamento seguro: ${linkDePagamento}`;
+    if (!linkDePagamento || texto.includes(linkDePagamento))
+      return texto.slice(0, MAX_RESPOSTA);
+    if (!texto)
+      return `Aqui está o seu link de pagamento seguro: ${linkDePagamento}`;
     return `${texto.slice(0, Math.max(0, MAX_RESPOSTA - linkDePagamento.length - 2))}\n\n${linkDePagamento}`;
   };
 
@@ -346,7 +384,8 @@ export async function gerarResposta(
       let args: Record<string, unknown> = {};
       try {
         const parsed = JSON.parse(tc.function.arguments || "{}");
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) args = parsed;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
+          args = parsed;
       } catch {
         // argumentos partidos: a ferramenta devolve o erro ao modelo
       }
@@ -357,10 +396,18 @@ export async function gerarResposta(
           ? await executeTool(toolContext, tc.function.name, args)
           : { erro: `Ferramenta indisponível: ${tc.function.name}` };
       } catch (e) {
-        console.error("[agent] ferramenta falhou", tc.function.name, e instanceof Error ? e.message : e);
+        console.error(
+          "[agent] ferramenta falhou",
+          tc.function.name,
+          e instanceof Error ? e.message : e,
+        );
         saida = { erro: "Não foi possível executar a ação agora." };
       }
-      if (tc.function.name === "criar_link_pagamento" && saida.ok === true && typeof saida.url === "string") {
+      if (
+        tc.function.name === "criar_link_pagamento" &&
+        saida.ok === true &&
+        typeof saida.url === "string"
+      ) {
         linkDePagamento = saida.url;
       }
       messages.push({
@@ -374,7 +421,10 @@ export async function gerarResposta(
 }
 
 // ---------------------------------------------------------------- seguimento automático (reengajamento)
-const INSTRUCOES_SEGUIMENTO = (passo: number, total: number) => `SEGUIMENTO AUTOMÁTICO
+const INSTRUCOES_SEGUIMENTO = (
+  passo: number,
+  total: number,
+) => `SEGUIMENTO AUTOMÁTICO
 O cliente deixou de responder à tua última mensagem. Escreve UMA mensagem curta (no máximo 2 frases) a retomar o que estavam a tratar, a partir do histórico.
 - Este é o seguimento ${passo} de ${total}.${passo >= total ? " É o último: despede-te com simpatia e diz que fica à disposição, sem insistir." : " Sê leve: uma pergunta simples que facilite a resposta."}
 - Retoma o ÚLTIMO assunto concreto. Não repitas a mensagem anterior nem te apresentes outra vez.
@@ -390,19 +440,29 @@ export async function gerarSeguimento(input: {
   conhecimento: string;
 }): Promise<string | null> {
   const messages: ChatMsg[] = [
-    { role: "system", content: `${buildSystemPrompt(input.conhecimento)}\n\n${INSTRUCOES_SEGUIMENTO(input.passo, input.totalPassos)}` },
+    {
+      role: "system",
+      content: `${buildSystemPrompt(input.conhecimento)}\n\n${INSTRUCOES_SEGUIMENTO(input.passo, input.totalPassos)}`,
+    },
     ...construirHistorico(input.historico),
   ];
   try {
     const msg = await chamarModelo(messages, [], 12_000);
     const texto = (msg.content ?? "").trim();
-    const anterior = [...input.historico].reverse().find((m) => m.direction === "OUT")?.body.trim();
+    const anterior = [...input.historico]
+      .reverse()
+      .find((m) => m.direction === "OUT")
+      ?.body.trim();
     if (texto.length < 5 || texto.length > 400) return null;
-    if (respostaSuspeita(texto) || /https?:\/\/|www\./i.test(texto)) return null;
+    if (respostaSuspeita(texto) || /https?:\/\/|www\./i.test(texto))
+      return null;
     if (anterior && texto === anterior) return null;
     return texto;
   } catch (err) {
-    console.error("[followup] o modelo falhou:", err instanceof Error ? err.message : err);
+    console.error(
+      "[followup] o modelo falhou:",
+      err instanceof Error ? err.message : err,
+    );
     return null;
   }
 }

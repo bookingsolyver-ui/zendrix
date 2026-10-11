@@ -1,6 +1,12 @@
 import { after, NextResponse } from "next/server";
 import { runAgentSafely, type AgentEvent } from "@/lib/agent";
-import { allowedNumbers, isNumberAllowed, isValidSignature, QR_PREFIX, webhookSecret } from "@/lib/openwa/config";
+import {
+  allowedNumbers,
+  isNumberAllowed,
+  isValidSignature,
+  QR_PREFIX,
+  webhookSecret,
+} from "@/lib/openwa/config";
 import { parseOpenWaWebhook } from "@/lib/openwa/parse";
 import { mapStatus } from "@/lib/openwa/client";
 import { syncStatus } from "@/lib/openwa/service";
@@ -11,6 +17,7 @@ import { processQrAudio } from "@/lib/openwa/inbound-audio";
 import { downloadMessageMedia } from "@/lib/openwa/client";
 import { openWaConfig } from "@/lib/openwa/config";
 import { captureProof } from "@/lib/payments/proofs";
+import { handleVisualMessage } from "@/lib/agent/vision";
 import { isProofMessageType } from "@/lib/payments/bank-format";
 
 export const maxDuration = 120; // as respostas humanizadas esperam alguns segundos entre mensagens
@@ -21,7 +28,8 @@ export const maxDuration = 120; // as respostas humanizadas esperam alguns segun
 // funcionam igual. Respostas 2xx rápidas: o OpenWA repete as entregas que falham.
 export async function POST(request: Request) {
   const key = process.env.INTEGRATION_ENCRYPTION_KEY;
-  if (!key) return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  if (!key)
+    return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
   const raw = await request.text(); // a assinatura cobre os bytes exatos
   let payload: unknown;
@@ -33,21 +41,36 @@ export async function POST(request: Request) {
   const event = parseOpenWaWebhook(payload);
   if (event.kind === "ignored") return NextResponse.json({ success: true });
 
-  if (!isValidSignature(raw, request.headers.get("x-openwa-signature"), webhookSecret(event.sessionId, key))) {
+  if (
+    !isValidSignature(
+      raw,
+      request.headers.get("x-openwa-signature"),
+      webhookSecret(event.sessionId, key),
+    )
+  ) {
     return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
   }
 
   if (event.kind === "status") {
     const integration = await prisma.socialIntegration.findFirst({
-      where: { platform: "WHATSAPP", providerAccountId: `${QR_PREFIX}${event.sessionId}` },
+      where: {
+        platform: "WHATSAPP",
+        providerAccountId: `${QR_PREFIX}${event.sessionId}`,
+      },
       select: { id: true, status: true },
     });
-    if (integration) await syncStatus(integration.id, integration.status, mapStatus(event.status));
+    if (integration)
+      await syncStatus(
+        integration.id,
+        integration.status,
+        mapStatus(event.status),
+      );
     return NextResponse.json({ success: true });
   }
 
   // Modo de teste (OPENWA_ALLOWED_NUMBERS): mensagens de outros números não são guardadas nem respondidas.
-  if (!isNumberAllowed(event.message.waId, allowedNumbers())) return NextResponse.json({ success: true });
+  if (!isNumberAllowed(event.message.waId, allowedNumbers()))
+    return NextResponse.json({ success: true });
 
   try {
     const saved = await saveInboundMessage(event.message);
@@ -79,26 +102,62 @@ export async function POST(request: Request) {
         waMessageId: event.message.waMessageId,
         type: event.message.type,
         getMedia: async () => {
-          if (event.media?.base64) return { buffer: Buffer.from(event.media.base64, "base64"), mime: event.media.mimetype ?? "image/jpeg" };
+          if (event.media?.base64)
+            return {
+              buffer: Buffer.from(event.media.base64, "base64"),
+              mime: event.media.mimetype ?? "image/jpeg",
+            };
           const cfg = openWaConfig();
           if (!cfg) return null;
-          const media = await downloadMessageMedia(cfg, event.sessionId, `${event.message.waId}@c.us`, event.message.waMessageId);
-          return { buffer: media.buffer, mime: media.mime ?? event.media?.mimetype ?? "image/jpeg" };
+          const media = await downloadMessageMedia(
+            cfg,
+            event.sessionId,
+            `${event.message.waId}@c.us`,
+            event.message.waMessageId,
+          );
+          return {
+            buffer: media.buffer,
+            mime: media.mime ?? event.media?.mimetype ?? "image/jpeg",
+          };
         },
       };
       after(async () => {
-        await captureProof(proof).catch((err) => console.error("[openwa/proof] falhou:", err instanceof Error ? err.message : err));
+        const outcome = await captureProof(proof).catch((err) => {
+          console.error(
+            "[openwa/proof] falhou:",
+            err instanceof Error ? err.message : err,
+          );
+          return "error" as const;
+        });
+        // Não é um comprovativo (ainda não enviámos dados bancários, ou é uma foto de um produto): guarda o ficheiro
+        // para a equipa e deixa o agente responder, com a imagem à vista. Um comprovativo já pausou a IA e respondeu.
+        if (outcome === "ignored") {
+          await handleVisualMessage({
+            workspaceId: proof.workspaceId,
+            conversationId: proof.conversationId,
+            waMessageId: proof.waMessageId,
+            type: proof.type,
+            getMedia: proof.getMedia,
+          });
+        }
       });
       return NextResponse.json({ success: true });
     }
-    const agentEvent: AgentEvent = { ...saved, waMessageId: event.message.waMessageId, type: event.message.type };
+    const agentEvent: AgentEvent = {
+      ...saved,
+      waMessageId: event.message.waMessageId,
+      type: event.message.type,
+    };
     after(async () => {
       await runAgentSafely([agentEvent]);
       await drainOutbox(60_000);
     });
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[openwa/webhook] falhou", err instanceof Error ? err.name : "unknown");
+    console.error(
+      "[openwa/webhook] falhou",
+      err instanceof Error ? err.name : "unknown",
+    );
     return NextResponse.json({ error: "processing_failed" }, { status: 500 });
   }
 }
