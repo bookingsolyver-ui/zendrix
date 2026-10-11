@@ -42,3 +42,11 @@ test("estado final e percentagens", () => {
   assert.equal(percent(1, 3), 33);
   assert.equal(percent(1, 0), 0);
 });
+
+test("variáveis de nome: aliases em pt/en e nome completo; as desconhecidas continuam a ser erro", () => {
+  assert.equal(renderMessage("Olá {{name}}! {{ Primeiro_Nome }}, {{first_name}}.", "Maria Silva"), "Olá Maria! Maria, Maria.");
+  assert.equal(renderMessage("Caro {{nome_completo}}, bem-vindo.", "Maria Silva"), "Caro Maria Silva, bem-vindo.");
+  assert.equal(renderMessage("Olá {{full_name}}!", null), "Olá!");
+  assert.equal(renderMessage("Pedido {{valor}} de {{nome}}", "Rui"), "Pedido {{valor}} de Rui");
+  assert.deepEqual(unknownPlaceholders("{{name}} {{nome_completo}} {{valor}}"), ["valor"]);
+});

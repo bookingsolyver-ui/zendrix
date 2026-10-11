@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/dashboard/marketing/how-it-works";
 import { ContactsTable, type ContactRow } from "@/components/dashboard/contacts/contacts-table";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
+import { LiveRefresh } from "@/components/dashboard/live-refresh";
 
 const dateFormat = new Intl.DateTimeFormat("pt-PT", {
   day: "2-digit",
@@ -57,6 +58,7 @@ export default async function ContactsPage({
 
   return (
     <>
+      <LiveRefresh />
       <DashboardPageHeader
         title="Contactos"
         subtitle="Gira todos os contactos do seu negócio, de todos os canais."

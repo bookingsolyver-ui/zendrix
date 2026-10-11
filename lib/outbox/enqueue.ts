@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { REPLY_WINDOW_MS } from "@/lib/inbox/types";
 import { splitText, TEXT_LIMITS } from "@/lib/outbox/split-text";
 import { activeWhatsAppKind } from "@/lib/whatsapp/channel-kind";
+import { hasNamePlaceholder, renderMessage } from "@/lib/campaigns/schema";
 import type { OutboxPayload } from "@/lib/validations/outbox";
 
 export type EnqueueError = "not_found" | "window_closed" | "no_integration" | "subscription_required";
@@ -23,7 +24,8 @@ export async function enqueueText(input: {
   // Se é um seguimento automático, o passo (1, 2, 3): fica registado na mensagem e conta para a sequência.
   followUpStep?: number;
 }): Promise<EnqueueResult> {
-  const { workspaceId, conversationId, text, followUpStep } = input;
+  const { workspaceId, conversationId, followUpStep } = input;
+  let { text } = input;
 
   // PAYWALL: sem plano ativo (trial acabado, cancelada, em atraso) nada novo sai. É o ponto único por onde
   // passam as respostas da IA, as da Inbox e as das chaves de API.
@@ -31,7 +33,7 @@ export async function enqueueText(input: {
 
   const conversation = await prisma.conversation.findFirst({
     where: { id: conversationId, workspaceId },
-    select: { platform: true, contact: { select: { waId: true } } },
+    select: { platform: true, contact: { select: { waId: true, name: true } } },
   });
   if (!conversation) return { ok: false, error: "not_found" };
 
@@ -53,6 +55,10 @@ export async function enqueueText(input: {
     select: { id: true },
   });
   if (!integration) return { ok: false, error: "no_integration" };
+
+  // {{nome}}, {{name}}, {{primeiro_nome}}, {{nome_completo}}...: cada destinatário recebe o seu nome (campanhas, automações,
+  // seguimentos e mensagens escritas na Inbox passam todos por aqui). Sem nome, a variável desaparece sem deixar lixo.
+  if (hasNamePlaceholder(text)) text = renderMessage(text, conversation.contact.name);
 
   // Cada plataforma tem o seu limite de texto: uma resposta longa vai em várias mensagens, por ordem.
   const parts = splitText(text, TEXT_LIMITS[conversation.platform]);

@@ -13,10 +13,11 @@ export async function GET() {
   try {
     const who = await requireRole(ALL_ROLES);
     const workspaceId = who.workspaceId;
-    const [message, contact, conversation] = await Promise.all([
+    const [message, contact, conversation, named] = await Promise.all([
       prisma.message.aggregate({ where: { workspaceId }, _max: { createdAt: true }, _count: { _all: true } }),
       prisma.contact.aggregate({ where: { workspaceId }, _max: { createdAt: true }, _count: { _all: true } }),
       prisma.conversation.aggregate({ where: { workspaceId }, _max: { lastMessageAt: true }, _sum: { unreadCount: true }, _count: { _all: true } }),
+      prisma.contact.count({ where: { workspaceId, name: { not: null } } }), // um nome capturado muda isto
     ]);
     const sig = [
       message._max.createdAt?.getTime() ?? 0,
@@ -26,6 +27,7 @@ export async function GET() {
       conversation._max.lastMessageAt?.getTime() ?? 0,
       conversation._sum.unreadCount ?? 0,
       conversation._count._all,
+      named,
     ].join(".");
     return ok({ sig }, 200);
   } catch (err) {

@@ -3,6 +3,7 @@ import { getAccess } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
 import { activeWhatsAppKind } from "@/lib/whatsapp/channel-kind";
 import type { EnqueueError } from "@/lib/outbox/enqueue";
+import { hasNamePlaceholder, renderMessage } from "@/lib/campaigns/schema";
 import { checkParams, renderTemplate } from "@/lib/templates/meta-payload";
 import type { OutboxPayload } from "@/lib/validations/outbox";
 
@@ -26,7 +27,7 @@ export async function enqueueTemplate(input: {
 
   const conversation = await prisma.conversation.findFirst({
     where: { id: conversationId, workspaceId },
-    select: { platform: true, contact: { select: { waId: true } } },
+    select: { platform: true, contact: { select: { waId: true, name: true } } },
   });
   if (!conversation) return { ok: false, error: "not_found" };
   if (conversation.platform !== "WHATSAPP") return { ok: false, error: "unsupported_platform" };
@@ -45,7 +46,9 @@ export async function enqueueTemplate(input: {
   const params = checkParams(template.body, input.params);
   if (!params) return { ok: false, error: "invalid_params" };
 
-  const text = renderTemplate(template.body, params);
+  let text = renderTemplate(template.body, params);
+  // No canal QR o modelo sai como texto: {{nome}} & co. recebem o nome do contacto.
+  if (kind === "qr" && hasNamePlaceholder(text)) text = renderMessage(text, conversation.contact.name);
   const createdAt = new Date();
   const message = await prisma.$transaction(async (tx) => {
     const created = await tx.message.create({

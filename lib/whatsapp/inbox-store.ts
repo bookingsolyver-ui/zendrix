@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { LINKED_STATUSES } from "@/lib/meta/integration-health";
+import { visibleName } from "@/lib/inbox/display";
 import { extractEmail, isOptOut } from "@/lib/leads/lead";
 import type { InboundMessage, StatusUpdate } from "@/lib/whatsapp/webhook";
 import type { PlatformName } from "@/lib/outbox/split-text";
@@ -56,8 +57,13 @@ export async function saveInboundMessage(
           workspaceId_platform_waId: { workspaceId, platform: msg.platform, waId: msg.waId },
         },
         create: { workspaceId, platform: msg.platform, waId: msg.waId, name: msg.contactName },
-        update: msg.contactName ? { name: msg.contactName } : {},
+        update: {},
       });
+      // O nome do perfil só PREENCHE um contacto sem nome. Antes reescrevia-o a cada mensagem e apagava o nome
+      // que a equipa editou ou que o cliente disse (captura do nome no início da conversa).
+      if (msg.contactName && !visibleName(contact.name)) {
+        await tx.contact.update({ where: { id: contact.id }, data: { name: msg.contactName } });
+      }
       const conversation = await tx.conversation.upsert({
         where: {
           workspaceId_contactId: { workspaceId, contactId: contact.id },

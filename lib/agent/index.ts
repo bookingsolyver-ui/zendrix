@@ -1,3 +1,4 @@
+import { handleNameStep } from "@/lib/agent/name-step";
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -144,6 +145,18 @@ async function handle(event: AgentEvent) {
       text: OPT_OUT_REPLY,
     });
     if (sent.ok) await drainOutbox();
+    return;
+  }
+
+  // Contacto sem nome: a primeira resposta pergunta-o e a seguinte guarda-o (lib/agent/name-step.ts).
+  if (
+    await handleNameStep({
+      workspaceId: event.workspaceId,
+      conversationId: event.conversationId,
+      contactId: mine.conversation.contact.id,
+      inboundText: event.unintelligible || mine.type !== "text" && event.type !== "audio" ? null : mine.body,
+    })
+  ) {
     return;
   }
 

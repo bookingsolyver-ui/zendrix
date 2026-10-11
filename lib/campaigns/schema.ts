@@ -17,9 +17,16 @@ export const MAX_AUDIENCE = 5000; // destinatários por campanha
 export const MAX_ACTIVE_CAMPAIGNS = 5; // agendadas ou a enviar, por organização
 export const MAX_SCHEDULE_AHEAD_DAYS = 90;
 
-// A única variável suportada é {{nome}}. Qualquer outra {{...}} é um erro (iria para o cliente tal e qual).
+// Variáveis suportadas: o primeiro nome ({{nome}}, {{name}}, {{primeiro_nome}}, {{first_name}}) e o nome completo
+// ({{nome_completo}}, {{full_name}}). Qualquer outra {{...}} é um erro (iria para o cliente tal e qual).
+const FIRST_NAME_VARS = ["nome", "name", "primeiro_nome", "first_name"];
+const FULL_NAME_VARS = ["nome_completo", "full_name"];
+export const PLACEHOLDER_RE = /\{\{\s*([^}]*?)\s*\}\}/g;
+const KNOWN_VARS = new Set([...FIRST_NAME_VARS, ...FULL_NAME_VARS]);
+export const hasNamePlaceholder = (message: string) => [...message.matchAll(PLACEHOLDER_RE)].some((m) => KNOWN_VARS.has(m[1].toLowerCase()));
+
 export function unknownPlaceholders(message: string): string[] {
-  return [...message.matchAll(/\{\{\s*([^}]*?)\s*\}\}/g)].map((m) => m[1]).filter((name) => name.toLowerCase() !== "nome");
+  return [...message.matchAll(PLACEHOLDER_RE)].map((m) => m[1]).filter((name) => !KNOWN_VARS.has(name.toLowerCase()));
 }
 
 // Primeiro nome, ou "" se não houver um nome utilizável. Rejeita nomes que são só números/símbolos (perfis sem nome).
@@ -28,11 +35,23 @@ export function firstName(name: string | null | undefined): string {
   return /\p{L}/u.test(first) ? first.slice(0, 40) : "";
 }
 
-// Aplica {{nome}}. Sem nome, a variável desaparece sem deixar espaços ou vírgulas soltos ("Olá , " vira "Olá,").
+// Nome completo utilizável, ou "" (mesma regra: sem números nem símbolos soltos).
+export function fullName(name: string | null | undefined): string {
+  const full = (name ?? "").trim().replace(/\s+/g, " ");
+  return /\p{L}/u.test(full) ? full.slice(0, 80) : "";
+}
+
+// Aplica as variáveis de nome. Sem nome, a variável desaparece sem deixar espaços ou vírgulas soltos ("Olá , " vira "Olá,").
 export function renderMessage(message: string, contactName: string | null | undefined): string {
-  const name = firstName(contactName);
+  const first = firstName(contactName);
+  const full = fullName(contactName);
   return message
-    .replace(/\{\{\s*nome\s*\}\}/gi, name)
+    .replace(PLACEHOLDER_RE, (match, variable: string) => {
+      const key = variable.toLowerCase();
+      if (FIRST_NAME_VARS.includes(key)) return first;
+      if (FULL_NAME_VARS.includes(key)) return full;
+      return match;
+    })
     .replace(/[ \t]+([,.!?;:])/g, "$1")
     .replace(/[ \t]{2,}/g, " ")
     .trim();
