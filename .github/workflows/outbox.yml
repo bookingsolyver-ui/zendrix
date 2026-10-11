@@ -35,7 +35,7 @@ jobs:
           CRON_SECRET="$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')"
           APP_URL="$(printf '%s' "$APP_URL" | tr -d '[:space:]')"; APP_URL="${APP_URL%/}"
           fail=0
-          paths="process-outbox follow-ups campaigns automations emails auto-sync handoff nightwatch"
+          paths="process-outbox follow-ups campaigns automations emails auto-sync handoff nightwatch openwa-gc"
           # Os trabalhos pesados não correm de 5 em 5 minutos: só na janela das 08:00 UTC (3 disparos de 5 min, para
           # sobreviver a atrasos do GitHub; são idempotentes). O data-cleaner só à segunda-feira.
           hour="$(date -u +%H)"; minute="$(date -u +%M)"; weekday="$(date -u +%u)"
