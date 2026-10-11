@@ -8,6 +8,7 @@ const ERRORS: Record<string, string> = {
   forbidden: "Sem permissão.",
   rate_limited: "Demasiadas tentativas. Aguarde um pouco.",
   not_found: "Este canal já não existe.",
+  openwa_error: "Não conseguimos terminar a sessão no servidor do OpenWA. Tente novamente.",
 };
 
 // Desligar em dois passos (um clique acidental não apaga as credenciais): "Desligar" -> "Confirmar".

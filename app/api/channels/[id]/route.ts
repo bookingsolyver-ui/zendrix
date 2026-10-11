@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authErrorResponse } from "@/lib/api-auth";
 import { decryptSecret } from "@/lib/crypto";
+import { QR_PREFIX } from "@/lib/openwa/config";
+import { disconnectQr } from "@/lib/openwa/service";
 import { isSameOrigin } from "@/lib/http/origin";
 import { unsubscribePage } from "@/lib/meta/oauth";
 import { prisma } from "@/lib/prisma";
@@ -32,9 +34,17 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     // Sempre dentro da organização da sessão: o id de outra organização é um 404.
     const integration = await prisma.socialIntegration.findFirst({
       where: { id: id.data, workspaceId: who.workspaceId },
-      select: { id: true, platform: true, pageId: true, accessToken: true },
+      select: { id: true, platform: true, pageId: true, accessToken: true, providerAccountId: true },
     });
     if (!integration) return NextResponse.json({ success: false, error: "not_found" }, { status: 404 });
+
+    // WhatsApp por QR: além de apagar a ligação, termina a sessão no servidor do OpenWA (senão ficava órfã).
+    if (integration.providerAccountId?.startsWith(QR_PREFIX)) {
+      const ok = await disconnectQr(who.workspaceId);
+      return ok
+        ? NextResponse.json({ success: true, unsubscribed: null })
+        : NextResponse.json({ success: false, error: "openwa_error" }, { status: 502 });
+    }
 
     // Instagram/Messenger: deixa de receber os eventos da página, a não ser que outra ligação (o mesmo
     // Facebook Page serve Instagram e Messenger) ainda a use. Best-effort: se falhar, desliga na mesma.

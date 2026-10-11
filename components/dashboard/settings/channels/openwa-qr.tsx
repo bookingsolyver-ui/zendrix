@@ -21,11 +21,20 @@ const ERRORS: Record<string, string> = {
 
 const POLL_MS = 3000;
 
-export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }) {
+export function OpenWaQr({
+  initiallyConnected,
+  officialChannel = null,
+}: {
+  initiallyConnected: boolean;
+  officialChannel?: { id: string; idTail: string } | null;
+}) {
   const router = useRouter();
   const [state, setState] = useState<State>(initiallyConnected ? "open" : "none");
   const [qr, setQr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Canal oficial da Meta que bloqueia o QR: desligá-lo liberta o painel no mesmo instante.
+  const [official, setOfficial] = useState(officialChannel);
+  const [confirmOfficial, setConfirmOfficial] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // O polling é um efeito ligado a `polling`: liga-se quando há um QR por ler e desliga-se ao ligar, desligar
   // ou sair da página (o cleanup cancela o temporizador e ignora respostas atrasadas).
@@ -101,6 +110,27 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
     }
   }
 
+  async function disconnectOfficial() {
+    if (!official) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/channels/${official.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        setError(res.status === 404 ? "Este canal já não existe." : (ERRORS[data?.error] ?? "Não foi possível desligar o canal oficial. Tente novamente."));
+        return;
+      }
+      setOfficial(null); // painel livre já: o botão «Conectar WhatsApp» aparece sem recarregar
+      setConfirmOfficial(false);
+      router.refresh();
+    } catch {
+      setError("Sem ligação ao servidor. Tente novamente.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function disconnect() {
     if (!window.confirm("Desligar este WhatsApp? Deixa de receber e responder mensagens por este número.")) return;
     setBusy(true);
@@ -135,6 +165,41 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
         <span className={`rounded-full px-3 py-1 text-xs font-medium ${tone}`}>{label}</span>
       </div>
 
+      {official && (
+        <div className="space-y-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+          <p className="text-sm text-amber-100">
+            Tem um número ligado pela <strong>API oficial da Meta</strong> (…{official.idTail}). Só é permitido um canal de
+            WhatsApp de cada vez: para usar o QR Code, desligue primeiro o canal oficial. As conversas e mensagens ficam
+            guardadas.
+          </p>
+          {confirmOfficial ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={disconnectOfficial}
+                disabled={busy}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unplug className="h-4 w-4" />}
+                Sim, desligar canal oficial
+              </button>
+              <button type="button" onClick={() => setConfirmOfficial(false)} disabled={busy} className="text-sm text-white/60 hover:text-white">
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmOfficial(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-red-400/40 px-4 py-2 text-sm text-red-200 hover:bg-red-500/10"
+            >
+              <Unplug className="h-4 w-4" />
+              Desligar / remover canal oficial
+            </button>
+          )}
+        </div>
+      )}
+
       {state === "connecting" && (
         <div className="flex flex-col items-center gap-3">
           {qr ? (
@@ -158,7 +223,7 @@ export function OpenWaQr({ initiallyConnected }: { initiallyConnected: boolean }
       {error && <p className="text-sm text-red-300">{error}</p>}
 
       <div className="flex flex-wrap gap-3">
-        {state !== "open" && (
+        {state !== "open" && !official && (
           <button
             type="button"
             onClick={connect}
