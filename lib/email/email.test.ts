@@ -151,6 +151,48 @@ test("envio: um erro 4xx (ex.: domínio por verificar) não se repete", async ()
   process.env.EMAIL_FROM = "x@y.test";
   let calls = 0;
   const result = await sendEmail(mail, (async () => { calls++; return new Response("{}", { status: 403 }); }) as unknown as typeof fetch);
-  assert.deepEqual(result, { ok: false, error: "http_403" });
+  assert.deepEqual(result, { ok: false, error: "http_403", status: 403 });
   assert.equal(calls, 1);
+});
+
+import { appDomain, domainMismatch, parseFrom, safeDetail } from "./from.ts";
+
+test("EMAIL_FROM: aceita os formatos válidos e recusa o que o Resend recusaria", () => {
+  assert.deepEqual(parseFrom("Kwanza Flow <No-Reply@KwanzaFlow.com>"), { ok: true, address: "no-reply@kwanzaflow.com", domain: "kwanzaflow.com", name: "Kwanza Flow" });
+  assert.equal(parseFrom("no-reply@kwanzaflow.com").ok, true);
+  assert.equal(parseFrom('"Kwanza Flow" <no-reply@mail.kwanzaflow.com>').ok, true);
+  for (const bad of ["", "   ", "sem-arroba", "Kwanza <no-reply@localhost>", "a@b.com, c@d.com", "x@y.com\nBcc: z@w.com", "Nome <>", undefined, null]) {
+    assert.equal(parseFrom(bad as string).ok, false, String(bad));
+  }
+});
+
+test("EMAIL_FROM: avisa quando o domínio não é o da app", () => {
+  assert.equal(appDomain("https://www.kwanzaflow.com"), "kwanzaflow.com");
+  assert.equal(domainMismatch("kwanzaflow.com", "https://www.kwanzaflow.com"), false);
+  assert.equal(domainMismatch("mail.kwanzaflow.com", "https://www.kwanzaflow.com"), false);
+  assert.equal(domainMismatch("zetrix.com", "https://www.kwanzaflow.com"), true);
+  assert.equal(domainMismatch("qualquer.com", undefined), false);
+});
+
+test("o detalhe do erro não leva e-mails e é curto", () => {
+  const d = safeDetail("validation_error", "The kwanzaflow.com domain is not verified; sent to ana@gmail.com " + "x".repeat(400));
+  assert.ok(!d.includes("ana@gmail.com") && d.includes("<email>") && d.length <= 200);
+});
+
+test("sendEmail devolve o motivo do Resend (sem o destinatário) num 403", async () => {
+  const prev = { k: process.env.RESEND_API_KEY, f: process.env.EMAIL_FROM };
+  process.env.RESEND_API_KEY = "re_test";
+  process.env.EMAIL_FROM = "Kwanza Flow <no-reply@kwanzaflow.com>";
+  const fake = (async () => new Response(JSON.stringify({ name: "validation_error", message: "The kwanzaflow.com domain is not verified" }), { status: 403 })) as unknown as typeof fetch;
+  const result = await sendEmail({ to: "ana@gmail.com", subject: "x", text: "y", html: "<p>y</p>" }, fake);
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.status, 403);
+    assert.match(result.detail ?? "", /not verified/);
+  }
+  process.env.EMAIL_FROM = "isto não é um e-mail";
+  const bad = await sendEmail({ to: "ana@gmail.com", subject: "x", text: "y", html: "<p>y</p>" }, fake);
+  assert.deepEqual(bad, { ok: false, error: "invalid_from" });
+  process.env.RESEND_API_KEY = prev.k;
+  process.env.EMAIL_FROM = prev.f;
 });

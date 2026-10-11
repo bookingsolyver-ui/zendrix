@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         idempotencyKey: `resend-${data.user.id}-${Math.floor(Date.now() / 60_000)}`,
       });
       if (sent.ok) return NextResponse.json({ success: true });
-      console.error("[auth/resend] Resend falhou; recurso do Supabase");
+      console.error(`[auth/resend] Resend falhou (${sent.error}${sent.detail ? `: ${sent.detail}` : ""}); recurso do Supabase`);
     }
     // Sem Resend (ou se falhou): o Supabase envia o seu e-mail pelo SMTP configurado lá.
     const supabase = await createClient();

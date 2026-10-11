@@ -62,6 +62,7 @@ export async function signUpUser(input: SignupInput): Promise<SignupResult> {
       idempotencyKey: `signup-${data.user.id}`,
     });
     if (!sent.ok) {
+      console.error(`[auth/signup] Resend falhou (${sent.error}${sent.detail ? `: ${sent.detail}` : ""}); recurso: e-mail do Supabase`);
       // O Resend falhou (domínio por verificar, chave errada...): o Supabase envia o seu e-mail em vez do nosso,
       // para a pessoa não ficar sem conta ativável. O utilizador já existe, por isso é um reenvio.
       const supabase = await createClient();
@@ -70,11 +71,13 @@ export async function signUpUser(input: SignupInput): Promise<SignupResult> {
         email,
         options: { emailRedirectTo: `${origin}/auth/callback` },
       });
-      if (resendError) console.error("[auth/signup] recurso do Supabase também falhou", resendError.status);
+      if (resendError) console.error("[auth/signup] recurso do Supabase também falhou", resendError.status, resendError.code);
+      else console.warn("[auth/signup] recurso do Supabase pediu o envio (só chega se o SMTP/Site URL do Supabase estiverem bem configurados)");
     }
     return { ok: true, userId: data.user.id, emailVerified: false, hasSession: false };
   }
 
+  console.warn("[auth/signup] Resend não configurado (RESEND_API_KEY/EMAIL_FROM/SUPABASE_SERVICE_ROLE_KEY): a usar o e-mail do Supabase");
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
