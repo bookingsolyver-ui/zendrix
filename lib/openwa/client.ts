@@ -237,27 +237,107 @@ export interface OpenWaSessionInfo {
   createdAt: string | null;
 }
 
-// Todas as sessões do servidor (o OpenWA devolve um array). Só campos de que a limpeza precisa.
+// Chaves sob as quais um servidor/proxy pode embrulhar a lista de sessões.
+const LIST_WRAPPERS = [
+  "data",
+  "sessions",
+  "response",
+  "items",
+  "results",
+  "rows",
+  "result",
+];
+
+// Extrai o array de sessões de um corpo JSON de forma defensiva: array direto, ou embrulhado (até 2 níveis).
+export function extractSessionArray(
+  json: unknown,
+  depth = 0,
+): unknown[] | null {
+  if (Array.isArray(json)) return json;
+  if (!isRecord(json) || depth > 2) return null;
+  for (const key of LIST_WRAPPERS) {
+    const found = extractSessionArray(json[key], depth + 1);
+    if (found) return found;
+  }
+  // último recurso: a única propriedade que seja um array
+  const arrays = Object.values(json).filter(Array.isArray);
+  return arrays.length === 1 ? (arrays[0] as unknown[]) : null;
+}
+
+// Todas as sessões do servidor, com o formato da resposta auto-detetado. NUNCA lança: em qualquer falha
+// (rede, timeout, HTTP != 200, JSON inválido, formato desconhecido) regista o motivo e devolve null, para o cron
+// continuar. O corpo registado é limitado a 250 caracteres e nunca inclui a chave.
 export async function listSessions(
   cfg: OpenWaConfig,
-  timeoutMs = TIMEOUT_MS,
-): Promise<OpenWaSessionInfo[]> {
-  const json = await call(cfg, "GET", "/sessions", undefined, timeoutMs);
-  if (!Array.isArray(json)) throw new OpenWaError(502, "openwa_bad_response");
-  const out: OpenWaSessionInfo[] = [];
-  for (const row of json) {
-    if (!isRecord(row)) continue;
-    const id = str(row.id);
-    const name = str(row.name);
-    if (id && name)
-      out.push({
-        id,
-        name,
-        status: str(row.status),
-        createdAt: str(row.createdAt),
+  timeoutMs = 20_000,
+): Promise<OpenWaSessionInfo[] | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let status = 0;
+  let raw = "";
+  try {
+    const res = await fetch(`${cfg.baseUrl}/api/sessions`, {
+      method: "GET",
+      headers: { "X-API-Key": cfg.apiKey, Accept: "application/json" },
+      signal: controller.signal,
+    });
+    status = res.status;
+    raw = await res.text();
+    if (status !== 200) {
+      console.error("[openwa/list-sessions-error]", {
+        status,
+        bodyRaw: raw.slice(0, 250),
       });
+      return null;
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(raw);
+    } catch {
+      console.error("[openwa/list-sessions-error]", {
+        status,
+        reason: "invalid_json",
+        bodyRaw: raw.slice(0, 250),
+      });
+      return null;
+    }
+    const rows = extractSessionArray(json);
+    if (!rows) {
+      console.error("[openwa/list-sessions-error]", {
+        status,
+        reason: "unknown_shape",
+        bodyRaw: raw.slice(0, 250),
+      });
+      return null;
+    }
+    const out: OpenWaSessionInfo[] = [];
+    for (const row of rows) {
+      if (!isRecord(row)) continue;
+      const id = str(row.id) ?? str(row.sessionId);
+      const name = str(row.name) ?? str(row.sessionName);
+      if (id && name) {
+        out.push({
+          id,
+          name,
+          status: str(row.status) ?? str(row.state),
+          createdAt: str(row.createdAt) ?? str(row.created_at),
+        });
+      }
+    }
+    return out;
+  } catch (err) {
+    const aborted =
+      err instanceof Error &&
+      (err.name === "AbortError" || err.name === "TimeoutError");
+    console.error("[openwa/list-sessions-error]", {
+      status,
+      reason: aborted ? `timeout_${timeoutMs}ms` : "network",
+      bodyRaw: raw.slice(0, 250),
+    });
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
-  return out;
 }
 
 // Mata o motor de uma sessão encravada (SIGKILL) e arruma-a. Best-effort: serve antes de apagar uma sessão presa.

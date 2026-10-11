@@ -428,16 +428,9 @@ export async function sweepOrphanQrSessions(
 
   // 3. órfãs no servidor
   if (!live()) return out;
-  let sessions;
-  try {
-    sessions = await listSessions(cfg, 15_000);
-  } catch (err) {
-    console.error(
-      "[openwa/gc] listagem falhou:",
-      err instanceof Error ? err.message : "unknown",
-    );
-    return out;
-  }
+  // listSessions nunca lança e já registou o motivo ([openwa/list-sessions-error]); null = salta esta fase.
+  const sessions = await listSessions(cfg, 20_000);
+  if (!sessions) return out;
   out.serverSessions = sessions.length;
   const ours = sessions.filter(
     (s) =>
