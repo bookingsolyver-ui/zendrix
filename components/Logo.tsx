@@ -17,10 +17,10 @@ export function Logo({
       <span
         className={`flex ${mark} items-center justify-center rounded-lg border border-border bg-surface-2 font-bold transition-colors group-hover:border-neon-green/60`}
       >
-        <span className="neon-green-text">Z</span>
+        <span className="neon-green-text">K</span>
       </span>
       <span className={`${wordmark} font-semibold tracking-tight text-foreground`}>
-        Zet<span className="neon-green-text">rix</span>
+        Kwanza <span className="neon-green-text">Flow</span>
       </span>
     </Link>
   );

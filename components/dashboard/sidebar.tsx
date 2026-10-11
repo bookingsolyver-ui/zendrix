@@ -90,7 +90,7 @@ export function Sidebar({
         <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-5">
           {collapsed ? (
             <span className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface-2 text-sm font-bold">
-              <span className="neon-green-text">Z</span>
+              <span className="neon-green-text">K</span>
             </span>
           ) : (
             <Logo />
