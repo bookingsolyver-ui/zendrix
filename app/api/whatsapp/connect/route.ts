@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { decryptSecret } from "@/lib/crypto";
 import { GRAPH_BASE } from "@/lib/meta/send";
 import { markIntegrationExpired } from "@/lib/meta/integration-health";
+import { QR_PREFIX } from "@/lib/openwa/config";
 
 export async function POST() {
   // Credenciais do canal: só OWNER e MANAGER (um Agente não troca o token da empresa).
@@ -42,7 +43,8 @@ export async function POST() {
 
     // 3. Read the WhatsApp credentials that belong to that workspace only.
     const integration = await prisma.socialIntegration.findFirst({
-      where: { workspaceId: dbUser.workspaceId, platform: "WHATSAPP", status: "ACTIVE" },
+      // Só a ligação OFICIAL da Meta: o canal por QR (qr:…) não tem token da Meta e nunca entra aqui.
+      where: { workspaceId: dbUser.workspaceId, platform: "WHATSAPP", status: "ACTIVE", NOT: { providerAccountId: { startsWith: QR_PREFIX } } },
       orderBy: { createdAt: "desc" },
       select: { id: true, accessToken: true, providerAccountId: true },
     });

@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { QR_PREFIX } from "@/lib/openwa/config";
 import { decryptSecret } from "@/lib/crypto";
 
 // Descarregar a mídia que um cliente enviou (Media API da Meta), em dois passos:
@@ -13,7 +14,7 @@ export type DownloadedMedia = { buffer: Buffer; mime: string };
 // O token que a Meta vê é o do workspace (guardado cifrado), nunca uma variável global.
 export async function getWhatsAppToken(workspaceId: string): Promise<string | null> {
   const integration = await prisma.socialIntegration.findFirst({
-    where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE" },
+    where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE", NOT: { providerAccountId: { startsWith: QR_PREFIX } } }, // o QR não tem token da Meta
     orderBy: { createdAt: "desc" },
     select: { accessToken: true },
   });

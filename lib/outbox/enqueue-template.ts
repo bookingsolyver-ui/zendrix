@@ -1,6 +1,7 @@
 import "server-only";
 import { getAccess } from "@/lib/billing/access";
 import { prisma } from "@/lib/prisma";
+import { QR_PREFIX } from "@/lib/openwa/config";
 import type { EnqueueError } from "@/lib/outbox/enqueue";
 import { checkParams, renderTemplate } from "@/lib/templates/meta-payload";
 import type { OutboxPayload } from "@/lib/validations/outbox";
@@ -37,7 +38,7 @@ export async function enqueueTemplate(input: {
   if (!params) return { ok: false, error: "invalid_params" };
 
   const integration = await prisma.socialIntegration.findFirst({
-    where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE", providerAccountId: { not: null } },
+    where: { workspaceId, platform: "WHATSAPP", status: "ACTIVE", providerAccountId: { not: null }, NOT: { providerAccountId: { startsWith: QR_PREFIX } } }, // modelos só existem na API oficial
     select: { id: true },
   });
   if (!integration) return { ok: false, error: "no_integration" };

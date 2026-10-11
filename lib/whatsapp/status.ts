@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { LINKED_STATUSES, TOKEN_EXPIRED } from "@/lib/meta/integration-health";
+import { QR_PREFIX } from "@/lib/openwa/config";
 
 export interface WhatsAppStatus {
   // Há PELO MENOS UM canal ligado (WhatsApp, Instagram ou Messenger): é o que decide mostrar a Inbox. O nome
@@ -8,13 +9,16 @@ export interface WhatsAppStatus {
   connected: boolean;
   // Números de WhatsApp ligados (incluindo os de token expirado: ainda há que lhes dar um token novo).
   count: number;
+  // Os mesmos números, separados pelo canal: API oficial da Meta e QR Code (OpenWA). São independentes.
+  officialCount: number;
+  qrConnected: boolean;
   // Algum canal com o token recusado pela Meta.
   expired: boolean;
   // Phone number ID of the newest active WhatsApp integration. Never includes the access token.
   phoneId: string | null;
 }
 
-const NOT_CONNECTED: WhatsAppStatus = { connected: false, count: 0, expired: false, phoneId: null };
+const NOT_CONNECTED: WhatsAppStatus = { connected: false, count: 0, officialCount: 0, qrConnected: false, expired: false, phoneId: null };
 
 // Real connection state, read from the workspace's SocialIntegration rows.
 export async function getWhatsAppStatus(workspaceId: string | undefined): Promise<WhatsAppStatus> {
@@ -30,8 +34,10 @@ export async function getWhatsAppStatus(workspaceId: string | undefined): Promis
     return {
       connected: rows.length > 0,
       count: whatsapp.length,
+      officialCount: whatsapp.filter((row) => !row.providerAccountId?.startsWith(QR_PREFIX)).length,
+      qrConnected: whatsapp.some((row) => row.providerAccountId?.startsWith(QR_PREFIX) && row.status === "ACTIVE"),
       expired: rows.some((row) => row.status === TOKEN_EXPIRED),
-      phoneId: whatsapp.find((row) => row.status === "ACTIVE")?.providerAccountId ?? null,
+      phoneId: whatsapp.find((row) => row.status === "ACTIVE" && !row.providerAccountId?.startsWith(QR_PREFIX))?.providerAccountId ?? null,
     };
   } catch (err) {
     console.error("[whatsapp/status] database lookup failed", err);

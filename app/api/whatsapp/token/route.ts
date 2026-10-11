@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { QR_PREFIX } from "@/lib/openwa/config";
 import { authErrorResponse } from "@/lib/api-auth";
 import { requireRole } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
@@ -56,7 +57,7 @@ export async function PATCH(request: Request) {
     if (!(await getAccess(dbUser.workspaceId)).active) return subscriptionRequiredResponse(); // PAYWALL
 
     const integration = await prisma.socialIntegration.findFirst({
-      where: { workspaceId: dbUser.workspaceId, platform: "WHATSAPP" },
+      where: { workspaceId: dbUser.workspaceId, platform: "WHATSAPP", NOT: { providerAccountId: { startsWith: QR_PREFIX } } }, // nunca a ligação por QR
       orderBy: { createdAt: "desc" },
       select: { id: true, providerAccountId: true },
     });
