@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 
 // O passo de "carregar para continuar" dos links de e-mail. O link em si (GET) não consome nada: só este botão
 // (POST) o faz. Assim os antivírus e pré-visualizadores de e-mail, que abrem os links, não gastam o token.
-export function ConfirmCard({ type, tokenHash, next }: { type: "signup" | "recovery"; tokenHash: string; next?: string }) {
+export function ConfirmCard({ type, tokenHash, next }: { type: "signup" | "recovery" | "magiclink"; tokenHash: string; next?: string }) {
   const t = useTranslations("Auth.confirm");
   const router = useRouter();
   const locale = useLocale();
@@ -39,7 +39,7 @@ export function ConfirmCard({ type, tokenHash, next }: { type: "signup" | "recov
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">{type === "signup" ? t("signupBody") : t("recoveryBody")}</p>
+      <p className="text-sm text-muted">{type !== "recovery" ? t("signupBody") : t("recoveryBody")}</p>
       {error && (
         <p role="alert" className="text-sm text-danger">
           {t("invalid")}
@@ -52,7 +52,7 @@ export function ConfirmCard({ type, tokenHash, next }: { type: "signup" | "recov
         className="neon-green-btn flex w-full items-center justify-center gap-2 rounded-full bg-green-500 px-6 py-3 text-sm font-semibold text-background hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        {pending ? t("working") : type === "signup" ? t("signupButton") : t("recoveryButton")}
+        {pending ? t("working") : type !== "recovery" ? t("signupButton") : t("recoveryButton")}
       </button>
     </div>
   );

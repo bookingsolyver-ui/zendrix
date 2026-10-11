@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const bodySchema = z.object({
   token_hash: z.string().min(10).max(512),
-  type: z.enum(["signup", "recovery"]),
+  type: z.enum(["signup", "recovery", "magiclink"]), // magiclink = link de reenvio da confirmação
   next: z.string().max(200).optional(),
   locale: z.string().max(8).optional(),
 });

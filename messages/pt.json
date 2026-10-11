@@ -276,7 +276,12 @@
       "rateLimited": "Demasiadas tentativas. Aguarde um pouco e tente novamente.",
       "provisionFailed": "A conta foi criada, mas a configuração da empresa falhou. Confirme o e-mail (se pedido) e entre; será concluída no primeiro acesso.",
       "generic": "Não foi possível criar a conta. Tente novamente.",
-      "legalNotice": "Ao criar conta, aceita os <terms>Termos de Serviço</terms> e a <privacy>Política de Privacidade</privacy>."
+      "legalNotice": "Ao criar conta, aceita os <terms>Termos de Serviço</terms> e a <privacy>Política de Privacidade</privacy>.",
+      "resend": "Reenviar e-mail",
+      "resending": "A reenviar…",
+      "resendWait": "Reenviar e-mail em {seconds}s",
+      "resendSent": "Enviámos um novo e-mail. Veja também a pasta de spam.",
+      "resendHint": "Não recebeu? Veja o spam ou peça um novo e-mail."
     },
     "forgot": {
       "title": "Recuperar palavra-passe",

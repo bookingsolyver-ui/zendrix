@@ -19,10 +19,10 @@ export default async function ConfirmPage({
   const { token_hash, type, next } = await searchParams;
   const t = await getTranslations("Auth.confirm");
 
-  const valid = token_hash && (type === "signup" || type === "recovery");
+  const valid = token_hash && (type === "signup" || type === "recovery" || type === "magiclink");
   return (
     <AuthShell
-      title={!valid ? t("invalidTitle") : type === "signup" ? t("signupTitle") : t("recoveryTitle")}
+      title={!valid ? t("invalidTitle") : type !== "recovery" ? t("signupTitle") : t("recoveryTitle")}
       subtitle=""
       footer={
         <Link href="/login" className="font-medium text-neon-green hover:text-neon-green-2">
